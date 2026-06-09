@@ -1,15 +1,6 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-/*
-  Path generado desde el GeoJSON oficial de Colombia (johan/world.geo.json).
-  Proyección:
-    lon_min = -78.990935  lon_max = -66.876326  → span = 12.114609
-    lat_min = -4.298187   lat_max = 12.437303   → span = 16.735490
-    viewBox "0 0 220 260" con 10px de margen
-    x = (lon + 78.990935) * (200/12.114609) + 10
-    y = (12.437303 - lat) * (240/16.735490) + 10
-*/
 const COLOMBIA_PATH = `
   M 70,191 L 63,187 L 55,183 L 50,185 L 36,183
   L 32,177 L 29,177 L 12,169 L 10,164 L 16,163
@@ -30,185 +21,125 @@ const COLOMBIA_PATH = `
   L 168,178 L 158,181 L 158,191 L 165,196 L 168,205
   L 168,211 L 160,250 L 152,242 L 147,242 L 158,228
   L 145,221 L 135,222 L 129,220 L 120,223 L 108,222
-  L 98,207 L 90,203 L 85,196 L 74,189
-  Z
+  L 98,207 L 90,203 L 85,196 L 74,189 Z
 `
 
-/*
-  Ciudades en las mismas coordenadas de proyección:
-  Bogotá      (4.711°N, -74.07°W)  → x=91, y=121
-  Medellín    (6.25°N,  -75.56°W)  → x=67, y=99
-  Barranquilla(10.96°N, -74.79°W)  → x=79, y=31
-  Cali        (3.45°N,  -76.52°W)  → x=51, y=139
-*/
 const CITIES = [
   {
-    city: 'Barranquilla',
-    x: 79, y: 31,
-    count: 1,
+    city: 'Barranquilla', x: 79, y: 31, count: 1,
     institutions: ['U. del Norte'],
+    color: '#F07B00',
   },
   {
-    city: 'Medellín',
-    x: 67, y: 99,
-    count: 2,
+    city: 'Cartagena', x: 70, y: 46, count: 1,
+    institutions: ['U. de los Andes'],
+    color: '#8B3FA8',
+  },
+  {
+    city: 'Bucaramanga', x: 107, y: 86, count: 1,
+    institutions: ['UPB Bucaramanga'],
+    color: '#00C4AD',
+  },
+  {
+    city: 'Medellín', x: 67, y: 99, count: 2,
     institutions: ['UPB Medellín', 'EAFIT'],
+    color: '#F07B00',
   },
   {
-    city: 'Bogotá',
-    x: 91, y: 121,
-    count: 9,
+    city: 'Bogotá', x: 91, y: 121, count: 9,
     institutions: [
       'U. del Rosario', 'U. de los Andes', 'U. Externado',
       'Javeriana', 'Sergio Arboleda', 'U. La Sabana',
       'U. La Salle', 'U. Sanitas', 'U. América',
     ],
+    color: '#8B3FA8',
   },
   {
-    city: 'Cali',
-    x: 51, y: 139,
-    count: 1,
+    city: 'Cali', x: 51, y: 139, count: 1,
     institutions: ['ICESI'],
+    color: '#00C4AD',
   },
 ]
-
-const GRAD_ID = 'bmMapGrad'
 
 export default function ColombiaMap() {
   const [active, setActive] = useState(null)
 
+  const totalInstitutions = CITIES.reduce((s, c) => s + c.count, 0)
+
   return (
-    <section id="mapa" style={{ padding: '100px 2rem', backgroundColor: '#0A0A0A' }}>
+    <section id="mapa" style={{ padding: '100px 2rem', background: 'transparent' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-        {/* Encabezado */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: '64px' }}
-        >
-          <span style={{
-            fontSize: '12px', fontWeight: 600, color: '#00C4AD',
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            display: 'block', marginBottom: '16px',
-          }}>
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.7 }}
+          style={{ marginBottom: '56px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '10px' }}>
             Cobertura Nacional
           </span>
-          <h2 style={{
-            fontSize: 'clamp(1.8rem, 4vw, 3rem)',
-            fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: '16px',
-          }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 800, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '12px' }}>
             Presencia en las principales<br />
-            <span style={{ color: '#00C4AD' }}>ciudades universitarias</span>
+            <span style={{ color: '#8B3FA8' }}>ciudades universitarias</span>
           </h2>
-          <p style={{ color: '#555', fontSize: '16px', maxWidth: '520px', lineHeight: 1.7 }}>
-            Operamos en 4 ciudades con las instituciones de mayor
-            influencia académica y poder adquisitivo de Colombia.
+          <p style={{ color: '#888', fontSize: '15px', maxWidth: '480px', lineHeight: 1.65 }}>
+            Operamos en 6 ciudades con las instituciones de mayor influencia académica de Colombia.
           </p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '48px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '40px', alignItems: 'start' }}>
 
-          {/* Mapa SVG */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          {/* Mapa */}
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }} transition={{ duration: 0.9 }}
             style={{
-              background: '#0D0D0D',
-              border: '1px solid #1E1E1E',
-              borderRadius: '24px',
-              padding: '32px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <svg
-              viewBox="5 5 215 252"
-              style={{ width: '100%', maxWidth: '420px', height: 'auto' }}
-            >
+              background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
+              borderRadius: '20px', padding: '32px',
+              display: 'flex', justifyContent: 'center',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+            }}>
+            <svg viewBox="5 5 215 252" style={{ width: '100%', maxWidth: '380px', height: 'auto' }}>
               <defs>
-                <linearGradient id={GRAD_ID} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%"   stopColor="#8B3FA8" />
-                  <stop offset="45%"  stopColor="#00C4AD" />
+                <linearGradient id="colGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8B3FA8" />
+                  <stop offset="50%" stopColor="#00C4AD" />
                   <stop offset="100%" stopColor="#F07B00" />
                 </linearGradient>
-                <filter id="pinGlow">
-                  <feGaussianBlur stdDeviation="2.5" result="blur" />
-                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
               </defs>
 
-              {/* Sombra del país */}
-              <path d={COLOMBIA_PATH} fill="none" stroke="rgba(0,196,173,0.06)" strokeWidth="10" />
-
               {/* Territorio */}
-              <path
-                d={COLOMBIA_PATH}
-                fill="#131313"
-                stroke={`url(#${GRAD_ID})`}
-                strokeWidth="1.6"
-              />
+              <path d={COLOMBIA_PATH} fill="#F5F5F5" stroke="url(#colGrad2)" strokeWidth="1.6" />
 
-              {/* Tono interior sutil con gradiente del logo */}
-              <path d={COLOMBIA_PATH} fill={`url(#${GRAD_ID})`} opacity="0.04" />
-
-              {/* Marcadores de ciudades */}
+              {/* Marcadores */}
               {CITIES.map((c, i) => (
-                <g
-                  key={c.city}
+                <g key={c.city}
                   onClick={() => setActive(active?.city === c.city ? null : c)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {/* Pulso externo */}
-                  <motion.circle
-                    cx={c.x} cy={c.y} r="14"
-                    fill="transparent"
-                    stroke={i === 0 ? '#F07B00' : '#00C4AD'}
-                    strokeWidth="0.8"
-                    animate={{ r: [8, 20], opacity: [0.6, 0] }}
-                    transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.65, ease: 'easeOut' }}
-                  />
-                  {/* Pulso secundario */}
-                  <motion.circle
-                    cx={c.x} cy={c.y} r="10"
-                    fill="transparent"
-                    stroke={i === 0 ? '#F07B00' : '#00C4AD'}
-                    strokeWidth="0.5"
-                    animate={{ r: [5, 14], opacity: [0.3, 0] }}
-                    transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.65 + 0.4, ease: 'easeOut' }}
-                  />
+                  style={{ cursor: 'pointer' }}>
+
+                  {/* Pulso */}
+                  <motion.circle cx={c.x} cy={c.y} r="8"
+                    fill="transparent" stroke={c.color} strokeWidth="0.8"
+                    animate={{ r: [6, 18], opacity: [0.6, 0] }}
+                    transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.4, ease: 'easeOut' }} />
 
                   {/* Pin */}
                   <motion.circle
                     cx={c.x} cy={c.y}
                     r={c.count >= 9 ? 10 : c.count >= 2 ? 8 : 7}
-                    fill={active?.city === c.city ? `url(#${GRAD_ID})` : '#0D0D0D'}
-                    stroke={i === 0 ? '#F07B00' : '#00C4AD'}
-                    strokeWidth="2"
-                    filter="url(#pinGlow)"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.4 + i * 0.2, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-                  />
+                    fill={active?.city === c.city ? c.color : '#fff'}
+                    stroke={c.color} strokeWidth="2"
+                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                    transition={{ delay: 0.3 + i * 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }} />
 
                   {/* Número */}
                   <motion.text
-                    x={c.x} y={c.y + 0.6}
+                    x={c.x} y={c.y + 0.5}
                     textAnchor="middle" dominantBaseline="middle"
-                    fontSize={c.count >= 9 ? '8' : '7'}
+                    fontSize={c.count >= 9 ? '7.5' : '7'}
                     fontWeight="900"
-                    fill={active?.city === c.city ? '#fff' : (i === 0 ? '#F07B00' : '#00C4AD')}
-                    fontFamily="system-ui, sans-serif"
-                    style={{ pointerEvents: 'none' }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 + i * 0.2 }}
-                  >
+                    fill={active?.city === c.city ? '#fff' : c.color}
+                    fontFamily="system-ui" style={{ pointerEvents: 'none' }}
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 + i * 0.15 }}>
                     {c.count}
                   </motion.text>
 
@@ -216,28 +147,24 @@ export default function ColombiaMap() {
                   <motion.text
                     x={
                       c.city === 'Barranquilla' ? c.x :
+                      c.city === 'Cartagena'    ? c.x - 12 :
                       c.city === 'Cali'         ? c.x - 12 :
-                      c.x + 14
+                      c.x + 13
                     }
                     y={
-                      c.city === 'Barranquilla' ? c.y - 14 :
+                      c.city === 'Barranquilla' ? c.y - 13 :
+                      c.city === 'Cartagena'    ? c.y + 1 :
                       c.y + 1
                     }
                     textAnchor={
-                      c.city === 'Cali'         ? 'end' :
-                      c.city === 'Barranquilla' ? 'middle' :
-                      'start'
+                      c.city === 'Cartagena' || c.city === 'Cali' ? 'end' :
+                      c.city === 'Barranquilla' ? 'middle' : 'start'
                     }
                     dominantBaseline={c.city === 'Barranquilla' ? 'auto' : 'middle'}
-                    fontSize="7"
-                    fill="#bbb"
-                    fontFamily="system-ui, sans-serif"
-                    fontWeight="600"
+                    fontSize="6.5" fill="#555" fontFamily="system-ui" fontWeight="600"
                     style={{ pointerEvents: 'none' }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.75 + i * 0.2 }}
-                  >
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 + i * 0.15 }}>
                     {c.city}
                   </motion.text>
                 </g>
@@ -245,75 +172,49 @@ export default function ColombiaMap() {
             </svg>
           </motion.div>
 
-          {/* Panel lateral */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Lista lateral */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {CITIES.map((c, i) => (
-              <motion.div
-                key={c.city}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 + 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              <motion.div key={c.city}
+                initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }} transition={{ delay: i * 0.08 + 0.3, duration: 0.55 }}
                 onClick={() => setActive(active?.city === c.city ? null : c)}
+                whileHover={{ y: -2, boxShadow: `0 6px 20px ${c.color}20` }}
                 style={{
-                  padding: '18px 20px',
-                  borderRadius: '12px',
-                  border: `1px solid ${active?.city === c.city ? '#00C4AD' : '#1E1E1E'}`,
-                  backgroundColor: active?.city === c.city ? 'rgba(0,196,173,0.05)' : '#0D0D0D',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  marginBottom: active?.city === c.city ? '12px' : 0,
+                  padding: '14px 16px', borderRadius: '10px', cursor: 'pointer',
+                  background: '#fff',
+                  border: `1px solid ${active?.city === c.city ? c.color : 'rgba(0,0,0,0.07)'}`,
+                  boxShadow: active?.city === c.city ? `0 4px 16px ${c.color}20` : '0 2px 8px rgba(0,0,0,0.04)',
+                  transition: 'border-color 0.2s',
                 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: active?.city === c.city ? '10px' : 0 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '14px', color: active?.city === c.city ? '#00C4AD' : '#fff' }}>
-                      {c.city}
-                    </div>
-                    <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '13px', color: active?.city === c.city ? c.color : '#1A1A1A' }}>{c.city}</div>
+                    <div style={{ fontSize: '11px', color: '#AAA', marginTop: '1px' }}>
                       {c.count} {c.count === 1 ? 'institución' : 'instituciones'}
                     </div>
                   </div>
                   <div style={{
-                    width: '32px', height: '32px', borderRadius: '8px',
-                    background: active?.city === c.city
-                      ? 'linear-gradient(135deg, #8B3FA8, #00C4AD)'
-                      : '#1A1A1A',
+                    width: '28px', height: '28px', borderRadius: '7px', flexShrink: 0,
+                    background: active?.city === c.city ? c.color : 'rgba(0,0,0,0.04)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '13px', fontWeight: 900,
-                    color: active?.city === c.city ? '#fff' : '#555',
-                    flexShrink: 0,
-                  }}>
-                    {c.count}
-                  </div>
+                    fontSize: '12px', fontWeight: 900,
+                    color: active?.city === c.city ? '#fff' : '#AAA',
+                  }}>{c.count}</div>
                 </div>
 
                 <AnimatePresence>
                   {active?.city === c.city && (
                     <motion.ul
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
+                      initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      style={{
-                        listStyle: 'none', padding: 0, margin: 0,
-                        display: 'flex', flexDirection: 'column', gap: '5px', overflow: 'hidden',
-                      }}
-                    >
+                      style={{ listStyle: 'none', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       {c.institutions.map((inst, j) => (
-                        <motion.li
-                          key={inst}
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
+                        <motion.li key={inst}
+                          initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: j * 0.04 }}
-                          style={{ fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '8px' }}
-                        >
-                          <span style={{
-                            width: '4px', height: '4px', borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #8B3FA8, #00C4AD)',
-                            flexShrink: 0, display: 'inline-block',
-                          }} />
+                          style={{ fontSize: '11px', color: '#666', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: c.color, flexShrink: 0, display: 'inline-block' }} />
                           {inst}
                         </motion.li>
                       ))}
@@ -325,20 +226,16 @@ export default function ColombiaMap() {
 
             {/* Total */}
             <div style={{
-              padding: '14px 20px',
-              borderRadius: '12px',
-              border: '1px solid #1E1E1E',
-              background: 'linear-gradient(135deg, rgba(139,63,168,0.06), rgba(0,196,173,0.06))',
+              padding: '12px 16px', borderRadius: '10px',
+              background: '#fff', border: '1px solid rgba(0,0,0,0.07)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ fontSize: '13px', color: '#555' }}>Total instituciones</span>
+              <span style={{ fontSize: '12px', color: '#AAA' }}>Total instituciones</span>
               <span style={{
-                fontWeight: 900, fontSize: '22px',
+                fontWeight: 900, fontSize: '20px',
                 background: 'linear-gradient(135deg, #8B3FA8, #00C4AD)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              }}>
-                13+
-              </span>
+              }}>{totalInstitutions}+</span>
             </div>
           </div>
         </div>
@@ -346,3 +243,5 @@ export default function ColombiaMap() {
     </section>
   )
 }
+
+
