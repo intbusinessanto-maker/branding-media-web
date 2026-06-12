@@ -24,9 +24,9 @@ function CustomCursor() {
     const onLeave = () => { x = -100; y = -100 }
 
     const tick = () => {
-      // Lerp suave para que el punto siga con un mínimo de inercia
-      cx += (x - cx) * 0.18
-      cy += (y - cy) * 0.18
+      // Lerp casi inmediato — sin delay perceptible
+      cx += (x - cx) * 0.85
+      cy += (y - cy) * 0.85
       if (dotRef.current) {
         dotRef.current.style.transform = `translate(${cx}px, ${cy}px)`
       }
@@ -65,7 +65,22 @@ function CustomCursor() {
   )
 }
 
-/* Spotlight — dots amplificados solo cerca del cursor, detrás del contenido */
+/*
+ * Dos capas de puntos:
+ *  1. BaseDots  — puntos pequeños (1.5px) visibles en todo el fondo siempre
+ *  2. SpotlightDots — capa enmascarada: tapa los puntos pequeños con #E9E9E9
+ *     y dibuja puntos GRANDES (3.5px) solo dentro del círculo del cursor
+ */
+function BaseDots() {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+      backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.18) 1.5px, transparent 1.5px)',
+      backgroundSize: '20px 20px',
+    }} />
+  )
+}
+
 function SpotlightDots() {
   useEffect(() => {
     const root = document.documentElement
@@ -87,14 +102,13 @@ function SpotlightDots() {
 
   return (
     <div style={{
-      position: 'fixed',
-      inset: 0,
-      pointerEvents: 'none',
-      zIndex: 0,
-      backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.22) 2.2px, transparent 2.2px)',
+      position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1,
+      /* Puntos grandes sobre fondo sólido: dentro del círculo cubre los pequeños y muestra los grandes */
+      backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.22) 3.5px, transparent 3.5px)',
       backgroundSize: '20px 20px',
-      maskImage: 'radial-gradient(circle 85px at var(--mx, -999px) var(--my, -999px), black 0%, black 50%, transparent 100%)',
-      WebkitMaskImage: 'radial-gradient(circle 85px at var(--mx, -999px) var(--my, -999px), black 0%, black 50%, transparent 100%)',
+      backgroundColor: '#E9E9E9',
+      maskImage: 'radial-gradient(circle 90px at var(--mx, -999px) var(--my, -999px), black 0%, black 55%, transparent 100%)',
+      WebkitMaskImage: 'radial-gradient(circle 90px at var(--mx, -999px) var(--my, -999px), black 0%, black 55%, transparent 100%)',
     }} />
   )
 }
@@ -103,9 +117,10 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', position: 'relative' }}>
       <CustomCursor />
+      <BaseDots />
       <SpotlightDots />
 
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div style={{ position: 'relative', zIndex: 2 }}>
         <Navbar />
         <main>
           <Hero />

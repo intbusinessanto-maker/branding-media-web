@@ -90,11 +90,11 @@ export default function Hero() {
         {/* CTAs */}
         <motion.div {...fadeUp(0.52)} style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="#contacto" style={{
-            background: 'linear-gradient(135deg, #8B3FA8, #00C4AD)',
+            background: '#8B3FA8',
             color: '#fff', padding: '14px 36px', borderRadius: '10px',
             fontSize: '14px', fontWeight: 700, textDecoration: 'none',
             display: 'inline-flex', alignItems: 'center', gap: '8px',
-            boxShadow: '0 6px 24px rgba(0,196,173,0.25)',
+            boxShadow: '0 6px 24px rgba(139,63,168,0.25)',
           }}>
             Activar campaña
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
@@ -117,7 +117,7 @@ export default function Hero() {
           style={{ marginTop: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '10px', color: '#BBB', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Scroll</span>
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}
-            style={{ width: '1px', height: '36px', background: 'linear-gradient(to bottom, #8B3FA8, #00C4AD, transparent)' }} />
+            style={{ width: '1px', height: '36px', background: '#8B3FA8', opacity: 0.5 }} />
         </motion.div>
       </div>
     </section>

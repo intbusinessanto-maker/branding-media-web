@@ -14,9 +14,13 @@ export default function Contact() {
   }
 
   return (
-    <section id="contacto" style={{ padding: '100px 2rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+    <section id="contacto" style={{ padding: 'clamp(60px,8vw,100px) 1.5rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+      <style>{`
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+        @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; gap: 40px; } }
+      `}</style>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '72px', alignItems: 'start' }}>
+        <div className="contact-grid">
           <motion.div initial={{ opacity: 0, x: -32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
             <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '12px' }}>Contacto</span>
             <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '20px' }}>
@@ -42,7 +46,7 @@ export default function Contact() {
             {sent ? (
               <div style={{ padding: '48px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(0,196,173,0.2)', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '14px', alignItems: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}>
                 <div style={{ fontSize: '48px' }}>✓</div>
-                <h3 style={{ fontSize: '20px', fontWeight: 700, background: 'linear-gradient(90deg, #00C4AD, #8B3FA8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>¡Mensaje enviado!</h3>
+                <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#00C4AD' }}>¡Mensaje enviado!</h3>
                 <p style={{ color: '#888', fontSize: '14px' }}>Nos ponemos en contacto en menos de 24 horas.</p>
               </div>
             ) : (
@@ -53,7 +57,7 @@ export default function Contact() {
                 </div>
                 <input style={input} name="email" type="email" placeholder="Email" value={form.email} onChange={handle} required />
                 <textarea style={{ ...input, minHeight: '110px', resize: 'vertical' }} name="mensaje" placeholder="Cuéntanos sobre tu campaña..." value={form.mensaje} onChange={handle} />
-                <button type="submit" style={{ background: 'linear-gradient(135deg, #8B3FA8, #00C4AD)', color: '#fff', padding: '15px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,196,173,0.25)' }}>
+                <button type="submit" style={{ background: '#8B3FA8', color: '#fff', padding: '15px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(139,63,168,0.25)' }}>
                   Enviar propuesta →
                 </button>
               </form>

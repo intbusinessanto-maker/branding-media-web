@@ -71,7 +71,7 @@ export default function Navbar() {
             >{link.label}</a>
           ))}
           <a href="#contacto" style={{
-            background: 'linear-gradient(135deg, #8B3FA8, #00C4AD)',
+            background: '#8B3FA8',
             color: '#fff', padding: '11px 24px', borderRadius: '8px',
             fontSize: '14px', fontWeight: 700, textDecoration: 'none',
             boxShadow: '0 4px 15px rgba(0,196,173,0.25)', whiteSpace: 'nowrap',
@@ -149,7 +149,7 @@ export default function Navbar() {
               onClick={closeMenu}
               style={{
                 marginTop: '24px',
-                background: 'linear-gradient(135deg, #8B3FA8, #00C4AD)',
+                background: '#8B3FA8',
                 color: '#fff', padding: '16px 24px', borderRadius: '12px',
                 fontSize: '16px', fontWeight: 700, textDecoration: 'none',
                 textAlign: 'center',

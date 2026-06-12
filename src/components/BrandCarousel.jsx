@@ -55,7 +55,7 @@ export default function BrandCarousel() {
           </p>
           <div style={{
             width: '40px', height: '3px', margin: '0 auto',
-            background: 'linear-gradient(90deg, #8B3FA8, #00C4AD, #F07B00)',
+            background: '#00C4AD',
             borderRadius: '2px',
           }} />
         </motion.div>
