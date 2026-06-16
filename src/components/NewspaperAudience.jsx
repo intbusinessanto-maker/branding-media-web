@@ -201,14 +201,9 @@ export default function NewspaperAudience() {
     offset: ['start start', 'end start'],
   })
 
-  /* Texto: aparece cuando el papel llegó ~55% del camino */
-  const textOp = useTransform(scrollYProgress, [0.38, 0.58], [0, 1])
-  const textY  = useTransform(scrollYProgress, [0.38, 0.58], [24, 0])
-
-  /* PNG personas: aparece suavemente al inicio */
-  const pngOp  = useTransform(scrollYProgress, [0, 0.05, 0.88, 1.0], [0, 1, 1, 0])
-  /* Texto desaparece suavemente al final (no hay salta brusco) */
-  const textFinalOp = useTransform(scrollYProgress, [0.80, 0.96], [1, 0])
+  /* Texto: aparece pronto, sin esperar al papel */
+  const textOp = useTransform(scrollYProgress, [0.08, 0.20], [0, 1])
+  const textY  = useTransform(scrollYProgress, [0.08, 0.20], [20, 0])
 
   if (isMobile) return <MobileAudience />
 
@@ -235,14 +230,13 @@ export default function NewspaperAudience() {
           filter: 'brightness(0.48)',
         }} />
 
-        {/* ── CAPA 1: PNG personas — estático, solo personas (sin papel, sin fondo) ── */}
-        <motion.div style={{
+        {/* ── CAPA 1: PNG personas — siempre visible, sin fade ── */}
+        <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${PNG_URL})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: pngOp,
         }} />
 
         {/* ── CAPA 2: SVG PAPEL 3D — único elemento animado ── */}
@@ -256,7 +250,7 @@ export default function NewspaperAudience() {
             transform: 'translate(-50%, -50%)',
             width: 'clamp(320px, 40%, 560px)',
             zIndex: 10,
-            opacity: useTransform([textOp, textFinalOp], ([a, b]) => a * b),
+            opacity: textOp,
             y: textY,
           }}
         >
