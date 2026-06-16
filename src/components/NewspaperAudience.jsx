@@ -201,9 +201,9 @@ export default function NewspaperAudience() {
     offset: ['start start', 'end start'],
   })
 
-  /* Texto: aparece pronto, sin esperar al papel */
-  const textOp = useTransform(scrollYProgress, [0.08, 0.20], [0, 1])
-  const textY  = useTransform(scrollYProgress, [0.08, 0.20], [20, 0])
+  /* Texto: aparece casi de inmediato al entrar la sección */
+  const textOp = useTransform(scrollYProgress, [0, 0.06], [0, 1])
+  const textY  = useTransform(scrollYProgress, [0, 0.06], [18, 0])
 
   if (isMobile) return <MobileAudience />
 
@@ -242,18 +242,19 @@ export default function NewspaperAudience() {
         {/* ── CAPA 2: SVG PAPEL 3D — único elemento animado ── */}
         <PaperSVG scrollYProgress={scrollYProgress} />
 
-        {/* ── CAPA 3: TEXTO centrado (vertical y horizontal) ── */}
-        <motion.div
+        {/* ── CAPA 3: TEXTO centrado ──
+              El div externo maneja el centrado CSS puro.
+              El motion.div interno maneja solo opacity/y sin conflicto. */}
+        <div
           style={{
             position: 'absolute',
             top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
             width: 'clamp(320px, 40%, 560px)',
             zIndex: 10,
-            opacity: textOp,
-            y: textY,
           }}
         >
+        <motion.div style={{ opacity: textOp, y: textY }}>
           {/* Header */}
           <div style={{
             padding: '20px 24px 16px', textAlign: 'center',
@@ -317,6 +318,7 @@ export default function NewspaperAudience() {
             ))}
           </div>
         </motion.div>
+        </div>
 
         {/* Indicador de scroll — se desvanece tras el primer scroll */}
         <motion.div
