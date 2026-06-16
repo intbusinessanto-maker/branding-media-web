@@ -30,7 +30,7 @@ export default function Contact() {
             <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '36px' }}>En menos de 24 horas te presentamos una propuesta de medios personalizada.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {[
-                { icon: '📍', label: 'Bogotá, Colombia', color: '#F07B00' },
+                { icon: '📍', label: 'Bogotá, Colombia', color: '#E8118A' },
                 { icon: '📱', label: '+57 301 697 8741', color: '#00C4AD' },
                 { icon: '✉️', label: 'admin@bmmedios.com', color: '#8B3FA8' },
               ].map(item => (

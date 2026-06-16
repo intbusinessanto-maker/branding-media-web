@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 const pillars = [
   { number: '01', title: 'Audiencia de alto valor', body: 'El universitario colombiano es el consumidor del futuro: conectado, aspiracional y con alta influencia en decisiones de compra del hogar.', color: '#00C4AD' },
   { number: '02', title: 'Contexto de concentración', body: 'El campus es un entorno donde el estudiante permanece horas diarias, facilitando mayor exposición y recuerdo de marca.', color: '#8B3FA8' },
-  { number: '03', title: 'Segmentación natural', body: 'Cada universidad tiene un perfil socioeconómico específico. Tu campaña llega al segmento correcto en el campus correcto.', color: '#F07B00' },
+  { number: '03', title: 'Segmentación natural', body: 'Cada universidad tiene un perfil socioeconómico específico. Tu campaña llega al segmento correcto en el campus correcto.', color: '#E8118A' },
   { number: '04', title: 'Baja saturación publicitaria', body: 'El entorno universitario tiene menos ruido publicitario que canales digitales o vía pública masiva, generando mayor impacto.', color: '#00C4AD' },
 ]
 
@@ -38,12 +38,12 @@ export default function Audience() {
             {/* Stat destacado */}
             <div style={{
               padding: '24px 28px',
-              border: '1px solid rgba(240,123,0,0.2)',
+              border: '1px solid rgba(232,17,138,0.2)',
               borderRadius: '14px',
-              background: 'rgba(240,123,0,0.04)',
+              background: 'rgba(232,17,138,0.04)',
               display: 'flex', alignItems: 'center', gap: '20px',
             }}>
-              <div style={{ fontSize: 'clamp(40px, 8vw, 56px)', fontWeight: 900, color: '#F07B00', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0 }}>
+              <div style={{ fontSize: 'clamp(40px, 8vw, 56px)', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0 }}>
                 3–6h
               </div>
               <div>

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import Navbar from './components/Navbar'
+import VideoIntro from './components/VideoIntro'
 import Hero from './components/Hero'
 import Stats from './components/Stats'
 import BrandCarousel from './components/BrandCarousel'
+import CinematicText from './components/CinematicText'
 import ColombiaMap from './components/ColombiaMap'
 import Formats from './components/Formats'
-import Audience from './components/Audience'
+import Audience from './components/NewspaperAudience'
 import Cases from './components/Cases'
 import Blog from './components/Blog'
 import Contact from './components/Contact'
@@ -114,27 +116,41 @@ function SpotlightDots() {
 }
 
 export default function App() {
-  return (
-    <div style={{ minHeight: '100vh', position: 'relative' }}>
-      <CustomCursor />
-      <BaseDots />
-      <SpotlightDots />
+  const [introVisible, setIntroVisible] = useState(
+    () => !sessionStorage.getItem('bm_intro_seen')
+  )
 
-      <div style={{ position: 'relative', zIndex: 2 }}>
-        <Navbar />
-        <main>
-          <Hero />
-          <Stats />
-          <BrandCarousel />
-          <ColombiaMap />
-          <Formats />
-          <Audience />
-          <Cases />
-          <Blog />
-          <Contact />
-        </main>
-        <Footer />
+  return (
+    <>
+      {introVisible && (
+        <VideoIntro onDismiss={() => {
+          sessionStorage.setItem('bm_intro_seen', '1')
+          setIntroVisible(false)
+        }} />
+      )}
+
+      <div style={{ minHeight: '100vh', position: 'relative' }}>
+        <CustomCursor />
+        <BaseDots />
+        <SpotlightDots />
+
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <Navbar />
+          <main>
+            <Hero />
+            <Stats />
+            <BrandCarousel />
+            <CinematicText />
+            <ColombiaMap />
+            <Formats />
+            <Audience />
+            <Cases />
+            <Blog />
+            <Contact />
+          </main>
+          <Footer />
+        </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -9,7 +9,7 @@ const fadeUp = (delay = 0) => ({
 const miniStats = [
   { value: '15+',   label: 'Universidades', color: '#8B3FA8' },
   { value: '800K+', label: 'Estudiantes/mes', color: '#00C4AD' },
-  { value: '5+',    label: 'Años', color: '#F07B00' },
+  { value: '5+',    label: 'Años', color: '#E8118A' },
 ]
 
 export default function Hero() {
@@ -24,7 +24,7 @@ export default function Hero() {
       <div style={{ position: 'absolute', top: '14%', right: '8%', width: '64px', height: '64px', background: '#fff', opacity: 0.65, transform: 'rotate(45deg)', borderRadius: '6px', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: '20%', left: '7%', width: '40px', height: '40px', background: '#00C4AD', opacity: 0.18, transform: 'rotate(45deg)', borderRadius: '4px', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', top: '35%', left: '5%', width: '80px', height: '80px', background: '#8B3FA8', opacity: 0.07, borderRadius: '50%', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '15%', right: '6%', width: '70px', height: '70px', background: '#F07B00', opacity: 0.08, borderRadius: '50%', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '15%', right: '6%', width: '70px', height: '70px', background: '#E8118A', opacity: 0.08, borderRadius: '50%', pointerEvents: 'none' }} />
 
       <div style={{ position: 'relative', maxWidth: '820px' }}>
 
@@ -42,7 +42,7 @@ export default function Hero() {
             <span style={{ color: '#DDD' }}>|</span>
             <span style={{ color: '#00C4AD' }}>● DOOH</span>
             <span style={{ color: '#DDD' }}>|</span>
-            <span style={{ color: '#F07B00' }}>● Universidades Colombia</span>
+            <span style={{ color: '#E8118A' }}>● Universidades Colombia</span>
           </span>
         </motion.div>
 

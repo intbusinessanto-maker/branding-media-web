@@ -11,7 +11,7 @@ const formats = [
     tag: 'Físico', title: 'OOH', subtitle: 'Out-of-Home',
     description: 'Vallas, backlight, stickers de piso, mupis y activaciones presenciales en universidades.',
     features: ['Presencia permanente en campus', 'Alta recordación de marca', 'Formatos adaptables', 'Impacto visual diferencial'],
-    color: '#F07B00', bg: 'rgba(240,123,0,0.06)', border: 'rgba(240,123,0,0.15)',
+    color: '#E8118A', bg: 'rgba(232,17,138,0.06)', border: 'rgba(232,17,138,0.15)',
   },
   {
     tag: 'Experiencial', title: 'Activaciones', subtitle: 'Brand Experience',

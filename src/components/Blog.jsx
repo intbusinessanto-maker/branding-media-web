@@ -1,6 +1,6 @@
 ﻿import { motion } from 'framer-motion'
 
-const categoryColors = { Estrategia: '#8B3FA8', DOOH: '#00C4AD', Tendencias: '#F07B00' }
+const categoryColors = { Estrategia: '#8B3FA8', DOOH: '#00C4AD', Tendencias: '#E8118A' }
 
 const posts = [
   { date: '03 Mar 2026', category: 'Estrategia', title: '¿Tu marca es protagonista o solo parte del paisaje?', excerpt: 'Estamos pagando fortunas por ser ignorados. El fin de la publicidad invisible en entornos universitarios.', readTime: '5 min' },

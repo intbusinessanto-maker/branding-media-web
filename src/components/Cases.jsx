@@ -10,7 +10,7 @@ const IMAGES = [
   'samsung-1.png', 'spotify.png', 'todossomosuna-1.png', 'volvo.png', 'yango-1.png',
 ].map(n => BASE + n)
 
-const FALLBACK = ['#8B3FA8', '#00C4AD', '#F07B00']
+const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
 
 const BUBBLES = [
   { left: '0%',  top: '4%',  size: 155, fromX: -1600 },
@@ -34,7 +34,7 @@ const BUBBLES = [
 
 const cases = [
   { sector: 'FMCG',    tag: 'DOOH · Bogotá',        color: '#00C4AD', headline: 'Incremento del 40% en reconocimiento de marca', m1: { l: 'Impactos', v: '1.2M+' }, m2: { l: 'Duración',  v: '8 sem' } },
-  { sector: 'Fintech', tag: 'OOH · Nacional',        color: '#F07B00', headline: 'Adquisición de usuarios en audiencia 18–25',    m1: { l: 'Ciudades',  v: '4'    }, m2: { l: 'Registros', v: '12K+'  } },
+  { sector: 'Fintech', tag: 'OOH · Nacional',        color: '#E8118A', headline: 'Adquisición de usuarios en audiencia 18–25',    m1: { l: 'Ciudades',  v: '4'    }, m2: { l: 'Registros', v: '12K+'  } },
   { sector: 'Retail',  tag: 'Activación · Medellín', color: '#8B3FA8', headline: '3.000 interacciones directas con la marca',    m1: { l: 'Interacc.', v: '3K+'  }, m2: { l: 'UGC posts', v: '800+'  } },
 ]
 
@@ -146,7 +146,7 @@ function SectionHeader() {
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
       <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '10px' }}>Resultados</span>
       <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '8px' }}>
-        Marcas que <span style={{ color: '#F07B00' }}>confían en nosotros</span>
+        Marcas que <span style={{ color: '#E8118A' }}>confían en nosotros</span>
       </h2>
       <p style={{ color: '#AAA', fontSize: '13px', lineHeight: 1.6 }}>
         Resultados reales — marcas protegidas por acuerdo de confidencialidad
@@ -268,7 +268,7 @@ export default function Cases() {
             </motion.span>
             <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.07 }}
               style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '8px' }}>
-              Marcas que <span style={{ color: '#F07B00' }}>confían en nosotros</span>
+              Marcas que <span style={{ color: '#E8118A' }}>confían en nosotros</span>
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
               style={{ color: '#AAA', fontSize: '12px', marginBottom: '28px', lineHeight: 1.6 }}>

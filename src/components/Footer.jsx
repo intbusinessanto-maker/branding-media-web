@@ -7,7 +7,7 @@ export default function Footer() {
       <div style={{ display: 'flex', marginBottom: '48px' }}>
         <div style={{ flex: 1, height: '3px', background: '#8B3FA8', borderRadius: '2px 0 0 2px' }} />
         <div style={{ flex: 1, height: '3px', background: '#00C4AD' }} />
-        <div style={{ flex: 1, height: '3px', background: '#F07B00', borderRadius: '0 2px 2px 0' }} />
+        <div style={{ flex: 1, height: '3px', background: '#E8118A', borderRadius: '0 2px 2px 0' }} />
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px' }}>
@@ -15,11 +15,11 @@ export default function Footer() {
         <p style={{ fontSize: '13px', color: '#555' }}>© 2026 Branding Media · Bogotá, Colombia</p>
         <div style={{ display: 'flex', gap: '24px' }}>
           {[
-            { label: 'OOH', color: '#F07B00' },
+            { label: 'OOH', color: '#E8118A' },
             { label: 'DOOH', color: '#00C4AD' },
             { label: 'Universidades', color: '#8B3FA8' },
             { label: 'Blog', color: '#00C4AD' },
-            { label: 'Contacto', color: '#F07B00' },
+            { label: 'Contacto', color: '#E8118A' },
           ].map(l => (
             <a key={l.label} href="#" style={{ fontSize: '13px', color: '#555', textDecoration: 'none', transition: 'color 0.2s' }}
               onMouseEnter={e => e.target.style.color = l.color}

@@ -20,9 +20,9 @@ function Counter({ to, suffix = '' }) {
 
 const stats = [
   { value: 13, suffix: '+', label: 'Universidades activas', desc: 'Top instituciones de Colombia', color: '#00C4AD' },
-  { value: 800, suffix: 'K+', label: 'Estudiantes / mes', desc: 'Audiencia universitaria premium', color: '#F07B00' },
+  { value: 800, suffix: 'K+', label: 'Estudiantes / mes', desc: 'Audiencia universitaria premium', color: '#E8118A' },
   { value: 5, suffix: '+', label: 'Años de operación', desc: 'Experiencia en medios académicos', color: '#8B3FA8' },
-  { value: 98, suffix: '%', label: 'Satisfacción de marca', desc: 'Clientes que renuevan campaña', color: '#F07B00' },
+  { value: 98, suffix: '%', label: 'Satisfacción de marca', desc: 'Clientes que renuevan campaña', color: '#E8118A' },
 ]
 
 export default function Stats() {
