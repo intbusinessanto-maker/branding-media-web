@@ -147,18 +147,18 @@ function CityCard({ c, isActive, onToggle, index }) {
 
 /* ── ColombiaMap ── */
 export default function ColombiaMap() {
-  const ref     = useRef(null)
-  const started = useRef(false)
-  const inView  = useInView(ref, { once: true, amount: 0.15 })
+  const ref        = useRef(null)
+  const started    = useRef(false)
+  const releaseRef = useRef(null)   // para que el botón Skip pueda llamar a release()
 
-  const [seqIdx,  setSeqIdx]  = useState(-1)    // ciudad activa en la secuencia
-  const [seqDone, setSeqDone] = useState(false)  // ¿terminó la secuencia?
-  const [manual,  setManual]  = useState(new Set()) // toggles manuales post-secuencia
+  const inView = useInView(ref, { once: true, amount: 0.15 })
+
+  const [seqIdx,  setSeqIdx]  = useState(-1)
+  const [seqDone, setSeqDone] = useState(false)
+  const [manual,  setManual]  = useState(new Set())
 
   const totalInstitutions = CITIES.reduce((s, c) => s + c.count, 0)
 
-  /* Durante la secuencia: solo la ciudad del índice actual está abierta.
-     Después: el usuario controla manualmente con clic. */
   const isActive = (cityName, idx) =>
     seqDone ? manual.has(cityName) : seqIdx === idx
 
@@ -172,6 +172,13 @@ export default function ColombiaMap() {
     })
   }
 
+  /* Botón Skip: desbloquea scroll, cancela la secuencia y termina */
+  const handleSkip = () => {
+    releaseRef.current?.()
+    setSeqIdx(-1)
+    setSeqDone(true)
+  }
+
   useEffect(() => {
     if (!inView || started.current) return
     started.current = true
@@ -182,18 +189,35 @@ export default function ColombiaMap() {
       document.body.style.overflow     = ''
       document.body.style.paddingRight = ''
       document.removeEventListener('keydown', blockKeys)
+      releaseRef.current = null
     }
+    releaseRef.current = release
 
     let cityTimers = []
     let tDone
 
-    /* 1. Llevar la sección al tope del viewport de forma suave */
+    /* Llevar la sección al tope del viewport */
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-    /* 2. Esperar que el scroll termine (~650ms) y luego bloquear + secuencia */
     const lockTimer = setTimeout(() => {
-      /* Bloquear scroll solo en desktop — en móvil es demasiado disruptivo */
-      if (window.innerWidth >= 768) {
+      /*
+       * Fix scroll rápido: si el usuario bajó muy rápido y la sección
+       * ya está más de un 30 % por encima del viewport, no bloquear —
+       * dejar que sigan scrolleando libremente.
+       */
+      const rect      = ref.current?.getBoundingClientRect()
+      const tooFarUp  = rect && rect.top < -(rect.height * 0.30)
+      const belowView = rect && rect.bottom < 0  // ya pasaron la sección
+
+      if (belowView) {
+        /* Saltaron por completo — terminar sin animación ni bloqueo */
+        release()
+        setSeqIdx(-1)
+        setSeqDone(true)
+        return
+      }
+
+      if (!tooFarUp && window.innerWidth >= 768) {
         const sw = window.innerWidth - document.documentElement.clientWidth
         document.body.style.overflow     = 'hidden'
         document.body.style.paddingRight = `${sw}px`
@@ -228,6 +252,7 @@ export default function ColombiaMap() {
       background: 'transparent',
       display: 'flex',
       flexDirection: 'column',
+      position: 'relative',
     }}>
       <style>{`
         .map-grid {
@@ -420,6 +445,39 @@ export default function ColombiaMap() {
 
         </div>
       </div>
+
+      {/* Botón Skip — visible solo mientras corre la secuencia automática */}
+      <AnimatePresence>
+        {!seqDone && (
+          <motion.button
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.3, delay: 0.8 }}
+            onClick={handleSkip}
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              right: '24px',
+              padding: '8px 18px',
+              borderRadius: '100px',
+              border: '1px solid rgba(0,0,0,0.12)',
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              fontSize: '12px',
+              fontWeight: 700,
+              color: '#555',
+              cursor: 'pointer',
+              letterSpacing: '0.04em',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
+              zIndex: 20,
+            }}
+          >
+            Saltar →
+          </motion.button>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
