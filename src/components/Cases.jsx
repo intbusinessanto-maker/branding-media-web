@@ -13,29 +13,50 @@ const IMAGES = [
 const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
 
 const BUBBLES = [
-  { left: '0%',  top: '4%',  size: 155, fromX: -1600 },
-  { left: '0%',  top: '40%', size: 128, fromX: -1600 },
-  { left: '0%',  top: '70%', size: 148, fromX: -1600 },
-  { left: '12%', top: '6%',  size: 114, fromX: -1100 },
-  { left: '12%', top: '54%', size: 140, fromX: -1100 },
-  { left: '9%',  top: '80%', size: 112, fromX: -1100 },
-  { left: '23%', top: '0%',  size: 122, fromX:  -750 },
-  { left: '22%', top: '85%', size: 108, fromX:  -750 },
-  { left: '43%', top: '90%', size: 104, fromX:  -600 },
-  { left: '67%', top: '0%',  size: 132, fromX:   750 },
-  { left: '66%', top: '86%', size: 118, fromX:   750 },
-  { left: '76%', top: '7%',  size: 138, fromX:  1100 },
-  { left: '78%', top: '51%', size: 114, fromX:  1100 },
-  { left: '74%', top: '80%', size: 144, fromX:  1100 },
-  { left: '88%', top: '3%',  size: 152, fromX:  1600 },
-  { left: '89%', top: '36%', size: 124, fromX:  1600 },
-  { left: '87%', top: '67%', size: 158, fromX:  1600 },
+  { left: '8%',  top: '4%',  size: 180, fromX: -1600 },
+  { left: '8%',  top: '40%', size: 150, fromX: -1600 },
+  { left: '8%',  top: '70%', size: 172, fromX: -1600 },
+  { left: '19%', top: '6%',  size: 135, fromX: -1100 },
+  { left: '19%', top: '54%', size: 163, fromX: -1100 },
+  { left: '16%', top: '80%', size: 132, fromX: -1100 },
+  { left: '31%', top: '0%',  size: 142, fromX:  -750 },
+  { left: '30%', top: '85%', size: 126, fromX:  -750 },
+  { left: '43%', top: '90%', size: 122, fromX:  -600 },
+  { left: '55%', top: '0%',  size: 155, fromX:   750 },
+  { left: '54%', top: '86%', size: 138, fromX:   750 },
+  { left: '65%', top: '7%',  size: 162, fromX:  1100 },
+  { left: '67%', top: '51%', size: 135, fromX:  1100 },
+  { left: '63%', top: '80%', size: 168, fromX:  1100 },
+  { left: '76%', top: '3%',  size: 178, fromX:  1600 },
+  { left: '77%', top: '36%', size: 146, fromX:  1600 },
+  { left: '75%', top: '67%', size: 184, fromX:  1600 },
 ]
 
-const cases = [
-  { sector: 'FMCG',    tag: 'DOOH · Bogotá',        color: '#00C4AD', headline: 'Incremento del 40% en reconocimiento de marca', m1: { l: 'Impactos', v: '1.2M+' }, m2: { l: 'Duración',  v: '8 sem' } },
-  { sector: 'Fintech', tag: 'OOH · Nacional',        color: '#E8118A', headline: 'Adquisición de usuarios en audiencia 18–25',    m1: { l: 'Ciudades',  v: '4'    }, m2: { l: 'Registros', v: '12K+'  } },
-  { sector: 'Retail',  tag: 'Activación · Medellín', color: '#8B3FA8', headline: '3.000 interacciones directas con la marca',    m1: { l: 'Interacc.', v: '3K+'  }, m2: { l: 'UGC posts', v: '800+'  } },
+const MOBILE_BUBBLES = [
+  // Far left column — entra desde la izquierda
+  { left: '-1%', top: '5%',  size: 88, fromX: -700 },
+  { left: '0%',  top: '40%', size: 78, fromX: -700 },
+  { left: '-1%', top: '74%', size: 84, fromX: -700 },
+  // Near left column
+  { left: '13%', top: '16%', size: 76, fromX: -450 },
+  { left: '12%', top: '52%', size: 82, fromX: -450 },
+  { left: '10%', top: '84%', size: 72, fromX: -450 },
+  // Top/bottom center-left
+  { left: '28%', top: '1%',  size: 86, fromX: -280 },
+  { left: '26%', top: '87%', size: 74, fromX: -280 },
+  // Bottom center
+  { left: '38%', top: '92%', size: 70, fromX: -220 },
+  // Top/bottom center-right
+  { left: '54%', top: '1%',  size: 86, fromX:  280 },
+  { left: '56%', top: '87%', size: 74, fromX:  280 },
+  // Near right column
+  { left: '67%', top: '16%', size: 76, fromX:  450 },
+  { left: '69%', top: '52%', size: 82, fromX:  450 },
+  { left: '67%', top: '84%', size: 72, fromX:  450 },
+  // Far right column — entra desde la derecha
+  { left: '80%', top: '5%',  size: 88, fromX:  700 },
+  { left: '82%', top: '40%', size: 78, fromX:  700 },
+  { left: '80%', top: '74%', size: 84, fromX:  700 },
 ]
 
 /* Popup de caso */
@@ -116,30 +137,6 @@ function Bubble({ progress, left, top, size, fromX, imgUrl, fallback, index, isO
   )
 }
 
-/* Tarjeta de caso — reutilizada en ambos layouts */
-function CaseCard({ c }) {
-  return (
-    <motion.div
-      whileHover={{ y: -4, boxShadow: `0 14px 36px ${c.color}20`, transition: { duration: 0.2 } }}
-      style={{ padding: '20px', borderRadius: '14px', background: '#fff', border: `1px solid ${c.color}22`, boxShadow: `0 4px 16px ${c.color}10`, textAlign: 'left' }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '4px' }}>
-        <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.color, background: `${c.color}0F`, border: `1px solid ${c.color}22`, padding: '3px 10px', borderRadius: '100px' }}>{c.sector}</span>
-        <span style={{ fontSize: '10px', color: '#CCC' }}>{c.tag}</span>
-      </div>
-      <p style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.35, marginBottom: '14px' }}>{c.headline}</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '12px', borderTop: `1px solid ${c.color}18` }}>
-        {[c.m1, c.m2].map(m => (
-          <div key={m.l}>
-            <div style={{ fontSize: '20px', fontWeight: 900, color: c.color, letterSpacing: '-0.03em', lineHeight: 1 }}>{m.v}</div>
-            <div style={{ fontSize: '11px', color: '#CCC', marginTop: '2px' }}>{m.l}</div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  )
-}
-
 /* Header común */
 function SectionHeader() {
   return (
@@ -171,70 +168,45 @@ export default function Cases() {
   const handleToggle = i => setActiveIndex(prev => prev === i ? null : i)
   const handleClose  = ()  => setActiveIndex(null)
 
-  /* Renderiza una fila de logos circulares para móvil */
-  const LogoRow = ({ slice, offset = 0 }) => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
-      {slice.map((url, idx) => {
-        const i = offset + idx
-        return (
-          <motion.div key={i}
-            initial={{ opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            onClick={e => { e.stopPropagation(); handleToggle(i) }}
-            style={{ position: 'relative', width: '60px', height: '60px', flexShrink: 0, cursor: 'pointer' }}
-          >
-            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#fff', border: activeIndex === i ? '2.5px solid #8B3FA8' : '2px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 14px rgba(0,0,0,0.09)' }}>
-              <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '15%' }}
-                onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = FALLBACK[i % 3] }} />
-            </div>
-            <AnimatePresence>
-              {activeIndex === i && (
-                <CasePopup imgUrl={url} fallback={FALLBACK[i % 3]} isOpen onToggle={() => handleToggle(i)} popupBelow size={60} />
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )
-      })}
-    </div>
-  )
-
-  /* ── LAYOUT MÓVIL ── */
+  /* ── LAYOUT MÓVIL — misma animación de burbujas que desktop ── */
   if (isMobile) {
-    const topLogos    = IMAGES.slice(0, 9)   // 9 primeros
-    const bottomLogos = IMAGES.slice(9)      // 8 últimos
-
     return (
-      <section id="casos" ref={ref} style={{ padding: '72px 1.5rem', background: 'transparent' }} onClick={handleClose}>
+      <section ref={ref} id="casos" style={{ height: '200vh', position: 'relative' }}>
+        <div
+          style={{ position: 'sticky', top: 0, height: '100vh', background: 'transparent', overflow: 'hidden' }}
+          onClick={handleClose}
+        >
+          <AnimatePresence>
+            {activeIndex !== null && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+                style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.12)', backdropFilter: 'blur(3px)', zIndex: 55, pointerEvents: 'none' }} />
+            )}
+          </AnimatePresence>
 
-        {/* Fila superior de logos */}
-        <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.5 }}
-          style={{ marginBottom: '32px' }}>
-          <LogoRow slice={topLogos} offset={0} />
-        </motion.div>
+          {MOBILE_BUBBLES.map((b, i) => (
+            <Bubble key={i} index={i} progress={scrollYProgress}
+              left={b.left} top={b.top} size={b.size} fromX={b.fromX}
+              imgUrl={IMAGES[i]} fallback={FALLBACK[i % 3]}
+              isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
+          ))}
 
-        {/* Header + tarjetas en el centro */}
-        <div style={{ marginBottom: '32px' }}>
-          <SectionHeader />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px' }}>
-            {cases.map((c, i) => (
-              <motion.div key={c.sector}
-                initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.5 }}>
-                <CaseCard c={c} />
-              </motion.div>
-            ))}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
+            <div style={{ textAlign: 'center', padding: '0 2rem' }}>
+              <motion.span initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+                style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '8px' }}>
+                Resultados
+              </motion.span>
+              <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.07 }}
+                style={{ fontSize: 'clamp(1.6rem, 7vw, 2.2rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '6px' }}>
+                Marcas que <span style={{ color: '#E8118A' }}>confían en nosotros</span>
+              </motion.h2>
+              <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
+                style={{ color: '#AAA', fontSize: '11px', lineHeight: 1.5 }}>
+                Resultados reales — marcas protegidas por NDA
+              </motion.p>
+            </div>
           </div>
         </div>
-
-        {/* Fila inferior de logos */}
-        <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.5 }}>
-          <LogoRow slice={bottomLogos} offset={9} />
-        </motion.div>
-
       </section>
     )
   }
@@ -271,13 +243,9 @@ export default function Cases() {
               Marcas que <span style={{ color: '#E8118A' }}>confían en nosotros</span>
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
-              style={{ color: '#AAA', fontSize: '12px', marginBottom: '28px', lineHeight: 1.6 }}>
+              style={{ color: '#AAA', fontSize: '12px', lineHeight: 1.6 }}>
               Resultados reales — marcas protegidas por acuerdo de confidencialidad
             </motion.p>
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.18 }}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', pointerEvents: 'all' }}>
-              {cases.map(c => <CaseCard key={c.sector} c={c} />)}
-            </motion.div>
           </div>
         </div>
       </div>

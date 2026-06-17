@@ -40,7 +40,7 @@ export default function Navbar() {
           padding: '0 1.5rem',
           height: '88px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          backgroundColor: scrolled || open ? 'rgba(233,233,233,0.97)' : 'rgba(233,233,233,0.80)',
+          backgroundColor: scrolled || open ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.82)',
           backdropFilter: 'blur(20px)',
           borderBottom: scrolled ? '1px solid rgba(0,0,0,0.08)' : '1px solid transparent',
           transition: 'all 0.3s ease',
@@ -113,7 +113,7 @@ export default function Navbar() {
             style={{
               position: 'fixed', top: '88px', left: 0, right: 0, bottom: 0,
               zIndex: 190,
-              backgroundColor: 'rgba(233,233,233,0.98)',
+              backgroundColor: 'rgba(255,255,255,0.98)',
               backdropFilter: 'blur(20px)',
               display: 'flex', flexDirection: 'column',
               padding: '32px 1.5rem 40px',

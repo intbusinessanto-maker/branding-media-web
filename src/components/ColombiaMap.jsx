@@ -24,35 +24,62 @@ const COLOMBIA_PATH = `
   L 98,207 L 90,203 L 85,196 L 74,189 Z
 `
 
+/* labelDx/Dy: offset del punto al texto; labelAnchor: alineación SVG */
 const CITIES = [
-  { city: 'Barranquilla', x: 79,  y: 31,  count: 1, institutions: ['U. del Norte'],     color: '#E8118A' },
-  { city: 'Cartagena',    x: 70,  y: 46,  count: 1, institutions: ['U. de los Andes'],  color: '#8B3FA8' },
-  { city: 'Bucaramanga',  x: 107, y: 86,  count: 1, institutions: ['UPB Bucaramanga'],  color: '#00C4AD' },
-  { city: 'Medellín',     x: 67,  y: 99,  count: 2, institutions: ['UPB Medellín', 'EAFIT'], color: '#E8118A' },
   {
-    city: 'Bogotá', x: 91, y: 121, count: 9,
-    institutions: ['U. del Rosario','U. de los Andes','U. Externado','Javeriana','Sergio Arboleda','U. La Sabana','U. La Salle','U. Sanitas','U. América'],
-    color: '#8B3FA8',
+    city: 'Barranquilla', x: 79,  y: 31,  count: 1,
+    institutions: ['U. del Norte'],
+    color: '#E8118A', labelAnchor: 'middle', labelDx: 0,   labelDy: -14,
   },
-  { city: 'Cali', x: 51, y: 139, count: 1, institutions: ['ICESI'], color: '#00C4AD' },
+  {
+    city: 'Cartagena',    x: 70,  y: 46,  count: 1,
+    institutions: ['U. de los Andes'],
+    color: '#00C4AD', labelAnchor: 'end',    labelDx: -13, labelDy: 1,
+  },
+  {
+    city: 'Bucaramanga',  x: 107, y: 86,  count: 1,
+    institutions: ['UPB Bucaramanga'],
+    color: '#00C4AD', labelAnchor: 'start',  labelDx: 15,  labelDy: 1,
+  },
+  {
+    city: 'Medellín',     x: 67,  y: 99,  count: 2,
+    institutions: ['UPB Medellín', 'EAFIT'],
+    color: '#E8118A', labelAnchor: 'start',  labelDx: 15,  labelDy: 1,
+  },
+  {
+    city: 'Bogotá',       x: 91,  y: 121, count: 9,
+    institutions: ['U. del Rosario','U. de los Andes','U. Externado','Javeriana','Sergio Arboleda','U. La Sabana','U. La Salle','U. Sanitas','U. América'],
+    color: '#E8118A', labelAnchor: 'start',  labelDx: 15,  labelDy: 1,
+  },
+  {
+    city: 'Cali',         x: 51,  y: 139, count: 1,
+    institutions: ['ICESI'],
+    color: '#00C4AD', labelAnchor: 'end',    labelDx: -13, labelDy: 1,
+  },
 ]
 
-/* Tarjeta de ciudad — se auto-expande al entrar al viewport */
-function CityCard({ c, isActive, onToggle, onReveal, index }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.75 })
+const STEP_MS     = 1200
+const SCROLL_KEYS = ['ArrowDown','ArrowUp','PageDown','PageUp',' ','End','Home']
 
-  useEffect(() => {
-    if (inView) onReveal()
-  }, [inView])
+/* Devuelve los bounds del rect blanco detrás del label */
+function labelBg(name, lx, ly, anchor) {
+  const w = name.length * 3.7 + 2  // ancho estimado del texto
+  const pad = 3
+  const total = w + pad * 2
+  const rx = anchor === 'end'    ? lx - total + pad
+           : anchor === 'middle' ? lx - total / 2
+           :                       lx - pad
+  return { x: rx, y: ly - 6, w: total, h: 10 }
+}
 
+/* ── CityCard simplificado (sin auto-reveal) ── */
+function CityCard({ c, isActive, onToggle, index }) {
   return (
     <motion.div
-      ref={ref}
       initial={{ opacity: 0, x: 28 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1 + 0.2, duration: 0.6 }}
+      transition={{ delay: index * 0.08, duration: 0.5 }}
       onClick={onToggle}
       whileHover={{ y: -2, boxShadow: `0 8px 28px ${c.color}22` }}
       style={{
@@ -65,7 +92,9 @@ function CityCard({ c, isActive, onToggle, onReveal, index }) {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isActive ? '12px' : 0 }}>
         <div>
-          <div style={{ fontWeight: 700, fontSize: '14px', color: isActive ? c.color : '#1A1A1A', transition: 'color 0.2s' }}>{c.city}</div>
+          <div style={{ fontWeight: 700, fontSize: '14px', color: isActive ? c.color : '#1A1A1A', transition: 'color 0.2s' }}>
+            {c.city}
+          </div>
           <div style={{ fontSize: '11px', color: '#AAA', marginTop: '2px' }}>
             {c.count} {c.count === 1 ? 'institución' : 'instituciones'}
           </div>
@@ -116,12 +145,26 @@ function CityCard({ c, isActive, onToggle, onReveal, index }) {
   )
 }
 
+/* ── ColombiaMap ── */
 export default function ColombiaMap() {
-  const [activeCities, setActiveCities] = useState(new Set())
+  const ref     = useRef(null)
+  const started = useRef(false)
+  const inView  = useInView(ref, { once: true, amount: 0.15 })
+
+  const [seqIdx,  setSeqIdx]  = useState(-1)    // ciudad activa en la secuencia
+  const [seqDone, setSeqDone] = useState(false)  // ¿terminó la secuencia?
+  const [manual,  setManual]  = useState(new Set()) // toggles manuales post-secuencia
+
   const totalInstitutions = CITIES.reduce((s, c) => s + c.count, 0)
 
-  const toggle = (cityName) => {
-    setActiveCities(prev => {
+  /* Durante la secuencia: solo la ciudad del índice actual está abierta.
+     Después: el usuario controla manualmente con clic. */
+  const isActive = (cityName, idx) =>
+    seqDone ? manual.has(cityName) : seqIdx === idx
+
+  const toggleManual = (cityName) => {
+    if (!seqDone) return
+    setManual(prev => {
       const next = new Set(prev)
       if (next.has(cityName)) next.delete(cityName)
       else next.add(cityName)
@@ -129,51 +172,123 @@ export default function ColombiaMap() {
     })
   }
 
-  const reveal = (cityName) => {
-    setActiveCities(prev => new Set([...prev, cityName]))
-  }
+  useEffect(() => {
+    if (!inView || started.current) return
+    started.current = true
+
+    const blockKeys = (e) => { if (SCROLL_KEYS.includes(e.key)) e.preventDefault() }
+
+    const release = () => {
+      document.body.style.overflow     = ''
+      document.body.style.paddingRight = ''
+      document.removeEventListener('keydown', blockKeys)
+    }
+
+    let cityTimers = []
+    let tDone
+
+    /* 1. Llevar la sección al tope del viewport de forma suave */
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+    /* 2. Esperar que el scroll termine (~650ms) y luego bloquear + secuencia */
+    const lockTimer = setTimeout(() => {
+      /* Bloquear scroll solo en desktop — en móvil es demasiado disruptivo */
+      if (window.innerWidth >= 768) {
+        const sw = window.innerWidth - document.documentElement.clientWidth
+        document.body.style.overflow     = 'hidden'
+        document.body.style.paddingRight = `${sw}px`
+        document.addEventListener('keydown', blockKeys)
+      }
+
+      cityTimers = CITIES.map((_, i) =>
+        setTimeout(() => setSeqIdx(i), i * STEP_MS)
+      )
+
+      tDone = setTimeout(() => {
+        setSeqIdx(-1)
+        setSeqDone(true)
+        release()
+      }, CITIES.length * STEP_MS)
+    }, 650)
+
+    return () => {
+      clearTimeout(lockTimer)
+      cityTimers.forEach(clearTimeout)
+      clearTimeout(tDone)
+      release()
+    }
+  }, [inView])
 
   return (
-    <section id="mapa" style={{ padding: 'clamp(80px, 10vw, 120px) 1.5rem', background: 'transparent' }}>
+    /* Sección full-screen — flex column para que header + grid llenen exactamente 100vh */
+    <section ref={ref} id="mapa" style={{
+      height: '100vh',
+      minHeight: '600px',
+      overflow: 'hidden',
+      background: 'transparent',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
       <style>{`
-        .map-layout-new {
+        .map-grid {
           display: grid;
-          grid-template-columns: 1fr 360px;
-          gap: 48px;
-          align-items: start;
+          grid-template-columns: 1fr 300px;
+          gap: 20px;
+          flex: 1;
+          min-height: 0;
+          align-items: stretch;
         }
+        /* Móvil: mapa y ciudades lado a lado dentro del mismo bloque */
         @media (max-width: 900px) {
-          .map-layout-new { grid-template-columns: 1fr; gap: 32px; }
+          .map-grid {
+            grid-template-columns: 1.3fr 1fr;
+            gap: 10px;
+          }
+          .map-svg-col {
+            transform: none !important;
+            padding: 12px !important;
+          }
+          .map-cards-col {
+            max-height: none;
+            overflow-y: auto;
+          }
+        }
+        @media (max-width: 480px) {
+          .map-grid { gap: 6px; }
+          .map-wrapper { padding: 12px 14px 10px !important; }
         }
       `}</style>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Wrapper interno — distribuye el espacio con flexbox */}
+      <div className="map-wrapper" style={{
+        maxWidth: '1200px', width: '100%', margin: '0 auto',
+        padding: '20px 24px 16px',
+        display: 'flex', flexDirection: 'column',
+        flex: 1, minHeight: 0,
+      }}>
 
-        {/* Header */}
+        {/* Header compacto */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          style={{ marginBottom: '48px' }}
+          transition={{ duration: 0.6 }}
+          style={{ flexShrink: 0, marginBottom: '14px' }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '10px' }}>
+          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '6px' }}>
             Cobertura Nacional
           </span>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.08, marginBottom: '14px' }}>
+          <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 2.2rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.08, margin: 0 }}>
             Presencia en las principales{' '}
             <span style={{ color: '#8B3FA8' }}>ciudades universitarias</span>
           </h2>
-          <p style={{ color: '#888', fontSize: '15px', maxWidth: '520px', lineHeight: 1.65 }}>
-            Operamos en 6 ciudades con las instituciones de mayor influencia académica de Colombia.
-            Haz clic en una ciudad para ver las universidades.
-          </p>
         </motion.div>
 
-        <div className="map-layout-new">
+        <div className="map-grid">
 
-          {/* Mapa SVG — grande con efecto 3D */}
+          {/* Mapa SVG — llena el alto disponible */}
           <motion.div
+            className="map-svg-col"
             initial={{ opacity: 0, scale: 0.94 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -182,135 +297,107 @@ export default function ColombiaMap() {
               position: 'relative',
               background: '#fff',
               border: '1px solid rgba(0,0,0,0.07)',
-              borderRadius: '24px',
-              padding: 'clamp(24px, 5vw, 48px)',
+              borderRadius: '20px',
+              padding: '20px',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.07), 0 40px 80px rgba(0,0,0,0.06)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.07)',
               transform: 'perspective(1000px) rotateX(3deg)',
               transformOrigin: 'top center',
-              minHeight: '520px',
+              minHeight: 0,    /* permite que el flex lo comprima */
+              overflow: 'hidden',
             }}
           >
-            {/* Glow de fondo sutil */}
-            <div style={{
-              position: 'absolute', inset: 0, borderRadius: '24px', pointerEvents: 'none',
-              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(139,63,168,0.04) 0%, transparent 70%)',
-            }} />
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '20px', pointerEvents: 'none',
+              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,196,173,0.04) 0%, transparent 70%)' }} />
 
-            <svg viewBox="5 5 215 252" style={{ width: '100%', maxWidth: '520px', height: 'auto', minHeight: '360px' }}>
-              <defs>
-                <linearGradient id="colGrad3D" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8B3FA8" />
-                  <stop offset="55%" stopColor="#00C4AD" />
-                  <stop offset="100%" stopColor="#E8118A" />
-                </linearGradient>
-                <filter id="mapShadow">
-                  <feDropShadow dx="2" dy="6" stdDeviation="4" floodColor="rgba(0,0,0,0.12)" />
-                </filter>
-              </defs>
-
-              {/* Sombra del país */}
-              <path d={COLOMBIA_PATH} fill="rgba(0,0,0,0.04)" transform="translate(3,6)" />
-
-              {/* País principal */}
-              <path
-                d={COLOMBIA_PATH}
-                fill="#F7F7F7"
-                stroke="url(#colGrad3D)"
-                strokeWidth="1.8"
-                filter="url(#mapShadow)"
-              />
+            <svg viewBox="5 5 215 252" style={{ width: '100%', maxWidth: '460px', height: '100%', maxHeight: '100%' }}>
+              <path d={COLOMBIA_PATH} fill="#F2F2F2" stroke="#444" strokeWidth="1.6" strokeLinejoin="round" />
 
               {CITIES.map((c, i) => {
-                const isActive = activeCities.has(c.city)
+                const active = isActive(c.city, i)
+                const lx = c.x + c.labelDx
+                const ly = c.y + c.labelDy
+                const bg = labelBg(c.city, lx, ly, c.labelAnchor)
+
                 return (
-                  <g key={c.city} onClick={() => toggle(c.city)} style={{ cursor: 'pointer' }}>
-                    {/* Pulso animado */}
-                    <motion.circle
-                      cx={c.x} cy={c.y} r="8"
-                      fill="transparent"
-                      stroke={c.color}
-                      strokeWidth="0.9"
+                  <g key={c.city} onClick={() => toggleManual(c.city)} style={{ cursor: 'pointer' }}>
+                    {/* Pulso doble */}
+                    <motion.circle cx={c.x} cy={c.y} r="8" fill="transparent" stroke={c.color} strokeWidth="0.9"
                       animate={{ r: [6, 22], opacity: [0.7, 0] }}
-                      transition={{ repeat: Infinity, duration: 2.8, delay: i * 0.45, ease: 'easeOut' }}
-                    />
-                    {/* Segunda onda */}
-                    <motion.circle
-                      cx={c.x} cy={c.y} r="8"
-                      fill="transparent"
-                      stroke={c.color}
-                      strokeWidth="0.5"
+                      transition={{ repeat: Infinity, duration: 2.8, delay: i * 0.45, ease: 'easeOut' }} />
+                    <motion.circle cx={c.x} cy={c.y} r="8" fill="transparent" stroke={c.color} strokeWidth="0.5"
                       animate={{ r: [6, 30], opacity: [0.4, 0] }}
-                      transition={{ repeat: Infinity, duration: 2.8, delay: i * 0.45 + 0.5, ease: 'easeOut' }}
-                    />
+                      transition={{ repeat: Infinity, duration: 2.8, delay: i * 0.45 + 0.5, ease: 'easeOut' }} />
+
                     {/* Dot principal */}
-                    <motion.circle
-                      cx={c.x} cy={c.y}
+                    <motion.circle cx={c.x} cy={c.y}
                       r={c.count >= 9 ? 11 : c.count >= 2 ? 9 : 7.5}
-                      fill={isActive ? c.color : '#fff'}
-                      stroke={c.color}
-                      strokeWidth="2.2"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.3 + i * 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-                    />
+                      fill={active ? c.color : '#fff'}
+                      stroke={c.color} strokeWidth="2.2"
+                      initial={{ scale: 0 }} animate={{ scale: 1 }}
+                      transition={{ delay: 0.3 + i * 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }} />
+
                     {/* Número */}
-                    <motion.text
-                      x={c.x} y={c.y + 0.5}
-                      textAnchor="middle" dominantBaseline="middle"
-                      fontSize={c.count >= 9 ? '8' : '7.5'}
-                      fontWeight="900"
-                      fill={isActive ? '#fff' : c.color}
-                      fontFamily="system-ui"
+                    <motion.text x={c.x} y={c.y + 0.5} textAnchor="middle" dominantBaseline="middle"
+                      fontSize={c.count >= 9 ? '8' : '7.5'} fontWeight="900"
+                      fill={active ? '#fff' : c.color} fontFamily="system-ui"
                       style={{ pointerEvents: 'none' }}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 + i * 0.15 }}
-                    >
+                      transition={{ delay: 0.5 + i * 0.15 }}>
                       {c.count}
                     </motion.text>
-                    {/* Label ciudad */}
-                    <motion.text
-                      x={c.city === 'Barranquilla' ? c.x : c.city === 'Cartagena' ? c.x - 13 : c.city === 'Cali' ? c.x - 13 : c.x + 15}
-                      y={c.city === 'Barranquilla' ? c.y - 14 : c.city === 'Cartagena' ? c.y + 1 : c.y + 1}
-                      textAnchor={c.city === 'Cartagena' || c.city === 'Cali' ? 'end' : c.city === 'Barranquilla' ? 'middle' : 'start'}
-                      dominantBaseline={c.city === 'Barranquilla' ? 'auto' : 'middle'}
-                      fontSize="6.5" fill={isActive ? c.color : '#666'}
-                      fontFamily="system-ui" fontWeight="700"
-                      style={{ pointerEvents: 'none', transition: 'fill 0.2s' }}
+
+                    {/* Label ciudad — bloque blanco detrás del texto */}
+                    <motion.g style={{ pointerEvents: 'none' }}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      transition={{ delay: 0.7 + i * 0.15 }}
-                    >
-                      {c.city}
-                    </motion.text>
+                      transition={{ delay: 0.7 + i * 0.15 }}>
+                      <rect
+                        x={bg.x} y={bg.y} width={bg.w} height={bg.h}
+                        rx={2.5} fill="white"
+                        style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.08))' }}
+                      />
+                      <text
+                        x={lx} y={ly + 0.5}
+                        textAnchor={c.labelAnchor}
+                        dominantBaseline="middle"
+                        fontSize="6.5" fontWeight="700"
+                        fill={active ? c.color : '#555'}
+                        fontFamily="system-ui"
+                        style={{ transition: 'fill 0.2s' }}
+                      >
+                        {c.city}
+                      </text>
+                    </motion.g>
                   </g>
                 )
               })}
             </svg>
           </motion.div>
 
-          {/* Panel derecho — lista de ciudades */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {/* Panel derecho — columna de ciudades con scroll interno */}
+          <div className="map-cards-col" style={{
+            display: 'flex', flexDirection: 'column', gap: '6px',
+            overflowY: 'auto', minHeight: 0,
+            paddingRight: '4px',   /* espacio para scrollbar */
+          }}>
             {/* Total badge */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.5 }}
               style={{
-                padding: '16px 20px', borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(139,63,168,0.07) 0%, rgba(0,196,173,0.07) 100%)',
-                border: '1px solid rgba(139,63,168,0.15)',
+                padding: '12px 16px', borderRadius: '10px', flexShrink: 0,
+                background: 'linear-gradient(135deg, rgba(232,17,138,0.07) 0%, rgba(0,196,173,0.07) 100%)',
+                border: '1px solid rgba(0,196,173,0.18)',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                marginBottom: '4px',
               }}
             >
               <div>
-                <div style={{ fontSize: '11px', color: '#888', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Total red</div>
-                <div style={{ fontSize: '11px', color: '#AAA', marginTop: '1px' }}>6 ciudades activas</div>
+                <div style={{ fontSize: '10px', color: '#888', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Total red</div>
+                <div style={{ fontSize: '10px', color: '#AAA', marginTop: '1px' }}>6 ciudades activas</div>
               </div>
-              <div style={{ fontSize: '32px', fontWeight: 900, color: '#8B3FA8', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              <div style={{ fontSize: '28px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1 }}>
                 {totalInstitutions}+
               </div>
             </motion.div>
@@ -321,21 +408,14 @@ export default function ColombiaMap() {
                 key={c.city}
                 c={c}
                 index={i}
-                isActive={activeCities.has(c.city)}
-                onToggle={() => toggle(c.city)}
-                onReveal={() => reveal(c.city)}
+                isActive={isActive(c.city, i)}
+                onToggle={() => toggleManual(c.city)}
               />
             ))}
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.8 }}
-              style={{ padding: '12px 16px', fontSize: '11px', color: '#BBB', textAlign: 'center', lineHeight: 1.5 }}
-            >
-              Las ciudades se expanden automáticamente al desplazarte
-            </motion.div>
+            <div style={{ padding: '8px 12px', fontSize: '10px', color: '#BBB', textAlign: 'center', flexShrink: 0 }}>
+              {seqDone ? 'Toca una ciudad para ver sus universidades' : 'Explorando ciudades…'}
+            </div>
           </div>
 
         </div>

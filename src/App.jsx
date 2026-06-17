@@ -6,12 +6,15 @@ import Stats from './components/Stats'
 import BrandCarousel from './components/BrandCarousel'
 import CinematicText from './components/CinematicText'
 import ColombiaMap from './components/ColombiaMap'
+import LogoShowcase from './components/LogoShowcase'
 import Formats from './components/Formats'
 import Audience from './components/NewspaperAudience'
 import Cases from './components/Cases'
 import Blog from './components/Blog'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+
+const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
 /* Cursor personalizado — punto negro que sigue al mouse */
 function CustomCursor() {
@@ -68,50 +71,76 @@ function CustomCursor() {
 }
 
 /*
- * Dos capas de puntos:
- *  1. BaseDots  — puntos pequeños (1.5px) visibles en todo el fondo siempre
- *  2. SpotlightDots — capa enmascarada: tapa los puntos pequeños con #E9E9E9
- *     y dibuja puntos GRANDES (3.5px) solo dentro del círculo del cursor
+ * Fondo interactivo de la página:
+ *  1. Fondo 2.png — imagen fija que se mueve sutilmente con el mouse (efecto papel)
+ *  2. Capa #E9E9E9 + puntos — gran círculo fijo en el centro revela la imagen;
+ *     los puntos solo aparecen en los bordes de la pantalla (vignette estática)
  */
-function BaseDots() {
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
-      backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.18) 1.5px, transparent 1.5px)',
-      backgroundSize: '20px 20px',
-    }} />
-  )
-}
+function InteractiveBackground() {
+  const bgRef = useRef(null)
 
-function SpotlightDots() {
   useEffect(() => {
-    const root = document.documentElement
+    let px = 0.5, py = 0.5
+    let cpx = 0.5, cpy = 0.5
+    let rafId
+
     const onMove = (e) => {
-      root.style.setProperty('--mx', `${e.clientX}px`)
-      root.style.setProperty('--my', `${e.clientY}px`)
+      px = e.clientX / window.innerWidth
+      py = e.clientY / window.innerHeight
     }
-    const onLeave = () => {
-      root.style.setProperty('--mx', '-999px')
-      root.style.setProperty('--my', '-999px')
+
+    const tick = () => {
+      // Lerp lento → inercia de papel al deslizarse
+      cpx += (px - cpx) * 0.038
+      cpy += (py - cpy) * 0.038
+
+      if (bgRef.current) {
+        // ±11px máximo de desplazamiento
+        const dx = (cpx - 0.5) * -22
+        const dy = (cpy - 0.5) * -22
+        bgRef.current.style.transform = `translate(${dx}px, ${dy}px) scale(1.12)`
+      }
+
+      rafId = requestAnimationFrame(tick)
     }
+
     window.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseleave', onLeave)
+    rafId = requestAnimationFrame(tick)
     return () => {
       window.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseleave', onLeave)
+      cancelAnimationFrame(rafId)
     }
   }, [])
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1,
-      /* Puntos grandes sobre fondo sólido: dentro del círculo cubre los pequeños y muestra los grandes */
-      backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.22) 3.5px, transparent 3.5px)',
-      backgroundSize: '20px 20px',
-      backgroundColor: '#E9E9E9',
-      maskImage: 'radial-gradient(circle 90px at var(--mx, -999px) var(--my, -999px), black 0%, black 55%, transparent 100%)',
-      WebkitMaskImage: 'radial-gradient(circle 90px at var(--mx, -999px) var(--my, -999px), black 0%, black 55%, transparent 100%)',
-    }} />
+    <>
+      {/* ① Fondo 2.png — se mueve con el mouse (efecto papel sutil) */}
+      <div
+        ref={bgRef}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 0,
+          pointerEvents: 'none',
+          backgroundImage: `url(${PAGE_BG_URL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          willChange: 'transform',
+        }}
+      />
+
+      {/* ② Vignette estática: gran elipse transparente en el centro, puntos en los bordes */}
+      <div
+        style={{
+          position: 'fixed', inset: 0, zIndex: 1,
+          pointerEvents: 'none',
+          backgroundColor: '#E9E9E9',
+          backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.16) 1.5px, transparent 1.5px)',
+          backgroundSize: '20px 20px',
+          /* Centro transparente (imagen visible) → bordes con puntos (E9E9E9 opaco) */
+          maskImage: 'radial-gradient(ellipse 40vw 45vh at 50% 50%, transparent 0%, transparent 78%, rgba(0,0,0,0.35) 89%, black 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 40vw 45vh at 50% 50%, transparent 0%, transparent 78%, rgba(0,0,0,0.35) 89%, black 100%)',
+        }}
+      />
+    </>
   )
 }
 
@@ -131,17 +160,17 @@ export default function App() {
 
       <div style={{ minHeight: '100vh', position: 'relative' }}>
         <CustomCursor />
-        <BaseDots />
-        <SpotlightDots />
+        <InteractiveBackground />
 
         <div style={{ position: 'relative', zIndex: 2 }}>
           <Navbar />
           <main>
-            <Hero />
+            <Hero videoActive={!introVisible} />
             <Stats />
             <BrandCarousel />
             <CinematicText />
             <ColombiaMap />
+            <LogoShowcase />
             <Formats />
             <Audience />
             <Cases />

@@ -191,19 +191,41 @@ export default function NewspaperAudience() {
   const ref = useRef(null)
 
   /*
-   * offset ['start start', 'end start']:
-   *   0 = top de la section llega al top del viewport
-   *   1 = bottom de la section llega al top del viewport (sección completamente salió)
-   * Esto da exactamente 250vh de rango de scroll para animar suavemente.
+   * offset ['start end', 'end start'] — sección 350vh + viewport 100vh = 450vh total
+   *
+   * Pin starts: 100/450 = 0.222   (sección toca el top del viewport)
+   * Pin ends:   350/450 = 0.778   (sección sale por arriba)
+   * Sticky activo: 250vh de scroll real (350-100)
+   *
+   * Con esto los 4 pilares caben holgadamente dentro del sticky,
+   * cada uno separado ~55vh, con 66vh de margen al final antes de soltarse.
    */
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start start', 'end start'],
+    offset: ['start end', 'end start'],
   })
 
-  /* Texto: aparece casi de inmediato al entrar la sección */
-  const textOp = useTransform(scrollYProgress, [0, 0.06], [0, 1])
-  const textY  = useTransform(scrollYProgress, [0, 0.06], [18, 0])
+  /* Header + stat: aparecen mientras la sección sube hacia el top del viewport */
+  const headerOp = useTransform(scrollYProgress, [0.05, 0.20], [0, 1])
+  const headerY  = useTransform(scrollYProgress, [0.05, 0.20], [16, 0])
+
+  /* Pilares: 55vh de separación entre cada uno (55/450 ≈ 0.122) */
+  /* Último pilar termina en 0.63 → bien dentro del sticky (que dura hasta 0.778) */
+  const p0op = useTransform(scrollYProgress, [0.23, 0.27], [0, 1])
+  const p0y  = useTransform(scrollYProgress, [0.23, 0.27], [22, 0])
+  const p1op = useTransform(scrollYProgress, [0.35, 0.39], [0, 1])
+  const p1y  = useTransform(scrollYProgress, [0.35, 0.39], [22, 0])
+  const p2op = useTransform(scrollYProgress, [0.47, 0.51], [0, 1])
+  const p2y  = useTransform(scrollYProgress, [0.47, 0.51], [22, 0])
+  const p3op = useTransform(scrollYProgress, [0.59, 0.63], [0, 1])
+  const p3y  = useTransform(scrollYProgress, [0.59, 0.63], [22, 0])
+
+  const pillarMotions = [
+    { op: p0op, y: p0y },
+    { op: p1op, y: p1y },
+    { op: p2op, y: p2y },
+    { op: p3op, y: p3y },
+  ]
 
   if (isMobile) return <MobileAudience />
 
@@ -211,129 +233,105 @@ export default function NewspaperAudience() {
     <section
       ref={ref}
       id="audiencia"
-      style={{ height: '250vh', position: 'relative' }}
+      style={{ height: '350vh', position: 'relative' }}
     >
-      <div
-        style={{
-          position: 'sticky', top: 0, height: '100vh',
-          overflow: 'hidden',
-          willChange: 'transform',
-        }}
-      >
+      <div style={{
+        position: 'sticky', top: 0, height: '100vh',
+        overflow: 'hidden', willChange: 'transform',
+      }}>
 
-        {/* ── CAPA 0: fondo webp — siempre visible, sin overlay negro ── */}
+        {/* ── CAPA 0: fondo webp ── */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${BG_URL})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: 'cover', backgroundPosition: 'center',
           filter: 'brightness(0.48)',
         }} />
 
-        {/* ── CAPA 1: PNG personas — siempre visible, sin fade ── */}
+        {/* ── CAPA 1: PNG personas ── */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${PNG_URL})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: 'cover', backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
         }} />
 
-        {/* ── CAPA 2: SVG PAPEL 3D — único elemento animado ── */}
+        {/* ── CAPA 2: SVG PAPEL 3D ── */}
         <PaperSVG scrollYProgress={scrollYProgress} />
 
-        {/* ── CAPA 3: TEXTO centrado ──
-              El div externo maneja el centrado CSS puro.
-              El motion.div interno maneja solo opacity/y sin conflicto. */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 'clamp(320px, 40%, 560px)',
-            zIndex: 10,
-          }}
-        >
-        <motion.div style={{ opacity: textOp, y: textY }}>
-          {/* Header */}
-          <div style={{
-            padding: '20px 24px 16px', textAlign: 'center',
-            background: 'rgba(0,0,0,0.68)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '16px 16px 0 0',
-            border: '1px solid rgba(255,255,255,0.09)',
-            borderBottom: 'none',
-          }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: '8px' }}>
-              La audiencia
-            </span>
-            <h2 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 2rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, textShadow: '0 2px 16px rgba(0,0,0,0.9)' }}>
-              ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
-            </h2>
-          </div>
+        {/* ── CAPA 3: CONTENIDO — bajado para no chocar con el periódico ── */}
+        <div style={{
+          position: 'absolute',
+          top: '62%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 'clamp(580px, 70%, 960px)',
+          zIndex: 10,
+        }}>
 
-          {/* Stat 3–6h */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '14px',
-            padding: '13px 20px',
-            background: 'rgba(232,17,138,0.16)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(232,17,138,0.25)',
-            borderTop: 'none', borderBottom: 'none',
-          }}>
-            <span style={{ fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0, textShadow: '0 0 24px rgba(232,17,138,0.5)' }}>
-              3–6h
-            </span>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>Tiempo promedio en campus</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Más que en cualquier otro entorno</div>
+          {/* Header + stat: aparecen de inmediato con el scroll */}
+          <motion.div style={{ opacity: headerOp, y: headerY }}>
+            <div style={{
+              padding: '32px 40px 26px', textAlign: 'center',
+              background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(20px)',
+              borderRadius: '20px 20px 0 0',
+              border: '1px solid rgba(255,255,255,0.09)', borderBottom: 'none',
+            }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: '12px' }}>
+                La audiencia
+              </span>
+              <h2 style={{ fontSize: 'clamp(2rem, 3.8vw, 3.4rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, textShadow: '0 2px 16px rgba(0,0,0,0.9)' }}>
+                ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
+              </h2>
             </div>
-          </div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '20px',
+              padding: '20px 32px',
+              background: 'rgba(232,17,138,0.16)', backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(232,17,138,0.25)',
+              borderTop: 'none', borderBottom: 'none',
+            }}>
+              <span style={{ fontSize: 'clamp(42px, 6vw, 64px)', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0, textShadow: '0 0 24px rgba(232,17,138,0.5)' }}>
+                3–6h
+              </span>
+              <div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>Tiempo promedio en campus</div>
+                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>Más que en cualquier otro entorno</div>
+              </div>
+            </div>
+          </motion.div>
 
-          {/* Pilares 2×2 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'rgba(255,255,255,0.06)' }}>
+          {/* Pilares 2×2 — cada uno aparece con su propio tramo de scroll */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             {pillars.map((p, i) => (
-              <div
+              <motion.div
                 key={p.number}
                 style={{
-                  display: 'flex', gap: '9px', padding: '12px 13px',
-                  background: 'rgba(0,0,0,0.68)',
-                  backdropFilter: 'blur(20px)',
-                  borderLeft: `3px solid ${p.color}`,
+                  opacity: pillarMotions[i].op,
+                  y: pillarMotions[i].y,
+                  display: 'flex', gap: '14px', padding: '20px 22px',
+                  background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(20px)',
+                  borderLeft: `4px solid ${p.color}`,
+                  /* Separador horizontal: solo en fila inferior */
+                  borderTop: i >= 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                  /* Separador vertical: solo en columna izquierda */
+                  borderRight: i % 2 === 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
                   borderRadius:
-                    i === 0 ? '0' :
-                    i === 1 ? '0' :
-                    i === 2 ? '0 0 0 16px' :
-                    '0 0 16px 0',
+                    i === 2 ? '0 0 0 20px' :
+                    i === 3 ? '0 0 20px 0' : '0',
                 }}
               >
-                <span style={{ fontSize: '9px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '2px 5px', borderRadius: '4px', flexShrink: 0, height: 'fit-content', marginTop: '1px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '4px 8px', borderRadius: '5px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
                   {p.number}
                 </span>
                 <div>
-                  <h4 style={{ fontSize: '11px', fontWeight: 800, color: '#fff', marginBottom: '2px', lineHeight: 1.2, textShadow: '0 1px 6px rgba(0,0,0,1)' }}>{p.title}</h4>
-                  <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{p.body}</p>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', marginBottom: '5px', lineHeight: 1.2, textShadow: '0 1px 6px rgba(0,0,0,1)' }}>{p.title}</h4>
+                  <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.55 }}>{p.body}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </motion.div>
-        </div>
 
-        {/* Indicador de scroll — se desvanece tras el primer scroll */}
-        <motion.div
-          style={{
-            position: 'absolute', bottom: '5%', left: '50%',
-            transform: 'translateX(-50%)',
-            opacity: useTransform(scrollYProgress, [0, 0.05, 0.12], [1, 1, 0]),
-            zIndex: 8, pointerEvents: 'none',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-          }}
-        >
-          <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>scroll</span>
-          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}
-            style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.2)' }} />
-        </motion.div>
+        </div>
 
       </div>
     </section>

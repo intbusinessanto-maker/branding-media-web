@@ -1,4 +1,7 @@
-﻿import { motion } from 'framer-motion'
+﻿import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+
+const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua-wow.jpeg'
 
 const formats = [
   {
@@ -22,11 +25,70 @@ const formats = [
 ]
 
 export default function Formats() {
+  const sectionRef = useRef(null)
+  const inView = useInView(sectionRef, { once: true, amount: 0.15 })
+
   return (
-    <section id="formatos" style={{ padding: '100px 2rem', background: 'transparent' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+    <section ref={sectionRef} id="formatos" className="formats-section"
+      style={{ padding: '100px 2rem', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .formats-section { padding: 56px 1.25rem 56px !important; }
+          .formats-header  { margin-bottom: 28px !important; }
+          .formats-grid {
+            display: flex !important;
+            grid-template-columns: none !important;
+            overflow-x: auto;
+            gap: 14px !important;
+            padding-bottom: 16px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+          .formats-grid::-webkit-scrollbar { display: none; }
+          .formats-card {
+            flex: 0 0 80vw !important;
+            scroll-snap-align: start;
+            padding: 24px !important;
+            gap: 14px !important;
+          }
+          .formats-card h3 { font-size: 26px !important; }
+        }
+      `}</style>
+      {/* ── Estatua "wow" — capa entre el fondo y los cards ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 40, scale: 0.94 }}
+        animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 'clamp(-20px, 4vw, 60px)',
+          width: 'clamp(180px, 28vw, 380px)',
+          height: 'clamp(280px, 44vw, 600px)',
+          pointerEvents: 'none',
+          zIndex: 0,
+          /* Máscara: ventana oval que revela la estatua y desvanece bordes */
+          maskImage: 'radial-gradient(ellipse 78% 80% at 52% 48%, black 0%, black 42%, rgba(0,0,0,0.6) 62%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 78% 80% at 52% 48%, black 0%, black 42%, rgba(0,0,0,0.6) 62%, transparent 80%)',
+        }}
+      >
+        <img
+          src={STATUE_URL}
+          alt=""
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            /* Centra en el área superior donde está la estatua y el megáfono */
+            objectPosition: 'center 20%',
+          }}
+        />
+      </motion.div>
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          transition={{ duration: 0.7 }} style={{ marginBottom: '56px' }}>
+          className="formats-header" transition={{ duration: 0.7 }} style={{ marginBottom: '56px' }}>
           <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '12px' }}>Formatos</span>
           <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1 }}>
             Medios que{' '}
@@ -34,9 +96,10 @@ export default function Formats() {
           </h2>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+        <div className="formats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
           {formats.map((f, i) => (
             <motion.div key={f.title}
+              className="formats-card"
               initial={{ opacity: 0, y: 36 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               transition={{ delay: i * 0.12, duration: 0.7 }}
               whileHover={{ y: -6, boxShadow: `0 16px 40px rgba(0,0,0,0.10)`, transition: { duration: 0.22 } }}
