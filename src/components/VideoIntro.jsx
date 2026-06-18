@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const LOGO = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo-Branding-Media.png'
+const LOGO    = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo-Branding-Media.png'
+const ESLOGAN = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/eslogan.webp'
 
 export default function VideoIntro({ onDismiss }) {
   const [visible, setVisible] = useState(true)
@@ -23,23 +24,17 @@ export default function VideoIntro({ onDismiss }) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.03 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: '#000', overflow: 'hidden',
-          }}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#000', overflow: 'hidden' }}
         >
-          {/* YouTube iframe — cubre toda la pantalla sin barras negras */}
+          {/* YouTube iframe — cubre toda la pantalla */}
           <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
             <iframe
               src="https://www.youtube.com/embed/68paHyhJHPU?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=68paHyhJHPU&rel=0&showinfo=0&iv_load_policy=3&disablekb=1"
               style={{
-                position: 'absolute',
-                top: '50%', left: '50%',
+                position: 'absolute', top: '50%', left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 'calc(100vh * 1.7778)',
-                height: '100vh',
-                minWidth: '100vw',
-                minHeight: 'calc(100vw * 0.5625)',
+                width: 'calc(100vh * 1.7778)', height: '100vh',
+                minWidth: '100vw', minHeight: 'calc(100vw * 0.5625)',
                 border: 'none',
               }}
               allow="autoplay; encrypted-media"
@@ -47,33 +42,22 @@ export default function VideoIntro({ onDismiss }) {
             />
           </div>
 
-          {/* Gradientes oscuros para resaltar texto */}
-          <div style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 22%, transparent 60%, rgba(0,0,0,0.78) 100%)',
-          }} />
-          <div style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.2) 100%)',
-          }} />
+          {/* Gradientes */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 22%, transparent 60%, rgba(0,0,0,0.78) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.2) 100%)' }} />
 
           {/* Logo top-left */}
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
             style={{ position: 'absolute', top: '28px', left: '36px', zIndex: 10 }}
           >
-            <img
-              src={LOGO} alt="Branding Media"
-              style={{ height: '60px', objectFit: 'contain', filter: 'brightness(100)' }}
-            />
+            <img src={LOGO} alt="Branding Media" style={{ height: '60px', objectFit: 'contain', filter: 'brightness(100)' }} />
           </motion.div>
 
           {/* Contenido bottom */}
           <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.7 }}
             style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -83,36 +67,35 @@ export default function VideoIntro({ onDismiss }) {
             }}
           >
             <div>
-              <p style={{
-                color: 'rgba(255,255,255,0.55)', fontSize: '11px',
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                marginBottom: '10px', fontWeight: 600,
-              }}>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '14px', fontWeight: 600 }}>
                 El circuito universitario más grande de Colombia
               </p>
-              <h2 style={{
-                color: '#fff', fontSize: 'clamp(1.6rem, 4vw, 2.8rem)',
-                fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05,
-              }}>
-                Tu marca.{' '}
-                <span style={{ color: '#E8118A' }}>Sus campus.</span>
-              </h2>
+              {/* Eslogan como imagen — reemplaza el texto anterior */}
+              <img
+                src={ESLOGAN}
+                alt="Movemos marcas en universidades"
+                style={{
+                  height: 'clamp(52px, 10vw, 120px)',
+                  width: 'auto',
+                  maxWidth: '72vw',
+                  objectFit: 'contain',
+                  objectPosition: 'left center',
+                  display: 'block',
+                  filter: 'drop-shadow(0 2px 18px rgba(0,0,0,0.9))',
+                }}
+              />
             </div>
 
             <motion.button
-              initial={{ opacity: 0, x: 16 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.8, duration: 0.5 }}
               onClick={dismiss}
               style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.16)',
-                color: '#fff', padding: '14px 30px',
-                borderRadius: '100px', fontSize: '14px', fontWeight: 600,
+                background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.16)', color: '#fff',
+                padding: '14px 30px', borderRadius: '100px', fontSize: '14px', fontWeight: 600,
                 cursor: 'pointer', whiteSpace: 'nowrap',
-                display: 'flex', alignItems: 'center', gap: '10px',
-                flexShrink: 0,
+                display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0,
               }}
               whileHover={{ background: 'rgba(255,255,255,0.18)', borderColor: 'rgba(255,255,255,0.28)' }}
             >
@@ -123,15 +106,10 @@ export default function VideoIntro({ onDismiss }) {
             </motion.button>
           </motion.div>
 
-          {/* Barra de progreso temporal */}
+          {/* Barra de progreso */}
           <motion.div
-            style={{
-              position: 'absolute', bottom: 0, left: 0,
-              height: '3px', background: '#E8118A', zIndex: 11,
-              transformOrigin: 'left',
-            }}
-            initial={{ width: '0%' }}
-            animate={{ width: '100%' }}
+            style={{ position: 'absolute', bottom: 0, left: 0, height: '3px', background: '#E8118A', zIndex: 11, transformOrigin: 'left' }}
+            initial={{ width: '0%' }} animate={{ width: '100%' }}
             transition={{ duration: 12, ease: 'linear' }}
           />
         </motion.div>
