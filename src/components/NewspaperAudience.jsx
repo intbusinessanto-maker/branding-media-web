@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
-const BG_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/periodico%20y%20maquina%20de%20escribir.webp'
-const PNG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/periodico_y_maquina_de_escribir-removebg-preview.png'
+const MOBILE_IMG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/vista%20celuar.png'
 
 const pillars = [
   { number: '01', title: 'Audiencia de alto valor',      body: 'El universitario colombiano es el consumidor del futuro: conectado, aspiracional y con alta influencia en decisiones de compra del hogar.',    color: '#00C4AD' },
@@ -11,8 +10,7 @@ const pillars = [
   { number: '04', title: 'Baja saturación publicitaria', body: 'El entorno universitario tiene menos ruido publicitario que canales digitales o vía pública masiva, generando mayor impacto.',                  color: '#00C4AD' },
 ]
 
-/* ID del video de Vimeo */
-const VIMEO_ID = '1202183420'
+const VIMEO_ID = '1202877882'
 
 /*
  * ── MÓVIL — scroll-based como CinematicText ──
@@ -47,14 +45,11 @@ function MobileAudience() {
     <div ref={ref} style={{ height: '500vh', position: 'relative' }}>
       <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden' }}>
 
-        {/* Fondo oscurecido */}
-        <img src={BG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(0.42)' }} />
+        {/* Fondo único */}
+        <img src={MOBILE_IMG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
 
-        {/* Personas PNG */}
-        <img src={PNG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
-
-        {/* Degradado abajo para legibilidad */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 22%, rgba(0,0,0,0.94) 65%)' }} />
+        {/* Degradado: oscuro arriba para el header, oscuro abajo para las cards */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 35%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.96) 100%)' }} />
 
         {/* ── Encabezado fijo mientras dura la sección ── */}
         <motion.div
@@ -80,7 +75,7 @@ function MobileAudience() {
           <motion.div
             key={p.number}
             style={{
-              position: 'absolute', bottom: 'clamp(2rem, 5vh, 3.5rem)',
+              position: 'absolute', top: '44%',
               left: '1.4rem', right: '1.4rem',
               opacity: pillarMotions[i].op,
               y: pillarMotions[i].y,
