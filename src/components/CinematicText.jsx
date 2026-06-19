@@ -77,8 +77,10 @@ export default function CinematicText() {
           WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
 
-        {/* ④ Imagen estatua + público (sin fondo) — centrada sobre el foco */}
+        {/* ④ Imagen estatua — solo en móvil (en desktop el video ya tiene contenido visual) */}
+        <style>{`@media (min-width: 768px) { .cinematic-statue { display: none !important; } }`}</style>
         <img
+          className="cinematic-statue"
           src={STATUE_URL}
           alt=""
           style={{

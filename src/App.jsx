@@ -127,19 +127,6 @@ function InteractiveBackground() {
         }}
       />
 
-      {/* ② Vignette estática: gran elipse transparente en el centro, puntos en los bordes */}
-      <div
-        style={{
-          position: 'fixed', inset: 0, zIndex: 1,
-          pointerEvents: 'none',
-          backgroundColor: '#E9E9E9',
-          backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.16) 1.5px, transparent 1.5px)',
-          backgroundSize: '20px 20px',
-          /* Centro transparente (imagen visible) → bordes con puntos (E9E9E9 opaco) */
-          maskImage: 'radial-gradient(ellipse 40vw 45vh at 50% 50%, transparent 0%, transparent 78%, rgba(0,0,0,0.35) 89%, black 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 40vw 45vh at 50% 50%, transparent 0%, transparent 78%, rgba(0,0,0,0.35) 89%, black 100%)',
-        }}
-      />
     </>
   )
 }

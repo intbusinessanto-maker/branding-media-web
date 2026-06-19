@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 const BG_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/periodico%20y%20maquina%20de%20escribir.webp'
 const PNG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/periodico_y_maquina_de_escribir-removebg-preview.png'
@@ -14,89 +14,88 @@ const pillars = [
 /* ID del video de Vimeo */
 const VIMEO_ID = '1202183420'
 
-/* ── MÓVIL — imagen fullscreen con carrusel de pilares encima ── */
+/*
+ * ── MÓVIL — scroll-based como CinematicText ──
+ * 500vh: encabezado + 4 pilares, cada uno ~100vh de scroll.
+ * Los pilares se revelan y desvanecen uno a uno mientras el usuario baja.
+ */
 function MobileAudience() {
-  const [current,  setCurrent]  = useState(0)
-  const [autoKey,  setAutoKey]  = useState(0)  // reinicia el timer al hacer swipe
-  const touchStartX = useRef(null)
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
-  /* Auto-avance cada 3 s; se reinicia cuando el usuario desliza */
-  useEffect(() => {
-    const t = setInterval(() => setCurrent(c => (c + 1) % pillars.length), 3000)
-    return () => clearInterval(t)
-  }, [autoKey])
+  /* Header aparece al entrar */
+  const headerOp = useTransform(scrollYProgress, [0, 0.05], [0, 1])
 
-  const goTo = (idx) => {
-    setCurrent((idx + pillars.length) % pillars.length)
-    setAutoKey(k => k + 1)
-  }
+  /* Pilares — fade in/out escalonado, uno visible a la vez */
+  const op0 = useTransform(scrollYProgress, [0.05, 0.11, 0.22, 0.27], [0, 1, 1, 0])
+  const y0  = useTransform(scrollYProgress, [0.05, 0.14], [22, 0])
+  const op1 = useTransform(scrollYProgress, [0.27, 0.33, 0.47, 0.52], [0, 1, 1, 0])
+  const y1  = useTransform(scrollYProgress, [0.27, 0.36], [22, 0])
+  const op2 = useTransform(scrollYProgress, [0.52, 0.58, 0.72, 0.77], [0, 1, 1, 0])
+  const y2  = useTransform(scrollYProgress, [0.52, 0.61], [22, 0])
+  const op3 = useTransform(scrollYProgress, [0.77, 0.83, 0.97, 1.00], [0, 1, 1, 0])
+  const y3  = useTransform(scrollYProgress, [0.77, 0.86], [22, 0])
 
-  const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
-  const onTouchEnd   = (e) => {
-    if (touchStartX.current === null) return
-    const dx = e.changedTouches[0].clientX - touchStartX.current
-    if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1)
-    touchStartX.current = null
-  }
-
-  const p = pillars[current]
+  const pillarMotions = [
+    { op: op0, y: y0 },
+    { op: op1, y: y1 },
+    { op: op2, y: y2 },
+    { op: op3, y: y3 },
+  ]
 
   return (
-    <section id="audiencia" style={{ position: 'relative', height: '100svh', minHeight: '600px', overflow: 'hidden' }}>
+    <div ref={ref} style={{ height: '500vh', position: 'relative' }}>
+      <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden' }}>
 
-      {/* Fondo oscurecido */}
-      <img src={BG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(0.42)' }} />
+        {/* Fondo oscurecido */}
+        <img src={BG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'brightness(0.42)' }} />
 
-      {/* Personas PNG encima del fondo */}
-      <img src={PNG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+        {/* Personas PNG */}
+        <img src={PNG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
 
-      {/* Degradado para legibilidad del texto abajo */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 28%, rgba(0,0,0,0.92) 68%)' }} />
+        {/* Degradado abajo para legibilidad */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 22%, rgba(0,0,0,0.94) 65%)' }} />
 
-      {/* Contenido superpuesto */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 1.4rem 2.6rem' }}>
-
-        {/* Encabezado */}
-        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', display: 'block', marginBottom: '6px' }}>
-          La audiencia
-        </span>
-        <h2 style={{ fontSize: 'clamp(1.7rem, 6.5vw, 2.4rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: '14px' }}>
-          ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
-        </h2>
-
-        {/* Stat compacto */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(232,17,138,0.14)', border: '1px solid rgba(232,17,138,0.22)', marginBottom: '16px' }}>
-          <span style={{ fontSize: '32px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0 }}>3–6h</span>
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>Tiempo en campus</div>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Promedio diario del estudiante</div>
-          </div>
-        </div>
-
-        {/* Carrusel — fade entre pilares */}
-        <div
-          style={{ minHeight: '120px', position: 'relative' }}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
+        {/* ── Encabezado fijo mientras dura la sección ── */}
+        <motion.div
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '2.4rem 1.4rem 0', opacity: headerOp, zIndex: 5 }}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.38 }}
-              style={{
-                display: 'flex', gap: '12px',
-                padding: '16px 16px',
-                borderRadius: '12px',
-                background: 'rgba(0,0,0,0.60)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                border: `1px solid rgba(255,255,255,0.07)`,
-                borderLeft: `4px solid ${p.color}`,
-              }}
-            >
+          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', display: 'block', marginBottom: '6px' }}>
+            La audiencia
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.7rem, 6.5vw, 2.4rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: '14px' }}>
+            ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
+          </h2>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(232,17,138,0.14)', border: '1px solid rgba(232,17,138,0.22)' }}>
+            <span style={{ fontSize: '28px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1 }}>3–6h</span>
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Tiempo en campus</div>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Promedio diario del estudiante</div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Pilares — uno a la vez, controlados por scroll ── */}
+        {pillars.map((p, i) => (
+          <motion.div
+            key={p.number}
+            style={{
+              position: 'absolute', bottom: 'clamp(2rem, 5vh, 3.5rem)',
+              left: '1.4rem', right: '1.4rem',
+              opacity: pillarMotions[i].op,
+              y: pillarMotions[i].y,
+              zIndex: 5,
+            }}
+          >
+            <div style={{
+              display: 'flex', gap: '12px', padding: '18px',
+              borderRadius: '14px',
+              background: 'rgba(0,0,0,0.65)',
+              backdropFilter: 'blur(18px)',
+              WebkitBackdropFilter: 'blur(18px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderLeft: `4px solid ${p.color}`,
+            }}>
               <span style={{ fontSize: '10px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '4px 8px', borderRadius: '5px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
                 {p.number}
               </span>
@@ -104,30 +103,18 @@ function MobileAudience() {
                 <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', marginBottom: '5px', lineHeight: 1.2 }}>{p.title}</h4>
                 <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>{p.body}</p>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+            </div>
+            {/* Indicador de posición */}
+            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', marginTop: '12px' }}>
+              {pillars.map((_, j) => (
+                <div key={j} style={{ height: '4px', width: j === i ? '20px' : '4px', borderRadius: '2px', background: j === i ? p.color : 'rgba(255,255,255,0.22)', transition: 'all 0.3s' }} />
+              ))}
+            </div>
+          </motion.div>
+        ))}
 
-        {/* Indicadores — punto largo para el activo */}
-        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '14px' }}>
-          {pillars.map((_, i) => (
-            <div
-              key={i}
-              onClick={() => goTo(i)}
-              style={{
-                height: '5px',
-                width: i === current ? '22px' : '5px',
-                borderRadius: '3px',
-                background: i === current ? pillars[current].color : 'rgba(255,255,255,0.25)',
-                transition: 'all 0.35s',
-                cursor: 'pointer',
-              }}
-            />
-          ))}
-        </div>
-
-      </div>
-    </section>
+      </section>
+    </div>
   )
 }
 

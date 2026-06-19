@@ -1,7 +1,7 @@
 ﻿import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 
-const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua-wow.jpeg'
+const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua%20megafono.png'
 
 const formats = [
   {
@@ -55,34 +55,25 @@ export default function Formats() {
           .formats-card h3 { font-size: 26px !important; }
         }
       `}</style>
-      {/* ── Estatua "wow" — capa entre el fondo y los cards ── */}
+      {/* ── Estatua con megáfono — lado izquierdo, PNG ya sin fondo ── */}
       <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.94 }}
-        animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+        initial={{ opacity: 0, x: -40, scale: 0.94 }}
+        animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
         style={{
           position: 'absolute',
           bottom: 0,
-          right: 'clamp(-20px, 4vw, 60px)',
-          width: 'clamp(180px, 28vw, 380px)',
-          height: 'clamp(280px, 44vw, 600px)',
+          left: 'clamp(-30px, 2vw, 20px)',
+          width: 'clamp(200px, 30vw, 420px)',
+          height: 'auto',
           pointerEvents: 'none',
           zIndex: 0,
-          /* Máscara: ventana oval que revela la estatua y desvanece bordes */
-          maskImage: 'radial-gradient(ellipse 78% 80% at 52% 48%, black 0%, black 42%, rgba(0,0,0,0.6) 62%, transparent 80%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 78% 80% at 52% 48%, black 0%, black 42%, rgba(0,0,0,0.6) 62%, transparent 80%)',
         }}
       >
         <img
           src={STATUE_URL}
           alt=""
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            /* Centra en el área superior donde está la estatua y el megáfono */
-            objectPosition: 'center 20%',
-          }}
+          style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }}
         />
       </motion.div>
 

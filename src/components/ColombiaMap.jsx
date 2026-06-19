@@ -338,7 +338,13 @@ export default function ColombiaMap() {
               background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,196,173,0.04) 0%, transparent 70%)' }} />
 
             <svg viewBox="5 5 215 252" style={{ width: '100%', maxWidth: '460px', height: '100%', maxHeight: '100%' }}>
-              <path d={COLOMBIA_PATH} fill="#F2F2F2" stroke="#444" strokeWidth="1.6" strokeLinejoin="round" />
+              <defs>
+                <linearGradient id="mapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%"   stopColor="#3B1A6E" />
+                  <stop offset="100%" stopColor="#006B5A" />
+                </linearGradient>
+              </defs>
+              <path d={COLOMBIA_PATH} fill="url(#mapGrad)" stroke="#6B21A8" strokeWidth="1.6" strokeLinejoin="round" />
 
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)
@@ -367,7 +373,7 @@ export default function ColombiaMap() {
                     {/* Número */}
                     <motion.text x={c.x} y={c.y + 0.5} textAnchor="middle" dominantBaseline="middle"
                       fontSize={c.count >= 9 ? '8' : '7.5'} fontWeight="900"
-                      fill={active ? '#fff' : c.color} fontFamily="system-ui"
+                      fill={active ? '#fff' : '#E8118A'} fontFamily="system-ui"
                       style={{ pointerEvents: 'none' }}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       transition={{ delay: 0.5 + i * 0.15 }}>
