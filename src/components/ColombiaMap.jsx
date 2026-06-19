@@ -344,7 +344,7 @@ export default function ColombiaMap() {
                   <stop offset="100%" stopColor="#006B5A" />
                 </linearGradient>
               </defs>
-              <path d={COLOMBIA_PATH} fill="url(#mapGrad)" stroke="#6B21A8" strokeWidth="1.6" strokeLinejoin="round" />
+              <path d={COLOMBIA_PATH} fill="rgba(139,63,168,0.10)" stroke="url(#mapGrad)" strokeWidth="3" strokeLinejoin="round" />
 
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)
