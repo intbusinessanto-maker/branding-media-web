@@ -1,14 +1,16 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
+import { supabase } from '../lib/supabase'
 
 const BASE = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/'
 
-const IMAGES = [
+/* Fallback estático mientras carga o si Supabase no responde */
+const FALLBACK_IMAGES = [
   'adidas-2.png', 'alkosto.png', 'davivienda.png', 'doggy-home.png',
   'electrolit-1.png', 'gabrica.png', 'hatsu.png', 'heinz.png',
   'kumpet.png', 'little.png', 'mazda.png', 'nescafe.png',
   'samsung-1.png', 'spotify.png', 'todossomosuna-1.png', 'volvo.png', 'yango-1.png',
-].map(n => BASE + n)
+].map(n => ({ id: n, name: n.replace(/-\d+/, '').replace('.png', ''), logo_url: BASE + n }))
 
 const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
 
@@ -59,9 +61,23 @@ const MOBILE_BUBBLES = [
   { left: '80%', top: '74%', size: 84, fromX:  700 },
 ]
 
-/* Popup de caso */
-function CasePopup({ imgUrl, fallback, isOpen, onToggle, popupBelow, size }) {
+/* Popup de caso — carga imágenes reales de Supabase */
+function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, size }) {
+  const [images, setImages] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen || !brand?.id) return
+    setLoading(true)
+    supabase.from('brand_case_images')
+      .select('*').eq('brand_id', brand.id).order('sort_order').order('created_at')
+      .then(({ data }) => { setImages(data || []); setLoading(false) })
+  }, [isOpen, brand?.id])
+
   if (!isOpen) return null
+
+  const hasImages = images.length > 0
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.86, y: popupBelow ? -12 : 12 }}
@@ -70,7 +86,7 @@ function CasePopup({ imgUrl, fallback, isOpen, onToggle, popupBelow, size }) {
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       onClick={e => e.stopPropagation()}
       style={{
-        position: 'absolute', width: '240px', left: '50%',
+        position: 'absolute', width: '260px', left: '50%',
         transform: 'translateX(-50%)',
         ...(popupBelow ? { top: size + 14 } : { bottom: size + 14 }),
         background: '#fff', borderRadius: '16px',
@@ -78,14 +94,17 @@ function CasePopup({ imgUrl, fallback, isOpen, onToggle, popupBelow, size }) {
         zIndex: 70, pointerEvents: 'all',
       }}
     >
-      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* Header */}
+      <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '34px', height: '34px', borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(0,0,0,0.08)', background: '#F8F8F8', flexShrink: 0 }}>
-            <img src={imgUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(0,0,0,0.08)', background: '#F8F8F8', flexShrink: 0 }}>
+            <img src={brand?.logo_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
           </div>
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>Caso de éxito</div>
-            <div style={{ fontSize: '10px', color: '#AAA', marginTop: '1px' }}>Imágenes próximamente</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>{brand?.name || 'Caso de éxito'}</div>
+            <div style={{ fontSize: '10px', color: '#AAA', marginTop: '1px' }}>
+              {loading ? 'Cargando…' : hasImages ? `${images.length} imagen${images.length !== 1 ? 'es' : ''}` : 'Caso protegido por NDA'}
+            </div>
           </div>
         </div>
         <button onClick={e => { e.stopPropagation(); onToggle() }}
@@ -93,27 +112,46 @@ function CasePopup({ imgUrl, fallback, isOpen, onToggle, popupBelow, size }) {
           ✕
         </button>
       </div>
-      <div style={{ padding: '12px 14px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px' }}>
-        {[0, 1, 2].map(n => (
-          <div key={n} style={{ aspectRatio: '4/3', borderRadius: '10px', background: '#F2F2F2', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)', position: 'relative' }}>
-            <img src={imgUrl} alt="" style={{ width: '55%', height: '55%', objectFit: 'contain', opacity: 0.35 }} />
-            <div style={{ position: 'absolute', bottom: '5px', right: '6px', fontSize: '9px', color: '#CCC' }}>⊞</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ padding: '0 14px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+      {/* Imágenes */}
+      {loading ? (
+        <div style={{ padding: '20px', textAlign: 'center', fontSize: '11px', color: '#BBB' }}>Cargando imágenes…</div>
+      ) : hasImages ? (
+        <div style={{ padding: '10px 12px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '6px' }}>
+          {images.slice(0, 6).map(img => (
+            <div key={img.id} style={{ aspectRatio: '4/3', borderRadius: '8px', overflow: 'hidden', background: '#F2F2F2', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <img src={img.image_url} alt={img.title || ''} loading="lazy"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onError={e => { e.target.style.display = 'none' }} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ padding: '16px 14px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px' }}>
+          {[0, 1, 2].map(n => (
+            <div key={n} style={{ aspectRatio: '4/3', borderRadius: '10px', background: '#F2F2F2', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '18px', opacity: 0.18 }}>🔒</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{ padding: '0 14px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8B3FA8', background: 'rgba(139,63,168,0.08)', border: '1px solid rgba(139,63,168,0.15)', padding: '3px 8px', borderRadius: '100px' }}>
           NDA protegido
         </span>
         <span style={{ fontSize: '10px', color: '#CCC' }}>Branding Media</span>
       </div>
+
+      {/* Flecha */}
       <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', ...(popupBelow ? { top: '-7px' } : { bottom: '-7px' }), width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', ...(popupBelow ? { borderBottom: '7px solid #fff' } : { borderTop: '7px solid #fff' }) }} />
     </motion.div>
   )
 }
 
-/* Burbuja individual — solo para desktop */
-function Bubble({ progress, left, top, size, fromX, imgUrl, fallback, index, isOpen, onToggle }) {
+/* Burbuja individual */
+function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOpen, onToggle }) {
   const rawX    = useTransform(progress, [0, 0.20, 0.80, 1], [fromX, 0, 0, fromX])
   const x       = useSpring(rawX, { stiffness: 80, damping: 22, mass: 0.6 })
   const opacity = useTransform(progress, [0.04, 0.18, 0.82, 0.96], [0, 1, 1, 0])
@@ -127,11 +165,11 @@ function Bubble({ progress, left, top, size, fromX, imgUrl, fallback, index, isO
     >
       <motion.div whileHover={{ scale: 1.07 }} transition={{ duration: 0.2 }}
         style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: isOpen ? '3px solid #8B3FA8' : '3px solid rgba(255,255,255,0.96)', boxShadow: isOpen ? '0 0 0 4px rgba(139,63,168,0.18), 0 16px 48px rgba(0,0,0,0.18)' : '0 8px 32px rgba(0,0,0,0.12)', background: '#fff', transition: 'border-color 0.2s, box-shadow 0.2s' }}>
-        <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '14%' }}
+        <img src={brand?.logo_url} alt={brand?.name || ''} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '14%' }}
           onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = fallback }} />
       </motion.div>
       <AnimatePresence>
-        {isOpen && <CasePopup imgUrl={imgUrl} fallback={fallback} isOpen={isOpen} onToggle={onToggle} popupBelow={popupBelow} size={size} />}
+        {isOpen && <CasePopup brand={brand} fallback={fallback} isOpen={isOpen} onToggle={onToggle} popupBelow={popupBelow} size={size} />}
       </AnimatePresence>
     </motion.div>
   )
@@ -155,13 +193,20 @@ function SectionHeader() {
 export default function Cases() {
   const ref = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile]       = useState(false)
+  const [brands, setBrands]           = useState(FALLBACK_IMAGES)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
+  }, [])
+
+  /* Cargar marcas visibles de Supabase */
+  useEffect(() => {
+    supabase.from('brands').select('id,name,logo_url').eq('visible', true).order('created_at')
+      .then(({ data }) => { if (data?.length) setBrands(data) })
   }, [])
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
@@ -186,7 +231,7 @@ export default function Cases() {
           {MOBILE_BUBBLES.map((b, i) => (
             <Bubble key={i} index={i} progress={scrollYProgress}
               left={b.left} top={b.top} size={b.size} fromX={b.fromX}
-              imgUrl={IMAGES[i]} fallback={FALLBACK[i % 3]}
+              brand={brands[i]} fallback={FALLBACK[i % 3]}
               isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
           ))}
 
@@ -202,7 +247,7 @@ export default function Cases() {
               </motion.h2>
               <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
                 style={{ color: '#AAA', fontSize: '11px', lineHeight: 1.5 }}>
-                Resultados reales — marcas protegidas por NDA
+                Toca una marca para ver su caso de éxito
               </motion.p>
             </div>
           </div>
@@ -228,7 +273,7 @@ export default function Cases() {
         {BUBBLES.map((b, i) => (
           <Bubble key={i} index={i} progress={scrollYProgress}
             left={b.left} top={b.top} size={b.size} fromX={b.fromX}
-            imgUrl={IMAGES[i]} fallback={FALLBACK[i % 3]}
+            brand={brands[i]} fallback={FALLBACK[i % 3]}
             isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
         ))}
 
@@ -244,7 +289,7 @@ export default function Cases() {
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
               style={{ color: '#AAA', fontSize: '12px', lineHeight: 1.6 }}>
-              Resultados reales — marcas protegidas por acuerdo de confidencialidad
+              Haz clic en una marca para ver su caso de éxito
             </motion.p>
           </div>
         </div>
