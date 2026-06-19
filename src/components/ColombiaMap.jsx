@@ -245,7 +245,7 @@ export default function ColombiaMap() {
 
   return (
     /* Sección full-screen — flex column para que header + grid llenen exactamente 100vh */
-    <section ref={ref} id="mapa" style={{
+    <section ref={ref} id="mapa" className="colombia-section" style={{
       height: '100vh',
       minHeight: '600px',
       overflow: 'hidden',
@@ -263,7 +263,7 @@ export default function ColombiaMap() {
           min-height: 0;
           align-items: stretch;
         }
-        /* Móvil: mapa y ciudades lado a lado dentro del mismo bloque */
+        /* Tablet: lado a lado más compacto */
         @media (max-width: 900px) {
           .map-grid {
             grid-template-columns: 1.3fr 1fr;
@@ -273,21 +273,38 @@ export default function ColombiaMap() {
             transform: none !important;
             padding: 12px !important;
           }
-          .map-cards-col {
-            max-height: none;
-            overflow-y: auto;
-          }
         }
-        @media (max-width: 480px) {
-          .map-grid { gap: 6px; }
-          .map-wrapper { padding: 12px 14px 10px !important; }
+        /* Móvil: stack vertical — mapa arriba, cards abajo */
+        @media (max-width: 600px) {
+          .colombia-section {
+            height: auto !important;
+            min-height: 100svh !important;
+            overflow: visible !important;
+          }
+          .map-wrapper {
+            padding: 16px 10px 20px !important;
+          }
+          .map-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+            flex: none !important;
+          }
+          .map-svg-col {
+            transform: none !important;
+            padding: 8px !important;
+            max-height: 56vw !important;
+          }
+          .map-cards-col {
+            overflow-y: visible !important;
+            max-height: none !important;
+          }
         }
       `}</style>
 
       {/* Wrapper interno — distribuye el espacio con flexbox */}
       <div className="map-wrapper" style={{
         maxWidth: '1200px', width: '100%', margin: '0 auto',
-        padding: '20px 24px 16px',
+        padding: '16px 20px 14px',
         display: 'flex', flexDirection: 'column',
         flex: 1, minHeight: 0,
       }}>
