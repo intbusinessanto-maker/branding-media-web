@@ -1,6 +1,12 @@
+import { useState, useEffect } from 'react'
+
 const VIDEO_ID = '68paHyhJHPU'
 
 export default function Hero({ videoActive = true }) {
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 768)
+  }, [])
   return (
     <section id="inicio" style={{
       minHeight: '100vh', display: 'flex', flexDirection: 'column',
@@ -11,8 +17,8 @@ export default function Hero({ videoActive = true }) {
       {/* Fondo oscuro base (siempre visible, incluso si el video falla) */}
       <div style={{ position: 'absolute', inset: 0, background: '#0a0a0a', pointerEvents: 'none' }} />
 
-      {/* Video fondo YouTube — solo se monta cuando el intro ya no está activo */}
-      {videoActive && (
+      {/* Video fondo YouTube — solo desktop (móvil bloquea autoplay) */}
+      {videoActive && isDesktop && (
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
           <iframe
             src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&mute=1&controls=0&loop=1&playlist=${VIDEO_ID}&rel=0&showinfo=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1`}

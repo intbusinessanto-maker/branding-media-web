@@ -46,7 +46,7 @@ function MobileAudience() {
       <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden' }}>
 
         {/* Fondo único */}
-        <img src={MOBILE_IMG_URL} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+        <img src={MOBILE_IMG_URL} alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
 
         {/* Degradado: oscuro arriba para el header, oscuro abajo para las cards */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 35%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.96) 100%)' }} />
@@ -116,6 +116,7 @@ function MobileAudience() {
 /* ── DESKTOP ── */
 export default function NewspaperAudience() {
   const [isMobile, setIsMobile] = useState(false)
+  const [showVideo, setShowVideo] = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -125,6 +126,18 @@ export default function NewspaperAudience() {
   }, [])
 
   const ref = useRef(null)
+
+  /* Cargar iframe solo cuando la sección entra en pantalla */
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setShowVideo(true); observer.disconnect() } },
+      { rootMargin: '400px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -163,7 +176,7 @@ export default function NewspaperAudience() {
          * (equivalente a object-fit: cover).
          */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', background: '#000' }}>
-          <iframe
+          {showVideo && <iframe
             src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0`}
             frameBorder="0"
             allow="autoplay; fullscreen; picture-in-picture"
@@ -171,7 +184,6 @@ export default function NewspaperAudience() {
             style={{
               position: 'absolute',
               top: '50%', left: '50%',
-              /* cover: el mayor de los dos valores cubre siempre el contenedor */
               width:  'max(100vw, 177.78vh)',
               height: 'max(100vh, 56.25vw)',
               transform: 'translate(-50%, -50%)',
@@ -179,7 +191,7 @@ export default function NewspaperAudience() {
               pointerEvents: 'none',
             }}
             title="Branding Media background"
-          />
+          />}
         </div>
 
         {/* ── CAPA 1: oscurecido sobre el video para legibilidad del texto ── */}

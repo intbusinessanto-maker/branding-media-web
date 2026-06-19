@@ -81,7 +81,7 @@ function CasePopup({ imgUrl, fallback, isOpen, onToggle, popupBelow, size }) {
       <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '34px', height: '34px', borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(0,0,0,0.08)', background: '#F8F8F8', flexShrink: 0 }}>
-            <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+            <img src={imgUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
           </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>Caso de éxito</div>

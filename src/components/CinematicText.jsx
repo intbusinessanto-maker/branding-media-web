@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
 const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua_y_publico-removebg-preview%20(1)%20(1).png'
@@ -12,6 +12,19 @@ const PHRASES = [
 
 export default function CinematicText() {
   const ref = useRef(null)
+  const [showVideo, setShowVideo] = useState(false)
+
+  /* Cargar el iframe solo cuando la sección está a punto de entrar en pantalla */
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setShowVideo(true); observer.disconnect() } },
+      { rootMargin: '300px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   /* ── Progreso de scroll → activa las frases ── */
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
@@ -40,26 +53,25 @@ export default function CinematicText() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
 
-        {/* ① Video Vimeo — fondo en bucle continuo, sin controles ni audio */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          overflow: 'hidden', pointerEvents: 'none', zIndex: 1,
-        }}>
-          <iframe
-            src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0&quality=auto`}
-            style={{
-              position: 'absolute',
-              top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'calc(100vh * 1.7778)',
-              height: '100vh',
-              minWidth: '100%',
-              minHeight: '100%',
-              border: 'none',
-            }}
-            allow="autoplay; fullscreen; picture-in-picture"
-            title=""
-          />
+        {/* ① Video Vimeo — se carga solo cuando la sección entra en vista */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 1 }}>
+          {showVideo && (
+            <iframe
+              src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0&quality=auto`}
+              style={{
+                position: 'absolute',
+                top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 'calc(100vh * 1.7778)',
+                height: '100vh',
+                minWidth: '100%',
+                minHeight: '100%',
+                border: 'none',
+              }}
+              allow="autoplay; fullscreen; picture-in-picture"
+              title=""
+            />
+          )}
         </div>
 
         {/* ② Viñeta circular — centro semitransparente, bordes muy oscuros */}

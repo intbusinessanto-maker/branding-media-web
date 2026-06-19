@@ -145,7 +145,7 @@ export default function Blog() {
           y: topY,
           pointerEvents: 'none',
         }}>
-          <img src={TRAY_URL} alt="" draggable={false} style={{
+          <img src={TRAY_URL} alt="" draggable={false} loading="lazy" style={{
             width: '100%', height: '100%',
             objectFit: 'contain', objectPosition: 'center center',
             display: 'block', userSelect: 'none',
@@ -161,7 +161,7 @@ export default function Blog() {
           y: botY,
           pointerEvents: 'none',
         }}>
-          <img src={TRAY_URL} alt="" draggable={false} style={{
+          <img src={TRAY_URL} alt="" draggable={false} loading="lazy" style={{
             width: '100%', height: '100%',
             objectFit: 'contain', objectPosition: 'center center',
             display: 'block', userSelect: 'none',

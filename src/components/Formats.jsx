@@ -73,6 +73,7 @@ export default function Formats() {
         <img
           src={STATUE_URL}
           alt=""
+          loading="lazy"
           style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }}
         />
       </motion.div>
