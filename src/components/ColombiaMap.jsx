@@ -58,8 +58,7 @@ const CITIES = [
   },
 ]
 
-const STEP_MS     = 1200
-const SCROLL_KEYS = ['ArrowDown','ArrowUp','PageDown','PageUp',' ','End','Home']
+const STEP_MS = 1200
 
 /* Devuelve los bounds del rect blanco detrás del label */
 function labelBg(name, lx, ly, anchor) {
@@ -183,51 +182,20 @@ export default function ColombiaMap() {
     if (!inView || started.current) return
     started.current = true
 
-    const blockKeys = (e) => { if (SCROLL_KEYS.includes(e.key)) e.preventDefault() }
-
-    const release = () => {
-      document.body.style.overflow     = ''
-      document.body.style.paddingRight = ''
-      document.removeEventListener('keydown', blockKeys)
-      releaseRef.current = null
-    }
+    const release = () => { releaseRef.current = null }
     releaseRef.current = release
 
     let cityTimers = []
     let tDone
 
-    /* Llevar la sección al tope del viewport */
+    /* Scroll suave a la sección sin bloquear */
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-    const lockTimer = setTimeout(() => {
-      /*
-       * Fix scroll rápido: si el usuario bajó muy rápido y la sección
-       * ya está más de un 30 % por encima del viewport, no bloquear —
-       * dejar que sigan scrolleando libremente.
-       */
-      const rect      = ref.current?.getBoundingClientRect()
-      const tooFarUp  = rect && rect.top < -(rect.height * 0.30)
-      const belowView = rect && rect.bottom < 0  // ya pasaron la sección
-
-      if (belowView) {
-        /* Saltaron por completo — terminar sin animación ni bloqueo */
-        release()
-        setSeqIdx(-1)
-        setSeqDone(true)
-        return
-      }
-
-      if (!tooFarUp && window.innerWidth >= 768) {
-        const sw = window.innerWidth - document.documentElement.clientWidth
-        document.body.style.overflow     = 'hidden'
-        document.body.style.paddingRight = `${sw}px`
-        document.addEventListener('keydown', blockKeys)
-      }
-
+    /* Pequeña pausa para que el scroll suave llegue antes de animar */
+    const startTimer = setTimeout(() => {
       cityTimers = CITIES.map((_, i) =>
         setTimeout(() => setSeqIdx(i), i * STEP_MS)
       )
-
       tDone = setTimeout(() => {
         setSeqIdx(-1)
         setSeqDone(true)
@@ -236,7 +204,7 @@ export default function ColombiaMap() {
     }, 650)
 
     return () => {
-      clearTimeout(lockTimer)
+      clearTimeout(startTimer)
       cityTimers.forEach(clearTimeout)
       clearTimeout(tDone)
       release()

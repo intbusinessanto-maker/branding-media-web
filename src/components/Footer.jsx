@@ -1,4 +1,4 @@
-const LOGO_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo-Branding-Media.png'
+const LOGO_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo%20Branding%20Media%20(f%20blanco).png'
 
 const SOCIALS = [
   {
@@ -70,19 +70,19 @@ export default function Footer() {
           {/* Logo + eslogan breve */}
           <div>
             <img src={LOGO_URL} alt="Branding Media" style={{ height: '52px', width: 'auto', objectFit: 'contain', marginBottom: '12px', display: 'block' }} />
-            <p style={{ fontSize: '12px', color: '#555', maxWidth: '240px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '12px', color: '#AAA', maxWidth: '240px', lineHeight: 1.6 }}>
               El circuito universitario más grande de Colombia.
             </p>
           </div>
 
           {/* Nav links */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#444', marginBottom: '2px' }}>Sitio</span>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', marginBottom: '2px' }}>Sitio</span>
             {NAV_LINKS.map(l => (
               <a key={l.label} href={l.href}
-                style={{ fontSize: '13px', color: '#555', textDecoration: 'none', transition: 'color 0.2s' }}
+                style={{ fontSize: '13px', color: '#AAA', textDecoration: 'none', transition: 'color 0.2s' }}
                 onMouseEnter={e => e.target.style.color = l.color}
-                onMouseLeave={e => e.target.style.color = '#555'}>
+                onMouseLeave={e => e.target.style.color = '#AAA'}>
                 {l.label}
               </a>
             ))}
@@ -90,7 +90,7 @@ export default function Footer() {
 
           {/* Redes sociales */}
           <div>
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#444', display: 'block', marginBottom: '14px' }}>Síguenos</span>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '14px' }}>Síguenos</span>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {SOCIALS.map(s => {
                 const inner = (
@@ -129,8 +129,16 @@ export default function Footer() {
 
         {/* Copyright */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ fontSize: '12px', color: '#444' }}>© 2026 Branding Media · Bogotá, Colombia</p>
-          <p style={{ fontSize: '12px', color: '#333' }}>Movemos marcas en universidades</p>
+          <p style={{ fontSize: '12px', color: '#AAA' }}>
+            Copyright ©2026 – All rights reserved. Powered by{' '}
+            <a href="https://dangerdigitalagency.com/" target="_blank" rel="noopener noreferrer"
+              style={{ color: '#E8118A', textDecoration: 'none', fontWeight: 700 }}
+              onMouseEnter={e => e.target.style.textDecoration = 'underline'}
+              onMouseLeave={e => e.target.style.textDecoration = 'none'}>
+              Danger
+            </a>
+          </p>
+          <p style={{ fontSize: '12px', color: '#666' }}>Movemos marcas en universidades</p>
         </div>
 
       </div>

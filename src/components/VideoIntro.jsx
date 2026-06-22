@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const LOGO    = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo-Branding-Media.png'
+const LOGO    = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo%20Branding%20Media%20(f%20blanco).png'
 const ESLOGAN = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/eslogan.webp'
 
 export default function VideoIntro({ onDismiss }) {
@@ -52,7 +52,7 @@ export default function VideoIntro({ onDismiss }) {
             transition={{ delay: 0.8, duration: 0.6 }}
             style={{ position: 'absolute', top: '28px', left: '36px', zIndex: 10 }}
           >
-            <img src={LOGO} alt="Branding Media" style={{ height: '60px', objectFit: 'contain', filter: 'brightness(100)' }} />
+            <img src={LOGO} alt="Branding Media" style={{ height: '60px', objectFit: 'contain' }} />
           </motion.div>
 
           {/* Contenido bottom */}

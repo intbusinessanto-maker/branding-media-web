@@ -1,6 +1,14 @@
 ﻿import { motion } from 'framer-motion'
 import { useState } from 'react'
 
+const FIGURA_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/figura%201.png'
+
+const INFO_ITEMS = [
+  { icon: '📍', label: 'Bogotá, Colombia',    color: '#E8118A' },
+  { icon: '📱', label: '+57 301 697 8741',    color: '#00C4AD' },
+  { icon: '✉️', label: 'admin@bmmedios.com',  color: '#8B3FA8' },
+]
+
 export default function Contact() {
   const [form, setForm] = useState({ nombre: '', empresa: '', email: '', mensaje: '' })
   const [sent, setSent] = useState(false)
@@ -18,6 +26,15 @@ export default function Contact() {
       <style>{`
         .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
         @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; gap: 40px; } }
+        /* Desktop: figura a la derecha del bloque info */
+        .contact-info-wrap { display: flex; align-items: flex-start; gap: 0; position: relative; }
+        .contact-figura-desktop { display: block; }
+        .contact-figura-mobile  { display: none; }
+        @media (max-width: 768px) {
+          .contact-figura-desktop { display: none; }
+          .contact-figura-mobile  { display: block; }
+          .contact-info-wrap { flex-direction: column; }
+        }
       `}</style>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <div className="contact-grid">
@@ -28,17 +45,32 @@ export default function Contact() {
               <span style={{ color: '#00C4AD' }}>universitaria</span>
             </h2>
             <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '36px' }}>En menos de 24 horas te presentamos una propuesta de medios personalizada.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {[
-                { icon: '📍', label: 'Bogotá, Colombia', color: '#E8118A' },
-                { icon: '📱', label: '+57 301 697 8741', color: '#00C4AD' },
-                { icon: '✉️', label: 'admin@bmmedios.com', color: '#8B3FA8' },
-              ].map(item => (
-                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
-                  <span style={{ fontSize: '14px', color: '#555' }}>{item.label}</span>
+
+            {/* Wrap info + figura desktop */}
+            <div className="contact-info-wrap">
+              <div style={{ flex: 1 }}>
+                {/* Figura móvil — al frente de los items */}
+                <div className="contact-figura-mobile" style={{ marginBottom: '20px' }}>
+                  <img src={FIGURA_URL} alt="" loading="lazy"
+                    style={{ width: '100%', maxWidth: '220px', height: 'auto', objectFit: 'contain', display: 'block' }} />
                 </div>
-              ))}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {INFO_ITEMS.map(item => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
+                      <span style={{ fontSize: '14px', color: '#555' }}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Figura desktop — a la derecha */}
+              <div className="contact-figura-desktop"
+                style={{ width: 'clamp(120px, 18vw, 200px)', flexShrink: 0, alignSelf: 'flex-end', marginLeft: '-10px', marginBottom: '-20px' }}>
+                <img src={FIGURA_URL} alt="" loading="lazy"
+                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
+              </div>
             </div>
           </motion.div>
 
