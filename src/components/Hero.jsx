@@ -14,10 +14,16 @@ export default function Hero({ videoActive = true }) {
       textAlign: 'center', padding: 'clamp(120px, 14vh, 160px) 1.5rem 80px',
       position: 'relative', overflow: 'hidden',
     }}>
-      {/* Fondo oscuro base (siempre visible, incluso si el video falla) */}
+      {/* Fondo base */}
       <div style={{ position: 'absolute', inset: 0, background: '#0a0a0a', pointerEvents: 'none' }} />
 
-      {/* Video fondo YouTube — solo desktop (móvil bloquea autoplay) */}
+      {/* Móvil: gradiente visual ya que YouTube no hace autoplay en iOS/Android */}
+      {!isDesktop && (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse at 25% 30%, rgba(139,63,168,0.45) 0%, transparent 55%), radial-gradient(ellipse at 75% 70%, rgba(0,196,173,0.25) 0%, transparent 55%)' }} />
+      )}
+
+      {/* Video fondo YouTube — solo desktop */}
       {videoActive && isDesktop && (
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
           <iframe

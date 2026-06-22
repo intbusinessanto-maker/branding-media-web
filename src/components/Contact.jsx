@@ -25,7 +25,7 @@ export default function Contact() {
     <section id="contacto" style={{ padding: 'clamp(60px,8vw,100px) 1.5rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
       <style>{`
         /* Desktop: 3 columnas — figura | info | formulario */
-        .contact-outer { display: grid; grid-template-columns: clamp(120px,14vw,200px) 1fr 1fr; gap: 40px; align-items: start; }
+        .contact-outer { display: grid; grid-template-columns: clamp(200px,22vw,340px) 1fr 1fr; gap: 36px; align-items: end; }
         /* Móvil: 1 columna, figura inline con los items */
         @media (max-width: 768px) {
           .contact-outer { grid-template-columns: 1fr; gap: 32px; }

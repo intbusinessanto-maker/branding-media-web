@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import Navbar from './components/Navbar'
 import VideoIntro from './components/VideoIntro'
 import Hero from './components/Hero'
+import CinematicText from './components/CinematicText'  // eager — scroll tracking
 
-/* Below-fold — lazy: solo se parsean cuando el navegador está ocioso */
+/* Below-fold — lazy */
 const Stats         = lazy(() => import('./components/Stats'))
 const BrandCarousel = lazy(() => import('./components/BrandCarousel'))
-const CinematicText = lazy(() => import('./components/CinematicText'))
 const ColombiaMap   = lazy(() => import('./components/ColombiaMap'))
 const LogoShowcase  = lazy(() => import('./components/LogoShowcase'))
 const Formats       = lazy(() => import('./components/Formats'))
