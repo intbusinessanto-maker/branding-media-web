@@ -52,7 +52,7 @@ export default function VideoIntro({ onDismiss }) {
             transition={{ delay: 0.8, duration: 0.6 }}
             style={{ position: 'absolute', top: '28px', left: '36px', zIndex: 10 }}
           >
-            <img src={LOGO} alt="Branding Media" style={{ height: '60px', objectFit: 'contain' }} />
+            <img src={LOGO} alt="Branding Media" style={{ height: 'clamp(72px, 10vw, 110px)', objectFit: 'contain' }} />
           </motion.div>
 
           {/* Contenido bottom */}

@@ -62,7 +62,7 @@ const MOBILE_BUBBLES = [
 ]
 
 /* Popup de caso — carga imágenes reales de Supabase */
-function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, size }) {
+function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, popupSide, size }) {
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -78,6 +78,13 @@ function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, size }) {
 
   const hasImages = images.length > 0
 
+  /* Posición horizontal: izquierda/derecha según el borde donde está la burbuja */
+  const hPos = popupSide === 'right'
+    ? { right: 0 }           // burbuja a la derecha → popup se abre a la izquierda
+    : popupSide === 'left'
+    ? { left: 0 }            // burbuja a la izquierda → popup se abre a la derecha
+    : { left: '50%', transform: 'translateX(-50%)' }  // centro → centrado
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.86, y: popupBelow ? -12 : 12 }}
@@ -86,11 +93,11 @@ function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, size }) {
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       onClick={e => e.stopPropagation()}
       style={{
-        position: 'absolute', width: '260px', left: '50%',
-        transform: 'translateX(-50%)',
+        position: 'absolute', width: 'min(300px, 80vw)',
+        ...hPos,
         ...(popupBelow ? { top: size + 14 } : { bottom: size + 14 }),
-        background: '#fff', borderRadius: '16px',
-        boxShadow: '0 24px 72px rgba(0,0,0,0.18)', overflow: 'hidden',
+        background: '#fff', borderRadius: '18px',
+        boxShadow: '0 24px 72px rgba(0,0,0,0.22)', overflow: 'hidden',
         zIndex: 70, pointerEvents: 'all',
       }}
     >
@@ -144,8 +151,15 @@ function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, size }) {
         <span style={{ fontSize: '10px', color: '#CCC' }}>Branding Media</span>
       </div>
 
-      {/* Flecha */}
-      <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', ...(popupBelow ? { top: '-7px' } : { bottom: '-7px' }), width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', ...(popupBelow ? { borderBottom: '7px solid #fff' } : { borderTop: '7px solid #fff' }) }} />
+      {/* Flecha — alineada según el lado */}
+      <div style={{
+        position: 'absolute',
+        ...(popupSide === 'right' ? { right: size / 2 - 7 } : popupSide === 'left' ? { left: size / 2 - 7 } : { left: '50%', transform: 'translateX(-50%)' }),
+        ...(popupBelow ? { top: '-7px' } : { bottom: '-7px' }),
+        width: 0, height: 0,
+        borderLeft: '7px solid transparent', borderRight: '7px solid transparent',
+        ...(popupBelow ? { borderBottom: '7px solid #fff' } : { borderTop: '7px solid #fff' }),
+      }} />
     </motion.div>
   )
 }
@@ -157,6 +171,9 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
   const opacity = useTransform(progress, [0.04, 0.18, 0.82, 0.96], [0, 1, 1, 0])
   const scale   = useTransform(progress, [0, 0.20, 0.80, 1], [0.25, 1, 1, 0.25])
   const popupBelow = parseFloat(top) < 38
+  /* Popup al lado opuesto del borde donde está la burbuja */
+  const leftPct = parseFloat(left)
+  const popupSide = leftPct < 30 ? 'left' : leftPct > 60 ? 'right' : 'center'
 
   return (
     <motion.div
@@ -169,7 +186,7 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
           onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = fallback }} />
       </motion.div>
       <AnimatePresence>
-        {isOpen && <CasePopup brand={brand} fallback={fallback} isOpen={isOpen} onToggle={onToggle} popupBelow={popupBelow} size={size} />}
+        {isOpen && <CasePopup brand={brand} fallback={fallback} isOpen={isOpen} onToggle={onToggle} popupBelow={popupBelow} popupSide={popupSide} size={size} />}
       </AnimatePresence>
     </motion.div>
   )

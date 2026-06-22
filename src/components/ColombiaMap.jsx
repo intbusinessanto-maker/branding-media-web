@@ -260,7 +260,7 @@ export default function ColombiaMap() {
           .map-svg-col {
             transform: none !important;
             padding: 8px !important;
-            max-height: 56vw !important;
+            max-height: 78vw !important;
           }
           .map-cards-col {
             overflow-y: visible !important;

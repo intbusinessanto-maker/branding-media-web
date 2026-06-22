@@ -89,26 +89,7 @@ export default function CinematicText() {
           WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
 
-        {/* ④ Imagen estatua — solo en móvil (en desktop el video ya tiene contenido visual) */}
-        <style>{`@media (min-width: 768px) { .cinematic-statue { display: none !important; } }`}</style>
-        <img
-          className="cinematic-statue"
-          src={STATUE_URL}
-          alt=""
-          style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            height: 'clamp(380px, 80vh, 700px)',
-            width: 'auto',
-            objectFit: 'contain',
-            opacity: 0.40,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            zIndex: 4,
-          }}
-          onError={e => { e.target.style.display = 'none' }}
-        />
+        {/* ④ Imagen estatua — eliminada, el video de fondo se ve en todos los tamaños */}
 
         {/* ⑤ Frases — una a la vez, controladas por scroll */}
         {layers.map((layer, i) => (
