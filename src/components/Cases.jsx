@@ -15,6 +15,7 @@ const FALLBACK_IMAGES = [
 const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
 
 const BUBBLES = [
+  /* ── originales (17) ── */
   { left: '8%',  top: '4%',  size: 180, fromX: -1600 },
   { left: '8%',  top: '40%', size: 150, fromX: -1600 },
   { left: '8%',  top: '70%', size: 172, fromX: -1600 },
@@ -32,33 +33,59 @@ const BUBBLES = [
   { left: '76%', top: '3%',  size: 178, fromX:  1600 },
   { left: '77%', top: '36%', size: 146, fromX:  1600 },
   { left: '75%', top: '67%', size: 184, fromX:  1600 },
+  /* ── extensión para marcas adicionales (18-32) ── */
+  { left: '24%', top: '22%', size: 138, fromX:  -950 },
+  { left: '23%', top: '65%', size: 126, fromX:  -950 },
+  { left: '35%', top: '8%',  size: 130, fromX:  -680 },
+  { left: '34%', top: '78%', size: 132, fromX:  -680 },
+  { left: '45%', top: '3%',  size: 124, fromX:  -520 },
+  { left: '44%', top: '95%', size: 118, fromX:  -520 },
+  { left: '58%', top: '6%',  size: 128, fromX:   520 },
+  { left: '57%', top: '92%', size: 122, fromX:   520 },
+  { left: '70%', top: '20%', size: 148, fromX:   950 },
+  { left: '71%', top: '68%', size: 140, fromX:   950 },
+  { left: '84%', top: '12%', size: 160, fromX:  1550 },
+  { left: '83%', top: '52%', size: 148, fromX:  1550 },
+  { left: '84%', top: '82%', size: 155, fromX:  1550 },
+  { left: '12%', top: '30%', size: 142, fromX: -1300 },
+  { left: '11%', top: '58%', size: 136, fromX: -1300 },
 ]
 
 const MOBILE_BUBBLES = [
-  // Far left column — entra desde la izquierda
+  /* ── originales (17) ── */
   { left: '-1%', top: '5%',  size: 88, fromX: -700 },
   { left: '0%',  top: '40%', size: 78, fromX: -700 },
   { left: '-1%', top: '74%', size: 84, fromX: -700 },
-  // Near left column
   { left: '13%', top: '16%', size: 76, fromX: -450 },
   { left: '12%', top: '52%', size: 82, fromX: -450 },
   { left: '10%', top: '84%', size: 72, fromX: -450 },
-  // Top/bottom center-left
   { left: '28%', top: '1%',  size: 86, fromX: -280 },
   { left: '26%', top: '87%', size: 74, fromX: -280 },
-  // Bottom center
   { left: '38%', top: '92%', size: 70, fromX: -220 },
-  // Top/bottom center-right
   { left: '54%', top: '1%',  size: 86, fromX:  280 },
   { left: '56%', top: '87%', size: 74, fromX:  280 },
-  // Near right column
   { left: '67%', top: '16%', size: 76, fromX:  450 },
   { left: '69%', top: '52%', size: 82, fromX:  450 },
   { left: '67%', top: '84%', size: 72, fromX:  450 },
-  // Far right column — entra desde la derecha
   { left: '80%', top: '5%',  size: 88, fromX:  700 },
   { left: '82%', top: '40%', size: 78, fromX:  700 },
   { left: '80%', top: '74%', size: 84, fromX:  700 },
+  /* ── extensión para marcas adicionales (18-32) ── */
+  { left: '24%', top: '28%', size: 74, fromX: -370 },
+  { left: '23%', top: '68%', size: 70, fromX: -370 },
+  { left: '38%', top: '8%',  size: 72, fromX: -230 },
+  { left: '38%', top: '78%', size: 68, fromX: -230 },
+  { left: '47%', top: '3%',  size: 74, fromX: -180 },
+  { left: '48%', top: '92%', size: 66, fromX: -180 },
+  { left: '60%', top: '8%',  size: 74, fromX:  230 },
+  { left: '61%', top: '78%', size: 68, fromX:  230 },
+  { left: '73%', top: '30%', size: 78, fromX:  370 },
+  { left: '73%', top: '66%', size: 74, fromX:  370 },
+  { left: '86%', top: '20%', size: 84, fromX:  650 },
+  { left: '87%', top: '55%', size: 78, fromX:  650 },
+  { left: '86%', top: '82%', size: 82, fromX:  650 },
+  { left: '6%',  top: '25%', size: 80, fromX: -680 },
+  { left: '5%',  top: '60%', size: 76, fromX: -680 },
 ]
 
 /* Popup de caso — carga imágenes reales de Supabase */
@@ -245,12 +272,15 @@ export default function Cases() {
             )}
           </AnimatePresence>
 
-          {MOBILE_BUBBLES.map((b, i) => (
-            <Bubble key={i} index={i} progress={scrollYProgress}
-              left={b.left} top={b.top} size={b.size} fromX={b.fromX}
-              brand={brands[i]} fallback={FALLBACK[i % 3]}
-              isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
-          ))}
+          {brands.slice(0, MOBILE_BUBBLES.length).map((brand, i) => {
+            const b = MOBILE_BUBBLES[i]
+            return (
+              <Bubble key={brand.id || i} index={i} progress={scrollYProgress}
+                left={b.left} top={b.top} size={b.size} fromX={b.fromX}
+                brand={brand} fallback={FALLBACK[i % 3]}
+                isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
+            )
+          })}
 
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
             <div style={{ textAlign: 'center', padding: '0 2rem' }}>
@@ -287,12 +317,15 @@ export default function Cases() {
           )}
         </AnimatePresence>
 
-        {BUBBLES.map((b, i) => (
-          <Bubble key={i} index={i} progress={scrollYProgress}
-            left={b.left} top={b.top} size={b.size} fromX={b.fromX}
-            brand={brands[i]} fallback={FALLBACK[i % 3]}
-            isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
-        ))}
+        {brands.slice(0, BUBBLES.length).map((brand, i) => {
+          const b = BUBBLES[i]
+          return (
+            <Bubble key={brand.id || i} index={i} progress={scrollYProgress}
+              left={b.left} top={b.top} size={b.size} fromX={b.fromX}
+              brand={brand} fallback={FALLBACK[i % 3]}
+              isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
+          )
+        })}
 
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
           <div style={{ textAlign: 'center', maxWidth: '680px', padding: '0 1.5rem', width: '100%' }}>
