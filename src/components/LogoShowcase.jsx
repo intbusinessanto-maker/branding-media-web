@@ -39,7 +39,7 @@ const SOCIALS = [
   },
   {
     id: 'whatsapp', label: 'WhatsApp',
-    href: 'https://wa.me/573016978741',
+    href: 'https://wa.me/573001556010',
     bg: '#25D366',
     size: 'clamp(54px, 6vw, 76px)',
     pos: { top: '42%', right: '12%' }, floatDur: 7.2, floatDelay: '2.4s',
