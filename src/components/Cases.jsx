@@ -88,13 +88,16 @@ const MOBILE_BUBBLES = [
   { left: '5%',  top: '60%', size: 76, fromX: -680 },
 ]
 
-/* Popup de caso — carga imágenes reales de Supabase */
-function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, popupSide, size }) {
-  const [images, setImages] = useState([])
+/* Popup de caso — modal centrado con carrusel horizontal */
+function CasePopup({ brand, isOpen, onToggle }) {
+  const [images, setImages]   = useState([])
   const [loading, setLoading] = useState(false)
+  const [idx, setIdx]         = useState(0)
+  const trackRef              = useRef(null)
 
   useEffect(() => {
     if (!isOpen || !brand?.id) return
+    setIdx(0)
     setLoading(true)
     supabase.from('brand_case_images')
       .select('*').eq('brand_id', brand.id).order('sort_order').order('created_at')
@@ -103,90 +106,139 @@ function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, popupSide, s
 
   if (!isOpen) return null
 
-  const hasImages = images.length > 0
+  const items    = images.length > 0 ? images : null
+  const total    = items ? items.length : 3
+  const canPrev  = idx > 0
+  const canNext  = items ? idx < items.length - 1 : false
 
-  /* Posición horizontal: izquierda/derecha según el borde donde está la burbuja */
-  const hPos = popupSide === 'right'
-    ? { right: 0 }           // burbuja a la derecha → popup se abre a la izquierda
-    : popupSide === 'left'
-    ? { left: 0 }            // burbuja a la izquierda → popup se abre a la derecha
-    : { left: '50%', transform: 'translateX(-50%)' }  // centro → centrado
+  const scrollTo = (newIdx) => {
+    if (!trackRef.current) return
+    trackRef.current.scrollTo({ left: newIdx * trackRef.current.clientWidth, behavior: 'smooth' })
+    setIdx(newIdx)
+  }
+
+  const arrowBtn = (dir) => ({
+    all: 'unset', cursor: 'pointer', position: 'absolute', top: '50%',
+    transform: 'translateY(-50%)',
+    ...(dir === -1 ? { left: 10 } : { right: 10 }),
+    width: 38, height: 38, borderRadius: '50%',
+    background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.18)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 22, color: '#1A1A1A', lineHeight: 1, zIndex: 5,
+  })
 
   return (
+    /* Overlay — fixed, centrado */
     <motion.div
-      initial={{ opacity: 0, scale: 0.86, y: popupBelow ? -12 : 12 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.86, y: popupBelow ? -12 : 12 }}
-      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-      onClick={e => e.stopPropagation()}
-      style={{
-        position: 'absolute', width: 'min(560px, 92vw)',
-        ...hPos,
-        ...(popupBelow ? { top: size + 16 } : { bottom: size + 16 }),
-        background: '#fff', borderRadius: '22px',
-        boxShadow: '0 28px 80px rgba(0,0,0,0.26)', overflow: 'hidden',
-        zIndex: 70, pointerEvents: 'all',
-      }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      onClick={e => { e.stopPropagation(); onToggle() }}
+      style={{ position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(5px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '16px' }}
     >
-      {/* Header */}
-      <div style={{ padding: '16px 18px 14px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '46px', height: '46px', borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(0,0,0,0.07)', background: '#F8F8F8', flexShrink: 0 }}>
-            <img src={brand?.logo_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
-          </div>
-          <div>
-            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1A1A1A' }}>{brand?.name || 'Caso de éxito'}</div>
-            <div style={{ fontSize: '12px', color: '#AAA', marginTop: '2px' }}>
-              {loading ? 'Cargando…' : hasImages ? `${images.length} imagen${images.length !== 1 ? 'es' : ''}` : 'Caso protegido por NDA'}
+      {/* Card centrada */}
+      <motion.div
+        initial={{ scale: 0.92, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.92, opacity: 0, y: 20 }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        onClick={e => e.stopPropagation()}
+        style={{ background: '#fff', borderRadius: '22px', overflow: 'hidden',
+          width: 'min(700px, 96vw)', boxShadow: '0 32px 90px rgba(0,0,0,0.30)' }}
+      >
+        {/* Header con logo de la marca */}
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#F8F8F8',
+              border: '2px solid rgba(0,0,0,0.07)', overflow: 'hidden', flexShrink: 0 }}>
+              <img src={brand?.logo_url} alt="" loading="lazy"
+                style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '7px' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A1A1A' }}>{brand?.name}</div>
+              <div style={{ fontSize: '12px', color: '#AAA', marginTop: '2px' }}>
+                {loading ? 'Cargando…' : items ? `${items.length} imagen${items.length !== 1 ? 'es' : ''}` : 'Caso protegido por NDA'}
+              </div>
             </div>
           </div>
+          <button onClick={e => { e.stopPropagation(); onToggle() }}
+            style={{ all: 'unset', cursor: 'pointer', width: 32, height: 32, borderRadius: '50%',
+              background: '#F0F0F0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '14px', color: '#666' }}>
+            ✕
+          </button>
         </div>
-        <button onClick={e => { e.stopPropagation(); onToggle() }}
-          style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#F0F0F0', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#888', cursor: 'pointer', flexShrink: 0, lineHeight: 1 }}>
-          ✕
-        </button>
-      </div>
 
-      {/* Imágenes */}
-      {loading ? (
-        <div style={{ padding: '28px', textAlign: 'center', fontSize: '13px', color: '#BBB' }}>Cargando imágenes…</div>
-      ) : hasImages ? (
-        <div style={{ padding: '14px 16px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
-          {images.slice(0, 9).map(img => (
-            <div key={img.id} style={{ aspectRatio: '4/3', borderRadius: '12px', overflow: 'hidden', background: '#F2F2F2', border: '1px solid rgba(0,0,0,0.05)' }}>
-              <img src={img.image_url} alt={img.title || ''} loading="lazy"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                onError={e => { e.target.style.display = 'none' }} />
+        {/* Carrusel */}
+        <div style={{ position: 'relative', background: '#F5F5F5' }}>
+          {loading ? (
+            <div style={{ aspectRatio: '16/9', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: 13, color: '#CCC' }}>
+              Cargando imágenes…
             </div>
-          ))}
+          ) : (
+            <>
+              {/* Track deslizable */}
+              <div
+                ref={trackRef}
+                onScroll={e => {
+                  const w = e.target.clientWidth
+                  if (w) setIdx(Math.round(e.target.scrollLeft / w))
+                }}
+                style={{ display: 'flex', overflowX: 'scroll', scrollSnapType: 'x mandatory',
+                  scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+              >
+                <style>{`.cases-track::-webkit-scrollbar{display:none}`}</style>
+                {items ? items.map((img) => (
+                  <div key={img.id} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
+                    aspectRatio: '16/9', overflow: 'hidden' }}>
+                    <img src={img.image_url} alt={img.title || ''} loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      onError={e => { e.target.style.display = 'none' }} />
+                  </div>
+                )) : [0,1,2].map(n => (
+                  <div key={n} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
+                    aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 32, opacity: 0.15 }}>🔒</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Flechas de navegación */}
+              {canPrev && (
+                <button style={arrowBtn(-1)} onClick={() => scrollTo(idx - 1)}>‹</button>
+              )}
+              {canNext && (
+                <button style={arrowBtn(1)} onClick={() => scrollTo(idx + 1)}>›</button>
+              )}
+            </>
+          )}
         </div>
-      ) : (
-        <div style={{ padding: '18px 16px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
-          {[0, 1, 2].map(n => (
-            <div key={n} style={{ aspectRatio: '4/3', borderRadius: '12px', background: '#F2F2F2', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '22px', opacity: 0.18 }}>🔒</div>
+
+        {/* Dots + footer */}
+        <div style={{ padding: '12px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Indicadores de posición */}
+          {items && items.length > 1 ? (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {items.map((_, i) => (
+                <button key={i} onClick={() => scrollTo(i)}
+                  style={{ all: 'unset', cursor: 'pointer', height: 6, borderRadius: 3, transition: 'all 0.22s',
+                    width: i === idx ? 18 : 6,
+                    background: i === idx ? '#8B3FA8' : '#DDD' }} />
+              ))}
             </div>
-          ))}
+          ) : <span />}
+          <span style={{ fontSize: '10px', fontWeight: 700, color: '#8B3FA8',
+            background: 'rgba(139,63,168,0.08)', border: '1px solid rgba(139,63,168,0.15)',
+            padding: '4px 10px', borderRadius: 100, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            NDA protegido
+          </span>
         </div>
-      )}
-
-      {/* Footer */}
-      <div style={{ padding: '0 16px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8B3FA8', background: 'rgba(139,63,168,0.08)', border: '1px solid rgba(139,63,168,0.15)', padding: '4px 10px', borderRadius: '100px' }}>
-          NDA protegido
-        </span>
-        <span style={{ fontSize: '10px', color: '#CCC' }}>Branding Media</span>
-      </div>
-
-      {/* Flecha — alineada según el lado */}
-      <div style={{
-        position: 'absolute',
-        ...(popupSide === 'right' ? { right: size / 2 - 7 } : popupSide === 'left' ? { left: size / 2 - 7 } : { left: '50%', transform: 'translateX(-50%)' }),
-        ...(popupBelow ? { top: '-7px' } : { bottom: '-7px' }),
-        width: 0, height: 0,
-        borderLeft: '7px solid transparent', borderRight: '7px solid transparent',
-        ...(popupBelow ? { borderBottom: '7px solid #fff' } : { borderTop: '7px solid #fff' }),
-      }} />
+      </motion.div>
     </motion.div>
   )
 }
@@ -197,23 +249,23 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
   const x       = useSpring(rawX, { stiffness: 80, damping: 22, mass: 0.6 })
   const opacity = useTransform(progress, [0.04, 0.18, 0.82, 0.96], [0, 1, 1, 0])
   const scale   = useTransform(progress, [0, 0.20, 0.80, 1], [0.25, 1, 1, 0.25])
-  const popupBelow = parseFloat(top) < 38
-  /* Popup al lado opuesto del borde donde está la burbuja */
-  const leftPct = parseFloat(left)
-  const popupSide = leftPct < 30 ? 'left' : leftPct > 60 ? 'right' : 'center'
 
   return (
     <motion.div
-      style={{ position: 'absolute', left, top, width: size, height: size, x, opacity, scale, zIndex: isOpen ? 60 : index % 3, cursor: 'pointer', willChange: 'transform, opacity' }}
+      style={{ position: 'absolute', left, top, width: size, height: size, x, opacity, scale,
+        zIndex: isOpen ? 60 : index % 3, cursor: 'pointer', willChange: 'transform, opacity' }}
       onClick={e => { e.stopPropagation(); onToggle() }}
     >
       <motion.div whileHover={{ scale: 1.07 }} transition={{ duration: 0.2 }}
-        style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: isOpen ? '3px solid #8B3FA8' : '3px solid rgba(255,255,255,0.96)', boxShadow: isOpen ? '0 0 0 4px rgba(139,63,168,0.18), 0 16px 48px rgba(0,0,0,0.18)' : '0 8px 32px rgba(0,0,0,0.12)', background: '#fff', transition: 'border-color 0.2s, box-shadow 0.2s' }}>
+        style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
+          border: isOpen ? '3px solid #8B3FA8' : '3px solid rgba(255,255,255,0.96)',
+          boxShadow: isOpen ? '0 0 0 4px rgba(139,63,168,0.18), 0 16px 48px rgba(0,0,0,0.18)' : '0 8px 32px rgba(0,0,0,0.12)',
+          background: '#fff', transition: 'border-color 0.2s, box-shadow 0.2s' }}>
         <img src={brand?.logo_url} alt={brand?.name || ''} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '14%' }}
           onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = fallback }} />
       </motion.div>
       <AnimatePresence>
-        {isOpen && <CasePopup brand={brand} fallback={fallback} isOpen={isOpen} onToggle={onToggle} popupBelow={popupBelow} popupSide={popupSide} size={size} />}
+        {isOpen && <CasePopup brand={brand} isOpen={isOpen} onToggle={onToggle} />}
       </AnimatePresence>
     </motion.div>
   )
