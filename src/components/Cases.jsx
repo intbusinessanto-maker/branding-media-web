@@ -183,8 +183,10 @@ function CasePopup({ brand, isOpen, onToggle }) {
           ) : (
             <>
               {/* Track deslizable */}
+              <style>{`.cases-carousel::-webkit-scrollbar{display:none}`}</style>
               <div
                 ref={trackRef}
+                className="cases-carousel"
                 onScroll={e => {
                   const w = e.target.clientWidth
                   if (w) setIdx(Math.round(e.target.scrollLeft / w))
@@ -192,7 +194,6 @@ function CasePopup({ brand, isOpen, onToggle }) {
                 style={{ display: 'flex', overflowX: 'scroll', scrollSnapType: 'x mandatory',
                   scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
               >
-                <style>{`.cases-track::-webkit-scrollbar{display:none}`}</style>
                 {items ? items.map((img) => (
                   <div key={img.id} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
                     aspectRatio: '16/9', overflow: 'hidden' }}>
@@ -243,7 +244,7 @@ function CasePopup({ brand, isOpen, onToggle }) {
   )
 }
 
-/* Burbuja individual */
+/* Burbuja individual — NO renderiza el popup (el transform del motion.div rompe position:fixed) */
 function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOpen, onToggle }) {
   const rawX    = useTransform(progress, [0, 0.20, 0.80, 1], [fromX, 0, 0, fromX])
   const x       = useSpring(rawX, { stiffness: 80, damping: 22, mass: 0.6 })
@@ -253,7 +254,7 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
   return (
     <motion.div
       style={{ position: 'absolute', left, top, width: size, height: size, x, opacity, scale,
-        zIndex: isOpen ? 60 : index % 3, cursor: 'pointer', willChange: 'transform, opacity' }}
+        zIndex: isOpen ? 20 : index % 3, cursor: 'pointer', willChange: 'transform, opacity' }}
       onClick={e => { e.stopPropagation(); onToggle() }}
     >
       <motion.div whileHover={{ scale: 1.07 }} transition={{ duration: 0.2 }}
@@ -264,9 +265,6 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
         <img src={brand?.logo_url} alt={brand?.name || ''} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '14%' }}
           onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = fallback }} />
       </motion.div>
-      <AnimatePresence>
-        {isOpen && <CasePopup brand={brand} isOpen={isOpen} onToggle={onToggle} />}
-      </AnimatePresence>
     </motion.div>
   )
 }
@@ -288,7 +286,7 @@ function SectionHeader() {
 
 export default function Cases() {
   const ref = useRef(null)
-  const [activeIndex, setActiveIndex] = useState(null)
+  const [activeBrand, setActiveBrand] = useState(null)   // objeto marca o null
   const [isMobile, setIsMobile]       = useState(false)
   const [brands, setBrands]           = useState(FALLBACK_IMAGES)
 
@@ -299,103 +297,74 @@ export default function Cases() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  /* Cargar marcas visibles de Supabase */
   useEffect(() => {
     supabase.from('brands').select('id,name,logo_url').eq('visible', true).order('created_at')
       .then(({ data }) => { if (data?.length) setBrands(data) })
   }, [])
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const handleToggle = i => setActiveIndex(prev => prev === i ? null : i)
-  const handleClose  = ()  => setActiveIndex(null)
+  const handleToggle = (brand) => setActiveBrand(prev => prev?.id === brand?.id ? null : brand)
+  const handleClose  = () => setActiveBrand(null)
 
-  /* ── LAYOUT MÓVIL — misma animación de burbujas que desktop ── */
-  if (isMobile) {
-    return (
-      <section ref={ref} id="casos" style={{ height: '200vh', position: 'relative' }}>
-        <div
-          style={{ position: 'sticky', top: 0, height: '100vh', background: 'transparent', overflow: 'hidden' }}
-          onClick={handleClose}
-        >
-          <AnimatePresence>
-            {activeIndex !== null && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-                style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.12)', backdropFilter: 'blur(3px)', zIndex: 55, pointerEvents: 'none' }} />
-            )}
-          </AnimatePresence>
+  const pool   = isMobile ? MOBILE_BUBBLES : BUBBLES
+  const subset = brands.slice(0, pool.length)
 
-          {brands.slice(0, MOBILE_BUBBLES.length).map((brand, i) => {
-            const b = MOBILE_BUBBLES[i]
-            return (
-              <Bubble key={brand.id || i} index={i} progress={scrollYProgress}
-                left={b.left} top={b.top} size={b.size} fromX={b.fromX}
-                brand={brand} fallback={FALLBACK[i % 3]}
-                isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
-            )
-          })}
-
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
-            <div style={{ textAlign: 'center', padding: '0 2rem' }}>
-              <motion.span initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
-                style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '8px' }}>
-                Resultados
-              </motion.span>
-              <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.07 }}
-                style={{ fontSize: 'clamp(1.6rem, 7vw, 2.2rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '6px' }}>
-                Marcas que <span style={{ color: '#E8118A' }}>confían en nosotros</span>
-              </motion.h2>
-              <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
-                style={{ color: '#AAA', fontSize: '11px', lineHeight: 1.5 }}>
-                Toca una marca para ver su caso de éxito
-              </motion.p>
-            </div>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  /* ── LAYOUT DESKTOP — scroll animation ── */
+  /* ── SHARED SECTION STRUCTURE ── */
   return (
     <section ref={ref} id="casos" style={{ height: '200vh', position: 'relative' }}>
       <div
-        style={{ position: 'sticky', top: 0, height: '100vh', background: 'transparent' }}
+        style={{ position: 'sticky', top: 0, height: '100vh', background: 'transparent',
+          overflow: isMobile ? 'hidden' : 'visible' }}
         onClick={handleClose}
       >
-        <AnimatePresence>
-          {activeIndex !== null && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.12)', backdropFilter: 'blur(3px)', zIndex: 55, pointerEvents: 'none' }} />
-          )}
-        </AnimatePresence>
-
-        {brands.slice(0, BUBBLES.length).map((brand, i) => {
-          const b = BUBBLES[i]
+        {/* Burbujas */}
+        {subset.map((brand, i) => {
+          const b = pool[i]
           return (
             <Bubble key={brand.id || i} index={i} progress={scrollYProgress}
               left={b.left} top={b.top} size={b.size} fromX={b.fromX}
               brand={brand} fallback={FALLBACK[i % 3]}
-              isOpen={activeIndex === i} onToggle={() => handleToggle(i)} />
+              isOpen={activeBrand?.id === brand.id}
+              onToggle={() => handleToggle(brand)} />
           )
         })}
 
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
+        {/* Título centrado */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
           <div style={{ textAlign: 'center', maxWidth: '680px', padding: '0 1.5rem', width: '100%' }}>
-            <motion.span initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
-              style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '12px' }}>
+            <motion.span initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.6 }}
+              style={{ fontSize: isMobile ? '10px' : '11px', fontWeight: 700, letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: '#888', display: 'block',
+                marginBottom: isMobile ? '8px' : '12px' }}>
               Resultados
             </motion.span>
-            <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.07 }}
-              style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '8px' }}>
+            <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.07 }}
+              style={{ fontSize: isMobile ? 'clamp(1.6rem,7vw,2.2rem)' : 'clamp(1.8rem,3.5vw,2.8rem)',
+                fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A',
+                lineHeight: 1.1, marginBottom: isMobile ? '6px' : '8px' }}>
               Marcas que <span style={{ color: '#E8118A' }}>confían en nosotros</span>
             </motion.h2>
-            <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
-              style={{ color: '#AAA', fontSize: '12px', lineHeight: 1.6 }}>
-              Haz clic en una marca para ver su caso de éxito
+            <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
+              viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
+              style={{ color: '#AAA', fontSize: isMobile ? '11px' : '12px', lineHeight: 1.6 }}>
+              {isMobile ? 'Toca una marca para ver su caso de éxito' : 'Haz clic en una marca para ver su caso de éxito'}
             </motion.p>
           </div>
         </div>
       </div>
+
+      {/*
+       * El popup se renderiza AQUÍ — fuera del motion.div de las burbujas.
+       * position:fixed funciona correctamente porque ningún ancestro tiene transform.
+       */}
+      <AnimatePresence>
+        {activeBrand && (
+          <CasePopup brand={activeBrand} isOpen={true} onToggle={handleClose} />
+        )}
+      </AnimatePresence>
     </section>
   )
 }
