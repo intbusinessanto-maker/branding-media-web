@@ -1,5 +1,6 @@
 ﻿import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 const FIGURA_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/figura%201.png'
 
@@ -10,10 +11,27 @@ const INFO_ITEMS = [
 ]
 
 export default function Contact() {
-  const [form, setForm] = useState({ nombre: '', empresa: '', email: '', mensaje: '' })
-  const [sent, setSent] = useState(false)
+  const [form, setForm]       = useState({ nombre: '', empresa: '', email: '', mensaje: '' })
+  const [sent, setSent]       = useState(false)
+  const [sending, setSending] = useState(false)
+  const [error, setError]     = useState('')
+
   const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
-  const submit = e => { e.preventDefault(); setSent(true) }
+
+  const submit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSending(true)
+    const { error: dbErr } = await supabase.from('contact_submissions').insert([{
+      nombre:  form.nombre.trim(),
+      empresa: form.empresa.trim(),
+      email:   form.email.trim(),
+      mensaje: form.mensaje.trim(),
+    }])
+    setSending(false)
+    if (dbErr) { setError('Hubo un error al enviar. Intenta de nuevo.'); return }
+    setSent(true)
+  }
 
   const input = {
     width: '100%', padding: '13px 16px', borderRadius: '10px',
@@ -91,8 +109,12 @@ export default function Contact() {
                 </div>
                 <input style={input} name="email" type="email" placeholder="Email" value={form.email} onChange={handle} required />
                 <textarea style={{ ...input, minHeight: '110px', resize: 'vertical' }} name="mensaje" placeholder="Cuéntanos sobre tu campaña..." value={form.mensaje} onChange={handle} />
-                <button type="submit" style={{ background: '#8B3FA8', color: '#fff', padding: '15px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(139,63,168,0.25)' }}>
-                  Enviar propuesta →
+                {error && (
+                  <p style={{ color: '#E8118A', fontSize: '13px', margin: 0 }}>{error}</p>
+                )}
+                <button type="submit" disabled={sending}
+                  style={{ background: sending ? '#b97fd4' : '#8B3FA8', color: '#fff', padding: '15px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, border: 'none', cursor: sending ? 'default' : 'pointer', boxShadow: '0 8px 24px rgba(139,63,168,0.25)', transition: 'background 0.2s' }}>
+                  {sending ? 'Enviando…' : 'Enviar propuesta →'}
                 </button>
               </form>
             )}
