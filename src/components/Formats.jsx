@@ -40,19 +40,34 @@ function FormatPopup({ format, onClose }) {
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="format-popup-overlay"
       style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end',
-        justifyContent: 'center', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
-        padding: '0 0 clamp(48px, 10vh, 100px)' }}
+        justifyContent: 'center', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
+      <style>{`
+        /* Móvil: flota un poco desde abajo */
+        .format-popup-overlay { padding: 0 0 clamp(40px, 8vh, 60px); }
+        .format-popup-sheet   { max-height: 78vh; border-radius: 24px; }
+
+        /* Desktop: casi pantalla completa — desde abajo hasta cerca del header */
+        @media (min-width: 768px) {
+          .format-popup-overlay { padding: 0; align-items: flex-end; }
+          .format-popup-sheet   {
+            max-height: calc(100vh - 68px);
+            border-radius: 24px 24px 0 0;
+          }
+        }
+      `}</style>
       <motion.div
         initial={{ y: '110%' }} animate={{ y: 0 }} exit={{ y: '110%' }}
         transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+        className="format-popup-sheet"
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: '900px', maxHeight: '75vh',
-          background: '#fff', borderRadius: '24px',
-          padding: '28px 28px 36px', overflowY: 'auto',
+          width: '100%', maxWidth: '1100px',
+          background: '#fff',
+          padding: '28px 36px 40px', overflowY: 'auto',
           boxShadow: '0 -8px 48px rgba(0,0,0,0.20)',
         }}
       >
