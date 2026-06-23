@@ -1,20 +1,18 @@
-import { useEffect, useRef, useState, lazy, Suspense } from 'react'
-import Navbar from './components/Navbar'
-import VideoIntro from './components/VideoIntro'
-import Hero from './components/Hero'
-import CinematicText from './components/CinematicText'  // eager — scroll tracking
-
-/* Below-fold — lazy */
-const Stats         = lazy(() => import('./components/Stats'))
-const BrandCarousel = lazy(() => import('./components/BrandCarousel'))
-const ColombiaMap   = lazy(() => import('./components/ColombiaMap'))
-const LogoShowcase  = lazy(() => import('./components/LogoShowcase'))
-const Formats       = lazy(() => import('./components/Formats'))
-const Audience      = lazy(() => import('./components/NewspaperAudience'))
-const Cases         = lazy(() => import('./components/Cases'))
-const Blog          = lazy(() => import('./components/Blog'))
-const Contact       = lazy(() => import('./components/Contact'))
-const Footer        = lazy(() => import('./components/Footer'))
+import { useEffect, useRef, useState } from 'react'
+import Navbar        from './components/Navbar'
+import VideoIntro    from './components/VideoIntro'
+import Hero          from './components/Hero'
+import Stats         from './components/Stats'
+import BrandCarousel from './components/BrandCarousel'
+import CinematicText from './components/CinematicText'
+import ColombiaMap   from './components/ColombiaMap'
+import LogoShowcase  from './components/LogoShowcase'
+import Formats       from './components/Formats'
+import Audience      from './components/NewspaperAudience'
+import Cases         from './components/Cases'
+import Blog          from './components/Blog'
+import Contact       from './components/Contact'
+import Footer        from './components/Footer'
 
 const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
@@ -155,20 +153,18 @@ export default function App() {
           <Navbar />
           <main>
             <Hero videoActive={!introVisible} />
-            <Suspense fallback={null}>
-              <Stats />
-              <BrandCarousel />
-              <CinematicText />
-              <ColombiaMap />
-              <LogoShowcase />
-              <Formats />
-              <Audience />
-              <Cases />
-              <Blog />
-              <Contact />
-            </Suspense>
+            <Stats />
+            <BrandCarousel />
+            <CinematicText />
+            <ColombiaMap />
+            <LogoShowcase />
+            <Formats />
+            <Audience />
+            <Cases />
+            <Blog />
+            <Contact />
           </main>
-          <Suspense fallback={null}><Footer /></Suspense>
+          <Footer />
         </div>
       </div>
     </>

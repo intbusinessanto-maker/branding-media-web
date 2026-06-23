@@ -43,10 +43,10 @@ function MobileAudience() {
 
   return (
     <div ref={ref} style={{ height: '500vh', position: 'relative' }}>
-      <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden' }}>
+      <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden', background: '#0D0D0D' }}>
 
-        {/* Fondo único */}
-        <img src={MOBILE_IMG_URL} alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+        {/* Fondo único — eager para que cargue de inmediato */}
+        <img src={MOBILE_IMG_URL} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
 
         {/* Degradado: oscuro arriba para el header, oscuro abajo para las cards */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 35%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.96) 100%)' }} />
@@ -169,7 +169,7 @@ export default function NewspaperAudience() {
 
   return (
     <section ref={ref} id="audiencia" style={{ height: '350vh', position: 'relative' }}>
-      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', willChange: 'transform' }}>
+      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', willChange: 'transform', background: '#0D0D0D' }}>
 
         {/*
          * ── CAPA 0: Video Vimeo como fondo full-cover ──

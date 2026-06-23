@@ -16,8 +16,14 @@ export default function VideoIntro({ onDismiss }) {
   }
 
   useEffect(() => {
-    const t = setTimeout(dismiss, IS_MOBILE ? 8000 : 12000)
-    return () => clearTimeout(t)
+    /* Bloquear scroll del body mientras el intro está visible */
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const t = setTimeout(dismiss, IS_MOBILE ? 7000 : 12000)
+    return () => {
+      clearTimeout(t)
+      document.body.style.overflow = prev
+    }
   }, [])
 
   const progressDuration = IS_MOBILE ? 8 : 12
@@ -77,30 +83,26 @@ export default function VideoIntro({ onDismiss }) {
               style={{ height: IS_MOBILE ? 'clamp(52px, 14vw, 72px)' : 'clamp(72px, 10vw, 110px)', objectFit: 'contain' }} />
           </motion.div>
 
-          {/* ── Contenido inferior ── */}
-          <motion.div
-            initial={{ opacity: 0, y: IS_MOBILE ? 0 : 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: IS_MOBILE ? 0.2 : 1.2, duration: IS_MOBILE ? 0.4 : 0.7 }}
-            style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0,
-              padding: IS_MOBILE ? '0 20px 36px' : 'clamp(20px,4vw,44px) clamp(20px,5vw,48px)',
-              display: 'flex',
-              flexDirection: IS_MOBILE ? 'column' : 'row',
-              justifyContent: IS_MOBILE ? 'flex-end' : 'space-between',
-              alignItems: IS_MOBILE ? 'flex-start' : 'flex-end',
-              gap: IS_MOBILE ? '20px' : '20px',
-              zIndex: 10,
-            }}
-          >
+          {/* ── Contenido inferior — siempre anclado a bottom, nunca requiere scroll ── */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
+            padding: IS_MOBILE
+              ? '0 20px max(28px, env(safe-area-inset-bottom, 28px))'
+              : 'clamp(20px,4vw,44px) clamp(20px,5vw,48px)',
+            display: 'flex',
+            flexDirection: IS_MOBILE ? 'column' : 'row',
+            justifyContent: IS_MOBILE ? 'flex-end' : 'space-between',
+            alignItems: IS_MOBILE ? 'flex-start' : 'flex-end',
+            gap: IS_MOBILE ? '16px' : '20px',
+          }}>
             <div>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 600 }}>
                 El circuito universitario más grande de Colombia
               </p>
               <img src={ESLOGAN} alt="Movemos marcas en universidades"
                 style={{
-                  height: IS_MOBILE ? 'clamp(38px, 9vw, 56px)' : 'clamp(52px, 10vw, 120px)',
-                  width: 'auto', maxWidth: '80vw',
+                  height: IS_MOBILE ? 'clamp(36px, 8vw, 52px)' : 'clamp(52px, 10vw, 120px)',
+                  width: 'auto', maxWidth: '78vw',
                   objectFit: 'contain', objectPosition: 'left center', display: 'block',
                   filter: 'drop-shadow(0 2px 18px rgba(0,0,0,0.9))',
                 }}
@@ -125,7 +127,7 @@ export default function VideoIntro({ onDismiss }) {
                 <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-          </motion.div>
+          </div>
 
           {/* ── Barra de progreso ── */}
           <motion.div
