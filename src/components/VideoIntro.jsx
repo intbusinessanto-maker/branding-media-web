@@ -16,13 +16,22 @@ export default function VideoIntro({ onDismiss }) {
   }
 
   useEffect(() => {
-    /* Bloquear scroll del body mientras el intro está visible */
-    const prev = document.body.style.overflow
+    /* Scroll lock robusto — funciona en iOS Safari donde overflow:hidden solo no basta */
+    const scrollY = window.scrollY
     document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top      = `-${scrollY}px`
+    document.body.style.width    = '100%'
+
     const t = setTimeout(dismiss, IS_MOBILE ? 7000 : 12000)
+
     return () => {
       clearTimeout(t)
-      document.body.style.overflow = prev
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top      = ''
+      document.body.style.width    = ''
+      window.scrollTo(0, scrollY)
     }
   }, [])
 
@@ -35,7 +44,7 @@ export default function VideoIntro({ onDismiss }) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.02 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden',
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden', touchAction: 'none',
             background: IS_MOBILE
               ? 'radial-gradient(ellipse at 25% 20%, rgba(139,63,168,0.55) 0%, transparent 55%), radial-gradient(ellipse at 75% 80%, rgba(232,17,138,0.40) 0%, transparent 55%), #080810'
               : '#000',
@@ -71,11 +80,11 @@ export default function VideoIntro({ onDismiss }) {
               background: 'linear-gradient(to bottom, transparent 40%, rgba(8,8,16,0.85) 75%)' }} />
           )}
 
-          {/* ── Logo ── */}
+          {/* ── Logo — sin delay en móvil para visibilidad inmediata ── */}
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: IS_MOBILE ? 0 : -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: IS_MOBILE ? 0.1 : 0.8, duration: 0.5 }}
+            transition={{ delay: IS_MOBILE ? 0 : 0.8, duration: IS_MOBILE ? 0.3 : 0.5 }}
             style={{ position: 'absolute', top: IS_MOBILE ? '24px' : '28px',
               left: IS_MOBILE ? '20px' : '36px', zIndex: 10 }}
           >

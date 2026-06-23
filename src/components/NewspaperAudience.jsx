@@ -129,13 +129,14 @@ export default function NewspaperAudience() {
 
   const ref = useRef(null)
 
-  /* Cargar iframe solo cuando la sección entra en pantalla */
+  /* Cargar iframe Vimeo cuando la sección está a punto de entrar —
+     rootMargin grande para que el video ya esté listo cuando el usuario llega */
   useEffect(() => {
     const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setShowVideo(true); observer.disconnect() } },
-      { rootMargin: '400px' }
+      { rootMargin: '600px' }
     )
     observer.observe(el)
     return () => observer.disconnect()

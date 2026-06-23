@@ -10,21 +10,18 @@ const PHRASES = [
   { normal: 'la nueva generación', highlight: 'ya está aquí' },
 ]
 
-const IS_MOBILE_CT = typeof window !== 'undefined' && window.innerWidth < 768
-
 export default function CinematicText() {
   const ref = useRef(null)
   const [showVideo, setShowVideo] = useState(false)
 
-  /* Cargar el iframe solo en desktop y cuando la sección entra en pantalla.
-     En móvil no cargamos Vimeo — mejora carga y el video no puede hacer autoplay en iOS. */
+  /* Cargar iframe Vimeo cuando la sección entra en el viewport (desktop y móvil).
+     Vimeo background=1 sí hace autoplay en móvil (a diferencia de YouTube). */
   useEffect(() => {
-    if (IS_MOBILE_CT) return          // móvil: sin iframe
     const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setShowVideo(true); observer.disconnect() } },
-      { rootMargin: '300px' }
+      { rootMargin: '200px' }
     )
     observer.observe(el)
     return () => observer.disconnect()
