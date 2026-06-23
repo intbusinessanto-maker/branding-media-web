@@ -106,7 +106,7 @@ export default function VideoIntro({ onDismiss }) {
           }}>
             <div>
               <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 600 }}>
-                El circuito universitario más grande de Colombia
+                Circuito de pauta dentro de las universidades más grandes de Latinoamérica
               </p>
               <img src={ESLOGAN} alt="Movemos marcas en universidades"
                 style={{

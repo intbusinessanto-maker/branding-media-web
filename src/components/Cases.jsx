@@ -262,7 +262,7 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
           border: isOpen ? '3px solid #8B3FA8' : '3px solid rgba(255,255,255,0.96)',
           boxShadow: isOpen ? '0 0 0 4px rgba(139,63,168,0.18), 0 16px 48px rgba(0,0,0,0.18)' : '0 8px 32px rgba(0,0,0,0.12)',
           background: '#fff', transition: 'border-color 0.2s, box-shadow 0.2s' }}>
-        <img src={brand?.logo_url} alt={brand?.name || ''} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '14%' }}
+        <img src={brand?.logo_url} alt={brand?.name || ''} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8%' }}
           onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = fallback }} />
       </motion.div>
     </motion.div>
@@ -349,7 +349,7 @@ export default function Cases() {
             </motion.h2>
             <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
               viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.13 }}
-              style={{ color: '#AAA', fontSize: isMobile ? '11px' : '12px', lineHeight: 1.6 }}>
+              style={{ color: '#333', fontSize: isMobile ? '11px' : '12px', lineHeight: 1.6 }}>
               {isMobile ? 'Toca una marca para ver su caso de éxito' : 'Haz clic en una marca para ver su caso de éxito'}
             </motion.p>
           </div>

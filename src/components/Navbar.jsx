@@ -40,7 +40,7 @@ export default function Navbar() {
           padding: '0 1.5rem',
           height: '88px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          backgroundColor: scrolled || open ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.82)',
+          backgroundColor: '#fff',
           backdropFilter: 'blur(20px)',
           borderBottom: scrolled ? '1px solid rgba(0,0,0,0.08)' : '1px solid transparent',
           transition: 'all 0.3s ease',

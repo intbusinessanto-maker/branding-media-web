@@ -71,7 +71,7 @@ export default function Footer() {
           <div>
             <img src={LOGO_URL} alt="Branding Media" style={{ height: 'clamp(80px, 10vw, 120px)', width: 'auto', objectFit: 'contain', marginBottom: '14px', display: 'block' }} />
             <p style={{ fontSize: '12px', color: '#AAA', maxWidth: '240px', lineHeight: 1.6 }}>
-              El circuito universitario más grande de Colombia.
+              Circuito de pauta dentro de las universidades más grandes de Latinoamérica.
             </p>
           </div>
 

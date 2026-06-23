@@ -112,8 +112,9 @@ export default function CinematicText() {
               display: 'block',
               fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
               fontWeight: 900,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.08,
+              letterSpacing: '-0.06em',
+              lineHeight: 1.0,
+              textTransform: 'uppercase',
               color: 'rgba(255,255,255,0.92)',
               textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
             }}>
@@ -123,8 +124,9 @@ export default function CinematicText() {
               display: 'block',
               fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
               fontWeight: 900,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.08,
+              letterSpacing: '-0.06em',
+              lineHeight: 1.0,
+              textTransform: 'uppercase',
               color: '#E8118A',
               textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)',
             }}>
