@@ -321,48 +321,48 @@ export default function ColombiaMap() {
                 </clipPath>
               </defs>
 
-              {/* Base — magenta oscuro */}
-              <path d={COLOMBIA_PATH} fill="#A0005A" />
+              {/*
+               * Base y mosaico tipo departamentos:
+               * 5 col × 6 filas — progresión norte (clarito/blanco) → sur (magenta profundo)
+               * Colores suaves, sin repetición inmediata entre vecinos, sin chillonas
+               */}
+              <path d={COLOMBIA_PATH} fill="#C03575" />
 
-              {/* Mosaico de tonos magenta — clipeado al contorno del país */}
               <g clipPath="url(#colombiaClip)">
                 {[
-                  { x:5,   y:5,   w:44, h:50, c:'#FF6EB4' },
-                  { x:49,  y:5,   w:44, h:50, c:'#E8118A' },
-                  { x:93,  y:5,   w:44, h:50, c:'#CC0077' },
-                  { x:137, y:5,   w:44, h:50, c:'#FF99CC' },
-                  { x:181, y:5,   w:44, h:50, c:'#E8118A' },
-
-                  { x:5,   y:55,  w:44, h:50, c:'#D4006F' },
-                  { x:49,  y:55,  w:44, h:50, c:'#FF80BB' },
-                  { x:93,  y:55,  w:44, h:50, c:'#B3005A' },
-                  { x:137, y:55,  w:44, h:50, c:'#FF4DA0' },
-                  { x:181, y:55,  w:44, h:50, c:'#C4006A' },
-
-                  { x:5,   y:105, w:44, h:50, c:'#FF99CC' },
-                  { x:49,  y:105, w:44, h:50, c:'#CC0066' },
-                  { x:93,  y:105, w:44, h:50, c:'#FF6EB4' },
-                  { x:137, y:105, w:44, h:50, c:'#A0004F' },
-                  { x:181, y:105, w:44, h:50, c:'#FF80BB' },
-
-                  { x:5,   y:155, w:44, h:50, c:'#E8118A' },
-                  { x:49,  y:155, w:44, h:50, c:'#FF4DA0' },
-                  { x:93,  y:155, w:44, h:50, c:'#D4006F' },
-                  { x:137, y:155, w:44, h:50, c:'#FF99CC' },
-                  { x:181, y:155, w:44, h:50, c:'#C4006A' },
-
-                  { x:5,   y:205, w:44, h:55, c:'#CC0066' },
-                  { x:49,  y:205, w:44, h:55, c:'#FF6EB4' },
-                  { x:93,  y:205, w:44, h:55, c:'#A0005A' },
-                  { x:137, y:205, w:44, h:55, c:'#E8118A' },
-                  { x:181, y:205, w:44, h:55, c:'#FF4DA0' },
-                ].map((r, i) => (
-                  <rect key={i} x={r.x} y={r.y} width={r.w} height={r.h} fill={r.c} opacity="0.88" />
+                  /* Fila 1 — norte, casi blancos */
+                  ['#FFF5FA','#FFEFF6','#FFF2F8','#FFECF5','#FFF7FB'],
+                  /* Fila 2 — rosa muy claro */
+                  ['#FFE2F0','#FFD8EB','#FFDFF0','#FFD2E8','#FFE6F3'],
+                  /* Fila 3 — rosa claro */
+                  ['#FFC5DE','#FFB8D8','#FFBFDB','#FFB0D0','#FFCAE3'],
+                  /* Fila 4 — rosa medio */
+                  ['#FF9EC8','#FF8ABE','#FF95C5','#FF80B8','#FF92C3'],
+                  /* Fila 5 — magenta suave */
+                  ['#E06898','#D75990','#DF6095','#CE4D85','#DB6294'],
+                  /* Fila 6 — sur, magenta profundo */
+                  ['#C03575','#B8286D','#C73278','#AA2060','#B42567'],
+                ].flatMap((row, ri) =>
+                  row.map((color, ci) => ({
+                    key: `${ri}-${ci}`,
+                    x: 5 + ci * 43,
+                    y: 5 + ri * 42,
+                    w: 43, h: 42,
+                    fill: color,
+                  }))
+                ).map(r => (
+                  <rect key={r.key} x={r.x} y={r.y} width={r.w} height={r.h} fill={r.fill} />
                 ))}
               </g>
 
-              {/* Contorno delgado */}
-              <path d={COLOMBIA_PATH} fill="none" stroke="rgba(255,255,255,0.30)" strokeWidth="1.2" strokeLinejoin="round" />
+              {/* División sutil entre celdas — líneas tenues de separación */}
+              <g clipPath="url(#colombiaClip)" opacity="0.18">
+                {[47,90,133,176].map(x => <line key={x} x1={x} y1="5" x2={x} y2="257" stroke="#fff" strokeWidth="0.6"/>)}
+                {[47,89,131,173,215].map(y => <line key={y} x1="5" y1={y} x2="220" y2={y} stroke="#fff" strokeWidth="0.6"/>)}
+              </g>
+
+              {/* Contorno del país */}
+              <path d={COLOMBIA_PATH} fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" strokeLinejoin="round" />
 
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)
