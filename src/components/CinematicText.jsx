@@ -5,7 +5,7 @@ const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/p
 const VIMEO_ID   = '1201924875'
 
 const PHRASES = [
-  { normal: 'el futuro de tu',     highlight: 'marca es aquí' },
+  { normal: 'contamos con una población', highlight: 'de más de 8 millones al mes' },
   { normal: 'público constante,',  highlight: 'atención real' },
   { normal: 'la nueva generación', highlight: 'ya está aquí' },
 ]
