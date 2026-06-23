@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const VIDEO_ID = '68paHyhJHPU'
+const VIDEO_ID = 'RShiy9dpewA'
 
 export default function Hero({ videoActive = true }) {
   const [isDesktop, setIsDesktop] = useState(false)

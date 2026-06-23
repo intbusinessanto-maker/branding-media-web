@@ -43,7 +43,7 @@ export default function Contact() {
     <section id="contacto" style={{ padding: 'clamp(60px,8vw,100px) 1.5rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
       <style>{`
         /* Desktop: 3 columnas — figura | info | formulario */
-        .contact-outer { display: grid; grid-template-columns: clamp(180px,18vw,280px) 1fr 1fr; gap: clamp(40px, 6vw, 80px); align-items: end; }
+        .contact-outer { display: grid; grid-template-columns: clamp(180px,18vw,260px) 1fr 1fr; gap: clamp(36px, 5vw, 72px); align-items: stretch; }
         /* Móvil: 1 columna, figura inline con los items */
         @media (max-width: 768px) {
           .contact-outer { grid-template-columns: 1fr; gap: 32px; }
@@ -60,9 +60,9 @@ export default function Contact() {
           <motion.div className="contact-figura-desktop"
             initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.8 }}
-            style={{ alignSelf: 'flex-end' }}>
+            style={{ display: 'flex', alignItems: 'flex-end' }}>
             <img src={FIGURA_URL} alt="" loading="lazy"
-              style={{ width: '100%', maxHeight: 'clamp(280px, 38vh, 440px)', objectFit: 'contain', objectPosition: 'bottom', display: 'block' }} />
+              style={{ width: '100%', height: '100%', maxHeight: '100%', objectFit: 'contain', objectPosition: 'bottom center', display: 'block' }} />
           </motion.div>
 
           {/* ── Col 2: Título + info ── */}

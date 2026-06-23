@@ -54,7 +54,7 @@ export default function VideoIntro({ onDismiss }) {
           {!IS_MOBILE && (
             <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
               <iframe
-                src="https://www.youtube.com/embed/68paHyhJHPU?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=68paHyhJHPU&rel=0&showinfo=0&iv_load_policy=3&disablekb=1"
+                src="https://www.youtube.com/embed/RShiy9dpewA?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=RShiy9dpewA&rel=0&showinfo=0&iv_load_policy=3&disablekb=1"
                 style={{
                   position: 'absolute', top: '50%', left: '50%',
                   transform: 'translate(-50%, -50%)',
