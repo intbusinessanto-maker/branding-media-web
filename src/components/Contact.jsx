@@ -43,7 +43,7 @@ export default function Contact() {
     <section id="contacto" style={{ padding: 'clamp(60px,8vw,100px) 1.5rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
       <style>{`
         /* Desktop: 3 columnas — figura | info | formulario */
-        .contact-outer { display: grid; grid-template-columns: clamp(180px,18vw,260px) 1fr 1fr; gap: clamp(36px, 5vw, 72px); align-items: stretch; }
+        .contact-outer { display: grid; grid-template-columns: clamp(120px,12vw,180px) 1.3fr 1.1fr; gap: clamp(32px, 4vw, 60px); align-items: stretch; }
         /* Móvil: 1 columna, figura inline con los items */
         @media (max-width: 768px) {
           .contact-outer { grid-template-columns: 1fr; gap: 32px; }

@@ -305,31 +305,64 @@ export default function ColombiaMap() {
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             style={{
               position: 'relative',
-              background: '#fff',
-              border: '1px solid rgba(0,0,0,0.07)',
+              background: 'transparent',
               borderRadius: '20px',
-              padding: '20px',
+              padding: '16px',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.07)',
-              transform: 'perspective(1000px) rotateX(3deg)',
-              transformOrigin: 'top center',
-              minHeight: 0,    /* permite que el flex lo comprima */
-              overflow: 'hidden',
+              minHeight: 0,
             }}
           >
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '20px', pointerEvents: 'none',
-              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,196,173,0.04) 0%, transparent 70%)' }} />
-
             <svg viewBox="5 5 215 252" style={{ width: '100%', maxWidth: '460px', height: '100%', maxHeight: '100%' }}>
               <defs>
-                <linearGradient id="mapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%"   stopColor="#3B1A6E" />
-                  <stop offset="100%" stopColor="#006B5A" />
-                </linearGradient>
+                <clipPath id="colombiaClip">
+                  <path d={COLOMBIA_PATH} />
+                </clipPath>
               </defs>
-              <path d={COLOMBIA_PATH} fill="rgba(139,63,168,0.10)" stroke="url(#mapGrad)" strokeWidth="3" strokeLinejoin="round" />
+
+              {/* Base — magenta oscuro */}
+              <path d={COLOMBIA_PATH} fill="#A0005A" />
+
+              {/* Mosaico de tonos magenta — clipeado al contorno del país */}
+              <g clipPath="url(#colombiaClip)">
+                {[
+                  { x:5,   y:5,   w:44, h:50, c:'#FF6EB4' },
+                  { x:49,  y:5,   w:44, h:50, c:'#E8118A' },
+                  { x:93,  y:5,   w:44, h:50, c:'#CC0077' },
+                  { x:137, y:5,   w:44, h:50, c:'#FF99CC' },
+                  { x:181, y:5,   w:44, h:50, c:'#E8118A' },
+
+                  { x:5,   y:55,  w:44, h:50, c:'#D4006F' },
+                  { x:49,  y:55,  w:44, h:50, c:'#FF80BB' },
+                  { x:93,  y:55,  w:44, h:50, c:'#B3005A' },
+                  { x:137, y:55,  w:44, h:50, c:'#FF4DA0' },
+                  { x:181, y:55,  w:44, h:50, c:'#C4006A' },
+
+                  { x:5,   y:105, w:44, h:50, c:'#FF99CC' },
+                  { x:49,  y:105, w:44, h:50, c:'#CC0066' },
+                  { x:93,  y:105, w:44, h:50, c:'#FF6EB4' },
+                  { x:137, y:105, w:44, h:50, c:'#A0004F' },
+                  { x:181, y:105, w:44, h:50, c:'#FF80BB' },
+
+                  { x:5,   y:155, w:44, h:50, c:'#E8118A' },
+                  { x:49,  y:155, w:44, h:50, c:'#FF4DA0' },
+                  { x:93,  y:155, w:44, h:50, c:'#D4006F' },
+                  { x:137, y:155, w:44, h:50, c:'#FF99CC' },
+                  { x:181, y:155, w:44, h:50, c:'#C4006A' },
+
+                  { x:5,   y:205, w:44, h:55, c:'#CC0066' },
+                  { x:49,  y:205, w:44, h:55, c:'#FF6EB4' },
+                  { x:93,  y:205, w:44, h:55, c:'#A0005A' },
+                  { x:137, y:205, w:44, h:55, c:'#E8118A' },
+                  { x:181, y:205, w:44, h:55, c:'#FF4DA0' },
+                ].map((r, i) => (
+                  <rect key={i} x={r.x} y={r.y} width={r.w} height={r.h} fill={r.c} opacity="0.88" />
+                ))}
+              </g>
+
+              {/* Contorno delgado */}
+              <path d={COLOMBIA_PATH} fill="none" stroke="rgba(255,255,255,0.30)" strokeWidth="1.2" strokeLinejoin="round" />
 
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)
@@ -339,26 +372,26 @@ export default function ColombiaMap() {
 
                 return (
                   <g key={c.city} onClick={() => toggleManual(c.city)} style={{ cursor: 'pointer' }}>
-                    {/* Pulso doble */}
-                    <motion.circle cx={c.x} cy={c.y} r="8" fill="transparent" stroke={c.color} strokeWidth="0.9"
-                      animate={{ r: [6, 22], opacity: [0.7, 0] }}
+                    {/* Pulso doble — negro, trazo delgado */}
+                    <motion.circle cx={c.x} cy={c.y} r="8" fill="transparent" stroke="#1A1A1A" strokeWidth="0.4"
+                      animate={{ r: [6, 22], opacity: [0.6, 0] }}
                       transition={{ repeat: Infinity, duration: 2.8, delay: i * 0.45, ease: 'easeOut' }} />
-                    <motion.circle cx={c.x} cy={c.y} r="8" fill="transparent" stroke={c.color} strokeWidth="0.5"
-                      animate={{ r: [6, 30], opacity: [0.4, 0] }}
+                    <motion.circle cx={c.x} cy={c.y} r="8" fill="transparent" stroke="#1A1A1A" strokeWidth="0.3"
+                      animate={{ r: [6, 30], opacity: [0.35, 0] }}
                       transition={{ repeat: Infinity, duration: 2.8, delay: i * 0.45 + 0.5, ease: 'easeOut' }} />
 
-                    {/* Dot principal */}
+                    {/* Dot principal negro */}
                     <motion.circle cx={c.x} cy={c.y}
                       r={c.count >= 9 ? 11 : c.count >= 2 ? 9 : 7.5}
-                      fill={active ? c.color : '#fff'}
-                      stroke={c.color} strokeWidth="2.2"
+                      fill={active ? '#E8118A' : '#1A1A1A'}
+                      stroke="rgba(255,255,255,0.7)" strokeWidth="1.0"
                       initial={{ scale: 0 }} animate={{ scale: 1 }}
                       transition={{ delay: 0.3 + i * 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }} />
 
-                    {/* Número */}
+                    {/* Número — blanco */}
                     <motion.text x={c.x} y={c.y + 0.5} textAnchor="middle" dominantBaseline="middle"
                       fontSize={c.count >= 9 ? '8' : '7.5'} fontWeight="900"
-                      fill={active ? '#fff' : '#E8118A'} fontFamily="system-ui"
+                      fill="#fff" fontFamily="system-ui"
                       style={{ pointerEvents: 'none' }}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       transition={{ delay: 0.5 + i * 0.15 }}>
@@ -379,7 +412,7 @@ export default function ColombiaMap() {
                         textAnchor={c.labelAnchor}
                         dominantBaseline="middle"
                         fontSize="6.5" fontWeight="700"
-                        fill={active ? c.color : '#555'}
+                        fill={active ? '#E8118A' : '#1A1A1A'}
                         fontFamily="system-ui"
                         style={{ transition: 'fill 0.2s' }}
                       >
