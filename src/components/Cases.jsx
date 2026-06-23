@@ -120,40 +120,40 @@ function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, popupSide, s
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       onClick={e => e.stopPropagation()}
       style={{
-        position: 'absolute', width: 'min(300px, 80vw)',
+        position: 'absolute', width: 'min(560px, 92vw)',
         ...hPos,
-        ...(popupBelow ? { top: size + 14 } : { bottom: size + 14 }),
-        background: '#fff', borderRadius: '18px',
-        boxShadow: '0 24px 72px rgba(0,0,0,0.22)', overflow: 'hidden',
+        ...(popupBelow ? { top: size + 16 } : { bottom: size + 16 }),
+        background: '#fff', borderRadius: '22px',
+        boxShadow: '0 28px 80px rgba(0,0,0,0.26)', overflow: 'hidden',
         zIndex: 70, pointerEvents: 'all',
       }}
     >
       {/* Header */}
-      <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(0,0,0,0.08)', background: '#F8F8F8', flexShrink: 0 }}>
-            <img src={brand?.logo_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+      <div style={{ padding: '16px 18px 14px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '46px', height: '46px', borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(0,0,0,0.07)', background: '#F8F8F8', flexShrink: 0 }}>
+            <img src={brand?.logo_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
           </div>
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>{brand?.name || 'Caso de éxito'}</div>
-            <div style={{ fontSize: '10px', color: '#AAA', marginTop: '1px' }}>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1A1A1A' }}>{brand?.name || 'Caso de éxito'}</div>
+            <div style={{ fontSize: '12px', color: '#AAA', marginTop: '2px' }}>
               {loading ? 'Cargando…' : hasImages ? `${images.length} imagen${images.length !== 1 ? 'es' : ''}` : 'Caso protegido por NDA'}
             </div>
           </div>
         </div>
         <button onClick={e => { e.stopPropagation(); onToggle() }}
-          style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#F0F0F0', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#888', cursor: 'pointer', flexShrink: 0, lineHeight: 1 }}>
+          style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#F0F0F0', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#888', cursor: 'pointer', flexShrink: 0, lineHeight: 1 }}>
           ✕
         </button>
       </div>
 
       {/* Imágenes */}
       {loading ? (
-        <div style={{ padding: '20px', textAlign: 'center', fontSize: '11px', color: '#BBB' }}>Cargando imágenes…</div>
+        <div style={{ padding: '28px', textAlign: 'center', fontSize: '13px', color: '#BBB' }}>Cargando imágenes…</div>
       ) : hasImages ? (
-        <div style={{ padding: '10px 12px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '6px' }}>
-          {images.slice(0, 6).map(img => (
-            <div key={img.id} style={{ aspectRatio: '4/3', borderRadius: '8px', overflow: 'hidden', background: '#F2F2F2', border: '1px solid rgba(0,0,0,0.05)' }}>
+        <div style={{ padding: '14px 16px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
+          {images.slice(0, 9).map(img => (
+            <div key={img.id} style={{ aspectRatio: '4/3', borderRadius: '12px', overflow: 'hidden', background: '#F2F2F2', border: '1px solid rgba(0,0,0,0.05)' }}>
               <img src={img.image_url} alt={img.title || ''} loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 onError={e => { e.target.style.display = 'none' }} />
@@ -161,18 +161,18 @@ function CasePopup({ brand, fallback, isOpen, onToggle, popupBelow, popupSide, s
           ))}
         </div>
       ) : (
-        <div style={{ padding: '16px 14px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px' }}>
+        <div style={{ padding: '18px 16px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
           {[0, 1, 2].map(n => (
-            <div key={n} style={{ aspectRatio: '4/3', borderRadius: '10px', background: '#F2F2F2', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '18px', opacity: 0.18 }}>🔒</div>
+            <div key={n} style={{ aspectRatio: '4/3', borderRadius: '12px', background: '#F2F2F2', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '22px', opacity: 0.18 }}>🔒</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Footer */}
-      <div style={{ padding: '0 14px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8B3FA8', background: 'rgba(139,63,168,0.08)', border: '1px solid rgba(139,63,168,0.15)', padding: '3px 8px', borderRadius: '100px' }}>
+      <div style={{ padding: '0 16px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8B3FA8', background: 'rgba(139,63,168,0.08)', border: '1px solid rgba(139,63,168,0.15)', padding: '4px 10px', borderRadius: '100px' }}>
           NDA protegido
         </span>
         <span style={{ fontSize: '10px', color: '#CCC' }}>Branding Media</span>
