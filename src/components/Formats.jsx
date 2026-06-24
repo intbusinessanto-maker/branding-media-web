@@ -114,21 +114,33 @@ export default function Formats() {
   const ref = useRef(null)
   const [activeFormat, setActiveFormat] = useState(null)
   const [visibleCount, setVisibleCount] = useState(0)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
-  /*
-   * Cada tarjeta entra desde la posición de la estatua (izquierda) hacia su lugar en la fila.
-   * Una vez visible, se queda — las 3 quedan en pantalla al final.
-   */
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  /* Desktop: cards entran desde la estatua y se quedan en fila horizontal */
   const op0 = useTransform(scrollYProgress, [0.00, 0.13], [0, 1])
   const x0  = useTransform(scrollYProgress, [0.00, 0.20], [-280, 0])
-
   const op1 = useTransform(scrollYProgress, [0.33, 0.46], [0, 1])
   const x1  = useTransform(scrollYProgress, [0.33, 0.53], [-380, 0])
-
   const op2 = useTransform(scrollYProgress, [0.66, 0.79], [0, 1])
   const x2  = useTransform(scrollYProgress, [0.66, 0.86], [-480, 0])
+
+  /* Móvil: cards entran desde la izquierda (megáfono) en vertical */
+  const mOp0 = useTransform(scrollYProgress, [0.00, 0.14], [0, 1])
+  const mX0  = useTransform(scrollYProgress, [0.00, 0.22], [-300, 0])
+  const mOp1 = useTransform(scrollYProgress, [0.33, 0.47], [0, 1])
+  const mX1  = useTransform(scrollYProgress, [0.33, 0.55], [-340, 0])
+  const mOp2 = useTransform(scrollYProgress, [0.66, 0.80], [0, 1])
+  const mX2  = useTransform(scrollYProgress, [0.66, 0.88], [-380, 0])
 
   useEffect(() => {
     const unsub = scrollYProgress.on('change', v => {
@@ -140,24 +152,41 @@ export default function Formats() {
     return unsub
   }, [scrollYProgress])
 
-  const layers = [
+  const desktopLayers = [
     { f: formats[0], op: op0, x: x0 },
     { f: formats[1], op: op1, x: x1 },
     { f: formats[2], op: op2, x: x2 },
   ]
+  const mobileLayers = [
+    { f: formats[0], op: mOp0, x: mX0 },
+    { f: formats[1], op: mOp1, x: mX1 },
+    { f: formats[2], op: mOp2, x: mX2 },
+  ]
+
+  const cardStyle = (f) => ({
+    padding: isMobile ? '14px 16px' : 'clamp(18px,2.2vw,28px)',
+    borderRadius: '14px',
+    background: '#fff',
+    border: `1px solid ${f.border}`,
+    borderLeft: `4px solid ${f.color}`,
+    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+    cursor: 'pointer',
+    display: 'flex', flexDirection: 'column', gap: '10px',
+    height: '100%',
+  })
 
   return (
     <div ref={ref} style={{ height: '300vh', position: 'relative' }}>
       <section id="formatos" style={{
-        position: 'sticky', top: 0, height: '100vh',
+        position: 'sticky', top: 0, height: '100svh',
         overflow: 'hidden', background: 'transparent',
       }}>
 
-        {/* ── Estatua — grande, izquierda ── */}
+        {/* ── Estatua: en mobile más pequeña y pegada abajo-izquierda ── */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0,
-          width: 'clamp(220px, 30vw, 440px)',
-          height: '92%',
+          width: isMobile ? 'clamp(130px, 36vw, 200px)' : 'clamp(220px, 30vw, 440px)',
+          height: isMobile ? '55%' : '92%',
           pointerEvents: 'none', zIndex: 1,
         }}>
           <img src={STATUE_URL} alt="" loading="lazy"
@@ -166,22 +195,23 @@ export default function Formats() {
 
         {/* ── Header ── */}
         <div style={{
-          position: 'absolute', top: 'clamp(80px,11vh,100px)',
+          position: 'absolute',
+          top: isMobile ? '10px' : 'clamp(80px,11vh,100px)',
           left: 0, right: 0, textAlign: 'center',
           pointerEvents: 'none', zIndex: 3, padding: '0 1rem',
         }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 10 }}>
+          <span style={{ fontSize: isMobile ? '9px' : '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: isMobile ? 4 : 10 }}>
             Formatos
           </span>
-          <h2 style={{ fontSize: 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
+          <h2 style={{ fontSize: isMobile ? 'clamp(1.2rem,5vw,1.6rem)' : 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
             Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
           </h2>
         </div>
 
-        {/* ── Grid de tarjetas — flotan desde la estatua a la derecha ── */}
+        {/* ── DESKTOP: 3 tarjetas en fila, flotan desde la estatua ── */}
+        {!isMobile && (
         <div style={{
           position: 'absolute',
-          /* dejar espacio a la estatua en desktop, full en mobile */
           left: 'clamp(200px, 28vw, 400px)',
           right: '2rem',
           top: '50%',
@@ -191,36 +221,19 @@ export default function Formats() {
           gap: 'clamp(10px, 1.4vw, 18px)',
           zIndex: 2,
         }}>
-          {layers.map(({ f, op, x }, i) => (
-            <motion.div
-              key={f.title}
-              style={{ opacity: op, x }}
-              onClick={() => setActiveFormat(f)}
-            >
-              <div style={{
-                padding: 'clamp(18px,2.2vw,28px)',
-                borderRadius: '16px',
-                background: '#fff',
-                border: `1px solid ${f.border}`,
-                borderLeft: `4px solid ${f.color}`,
-                boxShadow: '0 6px 28px rgba(0,0,0,0.09)',
-                cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', gap: '12px',
-                height: '100%',
-              }}>
+          {desktopLayers.map(({ f, op, x }) => (
+            <motion.div key={f.title} style={{ opacity: op, x }} onClick={() => setActiveFormat(f)}>
+              <div style={cardStyle(f)}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: f.color, background: f.bg,
-                    border: `1px solid ${f.border}`, padding: '3px 10px', borderRadius: '100px',
-                    letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
                   <span style={{ fontSize: '11px', color: f.color, fontWeight: 600 }}>Ver →</span>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)', fontWeight: 900, color: f.color,
-                    letterSpacing: '-0.04em', marginBottom: '3px', lineHeight: 1 }}>{f.title}</h3>
-                  <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, marginBottom: '8px' }}>{f.subtitle}</p>
-                  <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.65 }}>{f.description}</p>
+                  <h3 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', marginBottom: '3px', lineHeight: 1 }}>{f.title}</h3>
+                  <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, marginBottom: '6px' }}>{f.subtitle}</p>
+                  <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.6 }}>{f.description}</p>
                 </div>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '6px', marginTop: 'auto' }}>
+                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '5px', marginTop: 'auto' }}>
                   {f.features.map(feat => (
                     <li key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', fontSize: '11px', color: '#666' }}>
                       <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '4px' }} />
@@ -232,9 +245,42 @@ export default function Formats() {
             </motion.div>
           ))}
         </div>
+        )}
+
+        {/* ── MÓVIL: 3 tarjetas verticales, vuelan desde el megáfono (izquierda) ── */}
+        {isMobile && (
+        <div style={{
+          position: 'absolute',
+          /* Arranca debajo del header, a la derecha de la estatua */
+          top: '58px',
+          bottom: '40px',
+          left: 'clamp(130px, 36vw, 200px)',
+          right: '10px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          zIndex: 2,
+        }}>
+          {mobileLayers.map(({ f, op, x }) => (
+            <motion.div key={f.title} style={{ opacity: op, x, flex: 1 }} onClick={() => setActiveFormat(f)}>
+              <div style={{ ...cardStyle(f), height: '100%', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '2px 8px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{f.tag}</span>
+                  <span style={{ fontSize: '10px', color: f.color, fontWeight: 600 }}>Ver →</span>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 'clamp(1.3rem,5vw,1.7rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 2px' }}>{f.title}</h3>
+                  <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: '0 0 4px' }}>{f.subtitle}</p>
+                  <p style={{ fontSize: '10px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        )}
 
         {/* ── Dots ── */}
-        <div style={{ position: 'absolute', bottom: 'clamp(20px,3.5vh,36px)', left: 0, right: 0,
+        <div style={{ position: 'absolute', bottom: isMobile ? '12px' : 'clamp(20px,3.5vh,36px)', left: 0, right: 0,
           display: 'flex', justifyContent: 'center', gap: 8, zIndex: 4, pointerEvents: 'none' }}>
           {formats.map((f, i) => (
             <div key={f.title} style={{ height: 5, borderRadius: 3, transition: 'all 0.3s',

@@ -51,41 +51,45 @@ const BUBBLES = [
   { left: '11%', top: '58%', size: 136, fromX: -1300 },
 ]
 
+/*
+ * MOBILE_BUBBLES — posiciones recalculadas para evitar solapamiento.
+ * En 390px de ancho: 4 columnas con separación mínima de ~90px entre centros.
+ * Col A (x≈0%): r≈43  Col B (x≈22%): r≈36  Col C (x≈64%): r≈36  Col D (x≈80%): r≈43
+ * Distancia A-B ≈ 90px > 79px (suma radios) ✓
+ */
 const MOBILE_BUBBLES = [
-  /* ── originales (17) ── */
-  { left: '-1%', top: '5%',  size: 88, fromX: -700 },
-  { left: '0%',  top: '40%', size: 78, fromX: -700 },
-  { left: '-1%', top: '74%', size: 84, fromX: -700 },
-  { left: '13%', top: '16%', size: 76, fromX: -450 },
-  { left: '12%', top: '52%', size: 82, fromX: -450 },
-  { left: '10%', top: '84%', size: 72, fromX: -450 },
-  { left: '28%', top: '1%',  size: 86, fromX: -280 },
-  { left: '26%', top: '87%', size: 74, fromX: -280 },
-  { left: '38%', top: '92%', size: 70, fromX: -220 },
-  { left: '54%', top: '1%',  size: 86, fromX:  280 },
-  { left: '56%', top: '87%', size: 74, fromX:  280 },
-  { left: '67%', top: '16%', size: 76, fromX:  450 },
-  { left: '69%', top: '52%', size: 82, fromX:  450 },
-  { left: '67%', top: '84%', size: 72, fromX:  450 },
-  { left: '80%', top: '5%',  size: 88, fromX:  700 },
-  { left: '82%', top: '40%', size: 78, fromX:  700 },
-  { left: '80%', top: '74%', size: 84, fromX:  700 },
-  /* ── extensión para marcas adicionales (18-32) ── */
-  { left: '24%', top: '28%', size: 74, fromX: -370 },
-  { left: '23%', top: '68%', size: 70, fromX: -370 },
-  { left: '38%', top: '8%',  size: 72, fromX: -230 },
-  { left: '38%', top: '78%', size: 68, fromX: -230 },
-  { left: '47%', top: '3%',  size: 74, fromX: -180 },
-  { left: '48%', top: '92%', size: 66, fromX: -180 },
-  { left: '60%', top: '8%',  size: 74, fromX:  230 },
-  { left: '61%', top: '78%', size: 68, fromX:  230 },
-  { left: '73%', top: '30%', size: 78, fromX:  370 },
-  { left: '73%', top: '66%', size: 74, fromX:  370 },
-  { left: '86%', top: '20%', size: 84, fromX:  650 },
-  { left: '87%', top: '55%', size: 78, fromX:  650 },
-  { left: '86%', top: '82%', size: 82, fromX:  650 },
-  { left: '6%',  top: '25%', size: 80, fromX: -680 },
-  { left: '5%',  top: '60%', size: 76, fromX: -680 },
+  /* ── Col A (borde izquierdo, r≈43) ── */
+  { left: '-1%', top: '4%',  size: 86, fromX: -680 },
+  { left: '0%',  top: '29%', size: 80, fromX: -680 },
+  { left: '-1%', top: '57%', size: 84, fromX: -680 },
+  { left: '0%',  top: '82%', size: 78, fromX: -680 },
+  /* ── Col B (cerca-izquierda, r≈36) ── */
+  { left: '22%', top: '12%', size: 74, fromX: -360 },
+  { left: '21%', top: '40%', size: 70, fromX: -360 },
+  { left: '22%', top: '67%', size: 72, fromX: -360 },
+  { left: '21%', top: '88%', size: 68, fromX: -360 },
+  /* ── Centro arriba y abajo (sólo extremos para no tapar el título) ── */
+  { left: '37%', top: '0%',  size: 68, fromX: -200 },
+  { left: '52%', top: '0%',  size: 70, fromX:  200 },
+  { left: '39%', top: '92%', size: 66, fromX: -180 },
+  { left: '54%', top: '91%', size: 68, fromX:  180 },
+  /* ── Col C (cerca-derecha, r≈36) ── */
+  { left: '64%', top: '12%', size: 74, fromX:  360 },
+  { left: '63%', top: '40%', size: 70, fromX:  360 },
+  { left: '64%', top: '67%', size: 72, fromX:  360 },
+  { left: '63%', top: '88%', size: 68, fromX:  360 },
+  /* ── Col D (borde derecho, r≈43) ── */
+  { left: '80%', top: '4%',  size: 86, fromX:  680 },
+  { left: '81%', top: '29%', size: 80, fromX:  680 },
+  { left: '80%', top: '57%', size: 84, fromX:  680 },
+  { left: '81%', top: '82%', size: 78, fromX:  680 },
+  /* ── Columnas intermedias para marcas adicionales ── */
+  { left: '9%',  top: '18%', size: 70, fromX: -520 },
+  { left: '8%',  top: '47%', size: 66, fromX: -520 },
+  { left: '8%',  top: '73%', size: 68, fromX: -520 },
+  { left: '74%', top: '18%', size: 70, fromX:  520 },
+  { left: '73%', top: '47%', size: 66, fromX:  520 },
+  { left: '73%', top: '73%', size: 68, fromX:  520 },
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */

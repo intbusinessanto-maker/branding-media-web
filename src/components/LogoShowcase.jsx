@@ -78,11 +78,12 @@ function SocialBubble({ s, i }) {
 
   return s.href ? (
     <a href={s.href} target="_blank" rel="noopener noreferrer"
+      className={`social-bubble social-${s.id}`}
       style={{ ...wrapStyle, textDecoration: 'none' }}>
       {circle}
     </a>
   ) : (
-    <div style={wrapStyle}>{circle}</div>
+    <div className={`social-bubble social-${s.id}`} style={wrapStyle}>{circle}</div>
   )
 }
 
@@ -120,6 +121,30 @@ export default function LogoShowcase() {
         @keyframes bfloat {
           0%,100% { transform:translateY(0px); }
           50%      { transform:translateY(-16px); }
+        }
+        /* ── Posiciones móvil: alrededor del eslogan, sin taparse ── */
+        @media (max-width: 767px) {
+          .social-bubble { animation-duration: 5s !important; }
+
+          /* LinkedIn — arriba izquierda, más grande */
+          .social-linkedin { top: 6% !important; left: 4% !important; right: auto !important; }
+          .social-linkedin > div { width: 70px !important; height: 70px !important; }
+
+          /* Instagram — arriba derecha */
+          .social-instagram { top: 8% !important; left: auto !important; right: 4% !important; }
+          .social-instagram > div { width: 60px !important; height: 60px !important; }
+
+          /* Facebook — medio izquierda */
+          .social-facebook { top: 62% !important; left: 3% !important; right: auto !important; }
+          .social-facebook > div { width: 54px !important; height: 54px !important; }
+
+          /* TikTok — medio derecha */
+          .social-tiktok { top: 65% !important; left: auto !important; right: 3% !important; }
+          .social-tiktok > div { width: 52px !important; height: 52px !important; }
+
+          /* WhatsApp — abajo derecha, separado del eslogan */
+          .social-whatsapp { top: 80% !important; left: auto !important; right: 5% !important; }
+          .social-whatsapp > div { width: 52px !important; height: 52px !important; }
         }
       `}</style>
 

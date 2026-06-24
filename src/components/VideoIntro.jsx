@@ -45,14 +45,25 @@ export default function VideoIntro({ onDismiss }) {
           exit={{ opacity: 0, scale: 1.02 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden', touchAction: 'none',
-            background: IS_MOBILE
-              ? 'radial-gradient(ellipse at 25% 20%, rgba(139,63,168,0.55) 0%, transparent 55%), radial-gradient(ellipse at 75% 80%, rgba(232,17,138,0.40) 0%, transparent 55%), #080810'
-              : '#000',
+            background: '#000',
           }}
         >
-          {/* ── Video YouTube — solo desktop (iOS/Android bloquean autoplay) ── */}
-          {!IS_MOBILE && (
-            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+          {/* ── Video YouTube (desktop) / Vimeo background=1 (móvil — sí hace autoplay en iOS) ── */}
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            {IS_MOBILE ? (
+              <iframe
+                src="https://player.vimeo.com/video/1202877882?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0"
+                style={{
+                  position: 'absolute', top: '50%', left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 'max(100vw, 177.78vh)',
+                  height: 'max(100vh, 56.25vw)',
+                  border: 'none',
+                }}
+                allow="autoplay; fullscreen"
+                title=""
+              />
+            ) : (
               <iframe
                 src="https://www.youtube.com/embed/RShiy9dpewA?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=RShiy9dpewA&rel=0&showinfo=0&iv_load_policy=3&disablekb=1"
                 style={{
@@ -65,8 +76,8 @@ export default function VideoIntro({ onDismiss }) {
                 allow="autoplay; encrypted-media"
                 title="Branding Media intro"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* ── Gradientes — desktop tiene capa oscura, móvil usa el bg gradient ── */}
           {!IS_MOBILE && (
