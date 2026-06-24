@@ -322,47 +322,48 @@ export default function ColombiaMap() {
               </defs>
 
               {/*
-               * Base y mosaico tipo departamentos:
-               * 5 col × 6 filas — progresión norte (clarito/blanco) → sur (magenta profundo)
-               * Colores suaves, sin repetición inmediata entre vecinos, sin chillonas
+               * Regiones aproximadas de las 6 ciudades con universidad.
+               * Cada zona cubre el área geográfica de esa ciudad y usa un tono único.
+               * Paleta: progresión clarita (norte) → profundo (sur), sin colores chillones.
+               *
+               * Coordenadas SVG del mapa (viewBox 5 5 215 252):
+               *   Barranquilla ≈ (79, 31)   — norte, clarito
+               *   Cartagena    ≈ (70, 46)   — noroeste, claro
+               *   Bucaramanga  ≈ (107, 86)  — nororiente, medio-claro
+               *   Medellín     ≈ (67, 99)   — noroccidente, medio
+               *   Bogotá       ≈ (91, 121)  — centro, medio-oscuro
+               *   Cali         ≈ (51, 139)  — suroccidente, más oscuro
+               *
+               * Áreas aproximadas: cada ciudad "domina" su cuadrante.
                */}
-              <path d={COLOMBIA_PATH} fill="#C03575" />
+
+              {/* Fondo base — sur/amazonía (más oscuro) */}
+              <path d={COLOMBIA_PATH} fill="#C43275" />
 
               <g clipPath="url(#colombiaClip)">
-                {[
-                  /* Fila 1 — norte, casi blancos */
-                  ['#FFF5FA','#FFEFF6','#FFF2F8','#FFECF5','#FFF7FB'],
-                  /* Fila 2 — rosa muy claro */
-                  ['#FFE2F0','#FFD8EB','#FFDFF0','#FFD2E8','#FFE6F3'],
-                  /* Fila 3 — rosa claro */
-                  ['#FFC5DE','#FFB8D8','#FFBFDB','#FFB0D0','#FFCAE3'],
-                  /* Fila 4 — rosa medio */
-                  ['#FF9EC8','#FF8ABE','#FF95C5','#FF80B8','#FF92C3'],
-                  /* Fila 5 — magenta suave */
-                  ['#E06898','#D75990','#DF6095','#CE4D85','#DB6294'],
-                  /* Fila 6 — sur, magenta profundo */
-                  ['#C03575','#B8286D','#C73278','#AA2060','#B42567'],
-                ].flatMap((row, ri) =>
-                  row.map((color, ci) => ({
-                    key: `${ri}-${ci}`,
-                    x: 5 + ci * 43,
-                    y: 5 + ri * 42,
-                    w: 43, h: 42,
-                    fill: color,
-                  }))
-                ).map(r => (
-                  <rect key={r.key} x={r.x} y={r.y} width={r.w} height={r.h} fill={r.fill} />
-                ))}
+                {/* ── Zona Barranquilla — norte costeño, clarito casi blanco ── */}
+                <ellipse cx="85" cy="28" rx="80" ry="36" fill="#FFE8F5" />
+
+                {/* ── Zona Cartagena — noroeste, rosa muy pálido ── */}
+                <ellipse cx="58" cy="52" rx="55" ry="38" fill="#FFD8EE" />
+
+                {/* ── Zona Bucaramanga — nororiente, rosa claro ── */}
+                <ellipse cx="120" cy="85" rx="65" ry="42" fill="#FFB8DA" />
+
+                {/* ── Zona Medellín — noroccidente, rosa medio ── */}
+                <ellipse cx="62" cy="108" rx="58" ry="44" fill="#FF8EC0" />
+
+                {/* ── Zona Bogotá — centro, magenta suave ── */}
+                <ellipse cx="100" cy="128" rx="72" ry="46" fill="#E85499" />
+
+                {/* ── Zona Cali — suroccidente, magenta medio-oscuro ── */}
+                <ellipse cx="52" cy="150" rx="55" ry="48" fill="#D03880" />
+
+                {/* ── Sur / Amazonía — el más oscuro (fondo) ya puesto ── */}
               </g>
 
-              {/* División sutil entre celdas — líneas tenues de separación */}
-              <g clipPath="url(#colombiaClip)" opacity="0.18">
-                {[47,90,133,176].map(x => <line key={x} x1={x} y1="5" x2={x} y2="257" stroke="#fff" strokeWidth="0.6"/>)}
-                {[47,89,131,173,215].map(y => <line key={y} x1="5" y1={y} x2="220" y2={y} stroke="#fff" strokeWidth="0.6"/>)}
-              </g>
-
-              {/* Contorno del país */}
-              <path d={COLOMBIA_PATH} fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" strokeLinejoin="round" />
+              {/* Contorno del país — blanco suave */}
+              <path d={COLOMBIA_PATH} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4" strokeLinejoin="round" />
 
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)

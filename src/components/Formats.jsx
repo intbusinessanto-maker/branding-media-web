@@ -4,13 +4,13 @@ import { supabase } from '../lib/supabase'
 
 const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua%20megafono.png'
 
-/* Orden: Activaciones → OOH → DOOH */
+/* Orden de aparición: DOOH (1°) → OOH (2°) → Activaciones (3°, derecha) */
 const formats = [
   {
-    tag: 'Experiencial', title: 'Activaciones', subtitle: 'Brand Experience',
-    description: 'Intervenciones en vivo: stands, muestras, concursos y experiencias que generan engagement real.',
-    features: ['Interacción directa', 'Generación UGC', 'Sampling y demos', 'Medición de engagement'],
-    color: '#8B3FA8', bg: 'rgba(139,63,168,0.06)', border: 'rgba(139,63,168,0.15)',
+    tag: 'Digital', title: 'DOOH', subtitle: 'Digital Out-of-Home',
+    description: 'Pantallas LED de alta resolución en zonas de alto tráfico dentro de los campus universitarios.',
+    features: ['Contenido dinámico en tiempo real', 'Programación por horario', 'Actualización remota', 'Métricas de impacto'],
+    color: '#00C4AD', bg: 'rgba(0,196,173,0.06)', border: 'rgba(0,196,173,0.15)',
   },
   {
     tag: 'Físico', title: 'OOH', subtitle: 'Out-of-Home',
@@ -19,10 +19,10 @@ const formats = [
     color: '#E8118A', bg: 'rgba(232,17,138,0.06)', border: 'rgba(232,17,138,0.15)',
   },
   {
-    tag: 'Digital', title: 'DOOH', subtitle: 'Digital Out-of-Home',
-    description: 'Pantallas LED de alta resolución en zonas de alto tráfico dentro de los campus universitarios.',
-    features: ['Contenido dinámico en tiempo real', 'Programación por horario', 'Actualización remota', 'Métricas de impacto'],
-    color: '#00C4AD', bg: 'rgba(0,196,173,0.06)', border: 'rgba(0,196,173,0.15)',
+    tag: 'Experiencial', title: 'Activaciones', subtitle: 'Brand Experience',
+    description: 'Intervenciones en vivo: stands, muestras, concursos y experiencias que generan engagement real.',
+    features: ['Interacción directa', 'Generación UGC', 'Sampling y demos', 'Medición de engagement'],
+    color: '#8B3FA8', bg: 'rgba(139,63,168,0.06)', border: 'rgba(139,63,168,0.15)',
   },
 ]
 
