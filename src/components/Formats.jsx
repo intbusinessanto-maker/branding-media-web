@@ -151,18 +151,18 @@ export default function Formats() {
    * Cada card ocupa ~15% del scroll, luego sale. Card3 se queda el resto.
    * Queda 43% de scroll (215vh) con DOOH visible y sin que el sticky se libere.
    */
-  // Card 1 — Activaciones
-  const mSX0    = useTransform(scrollYProgress, [0.00, 0.10], [0.03, 1])
-  const mX0_out = useTransform(scrollYProgress, [0.19, 0.25], ['0%', '112%'])
+  // Card 1 — Activaciones (scaleX parte en 0, no en 0.03, para evitar rendija visible)
+  const mSX0    = useTransform(scrollYProgress, [0.00, 0.10], [0, 1])
+  const mX0_out = useTransform(scrollYProgress, [0.19, 0.25], ['0%', '114%'])
   const mOp0    = useTransform(scrollYProgress, [0.00, 0.07, 0.19, 0.25], [0, 1, 1, 0])
 
   // Card 2 — OOH
-  const mSX1    = useTransform(scrollYProgress, [0.26, 0.35], [0.03, 1])
-  const mX1_out = useTransform(scrollYProgress, [0.44, 0.50], ['0%', '112%'])
+  const mSX1    = useTransform(scrollYProgress, [0.26, 0.35], [0, 1])
+  const mX1_out = useTransform(scrollYProgress, [0.44, 0.50], ['0%', '114%'])
   const mOp1    = useTransform(scrollYProgress, [0.26, 0.33, 0.44, 0.50], [0, 1, 1, 0])
 
   // Card 3 — DOOH (se queda hasta el final)
-  const mSX2 = useTransform(scrollYProgress, [0.52, 0.62], [0.03, 1])
+  const mSX2 = useTransform(scrollYProgress, [0.52, 0.62], [0, 1])
   const mOp2 = useTransform(scrollYProgress, [0.52, 0.59], [0, 1])
 
   useEffect(() => {
@@ -206,11 +206,11 @@ export default function Formats() {
         overflow: 'hidden', background: 'transparent',
       }}>
 
-        {/* ── Estatua: en mobile más grande ── */}
+        {/* ── Estatua: en mobile ocupa mitad izquierda completa, card alineado con ella ── */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0,
-          width: isMobile ? 'clamp(150px, 42vw, 230px)' : 'clamp(220px, 30vw, 440px)',
-          height: isMobile ? '72%' : '92%',
+          width: isMobile ? '46vw' : 'clamp(220px, 30vw, 440px)',
+          height: isMobile ? '80%' : '92%',
           pointerEvents: 'none', zIndex: 1,
         }}>
           <img src={STATUE_URL} alt="" loading="lazy"
@@ -220,14 +220,18 @@ export default function Formats() {
         {/* ── Header ── */}
         <div style={{
           position: 'absolute',
-          top: isMobile ? '10px' : 'clamp(80px,11vh,100px)',
-          left: 0, right: 0, textAlign: 'center',
-          pointerEvents: 'none', zIndex: 3, padding: '0 1rem',
+          top: isMobile ? '6px' : 'clamp(80px,11vh,100px)',
+          /* En mobile: sólo sobre el área del card (derecha de la estatua) */
+          left: isMobile ? '46vw' : 0,
+          right: isMobile ? '8px' : 0,
+          textAlign: isMobile ? 'left' : 'center',
+          pointerEvents: 'none', zIndex: 3,
+          padding: isMobile ? '0' : '0 1rem',
         }}>
-          <span style={{ fontSize: isMobile ? '9px' : '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: isMobile ? 4 : 10 }}>
+          <span style={{ fontSize: isMobile ? '8px' : '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: isMobile ? 3 : 10 }}>
             Formatos
           </span>
-          <h2 style={{ fontSize: isMobile ? 'clamp(1.2rem,5vw,1.6rem)' : 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
+          <h2 style={{ fontSize: isMobile ? 'clamp(1rem,4.5vw,1.3rem)' : 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
             Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
           </h2>
         </div>
@@ -275,11 +279,15 @@ export default function Formats() {
         {isMobile && (
           <div style={{
             position: 'absolute',
-            /* Alto fijo para que los hijos absolute tengan dimensiones */
-            height: 'clamp(200px, 52svh, 320px)',
-            top: '50%', transform: 'translateY(-50%)',
-            left: 'clamp(148px, 41vw, 224px)',
-            right: '10px',
+            /*
+             * La estatua tiene height=80% anclada abajo → su tope está en top=20%.
+             * El card se alinea en el mismo nivel: top=20%, bottom=44px (barra abajo).
+             * El card sale desde el megáfono (left edge = right edge de la estatua = 46vw).
+             */
+            top: '20%',
+            bottom: '44px',
+            left: '46vw',
+            right: '8px',
             overflow: 'hidden',
             zIndex: 2,
           }}>
@@ -335,11 +343,11 @@ export default function Formats() {
           </div>
         )}
 
-        {/* ── Indicador de carrusel (barra) ── */}
+        {/* ── Barra de progreso: debajo del card, alineada con él ── */}
         {isMobile && visibleCount > 0 && (
           <div style={{
             position: 'absolute', bottom: '14px',
-            left: 'clamp(148px, 41vw, 224px)', right: '10px',
+            left: '46vw', right: '8px',
             display: 'flex', gap: 5, zIndex: 4, pointerEvents: 'none',
           }}>
             {formats.map((f, i) => (
