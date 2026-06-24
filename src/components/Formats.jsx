@@ -126,13 +126,17 @@ export default function Formats() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  /* Desktop: cards entran desde la estatua y se quedan en fila horizontal */
-  const op0 = useTransform(scrollYProgress, [0.00, 0.13], [0, 1])
-  const x0  = useTransform(scrollYProgress, [0.00, 0.20], [-280, 0])
-  const op1 = useTransform(scrollYProgress, [0.33, 0.46], [0, 1])
-  const x1  = useTransform(scrollYProgress, [0.33, 0.53], [-380, 0])
-  const op2 = useTransform(scrollYProgress, [0.66, 0.79], [0, 1])
-  const x2  = useTransform(scrollYProgress, [0.66, 0.86], [-480, 0])
+  /*
+   * Desktop: cards entran en los primeros 50% del scroll → quedan visibles 250vh
+   * Sección = 500vh → las 3 tarjetas se mantienen visibles el resto del scroll
+   * sin que el sticky se libere pronto.
+   */
+  const op0 = useTransform(scrollYProgress, [0.00, 0.10], [0, 1])
+  const x0  = useTransform(scrollYProgress, [0.00, 0.16], [-280, 0])
+  const op1 = useTransform(scrollYProgress, [0.20, 0.30], [0, 1])
+  const x1  = useTransform(scrollYProgress, [0.20, 0.36], [-380, 0])
+  const op2 = useTransform(scrollYProgress, [0.40, 0.50], [0, 1])
+  const x2  = useTransform(scrollYProgress, [0.40, 0.56], [-480, 0])
 
   /*
    * ── MÓVIL: CARRUSEL — solo un card visible a la vez ──
@@ -142,26 +146,30 @@ export default function Formats() {
    * Al subir todo es en reversa automáticamente (transforms bidireccionales)
    */
 
+  /*
+   * Móvil: carrusel ajustado a 500vh.
+   * Cada card ocupa ~15% del scroll, luego sale. Card3 se queda el resto.
+   * Queda 43% de scroll (215vh) con DOOH visible y sin que el sticky se libere.
+   */
   // Card 1 — Activaciones
-  const mSX0  = useTransform(scrollYProgress, [0.00, 0.13], [0.03, 1])
-  const mX0_out = useTransform(scrollYProgress, [0.30, 0.37], ['0%', '112%'])
-  const mOp0  = useTransform(scrollYProgress, [0.00, 0.08, 0.30, 0.37], [0, 1, 1, 0])
+  const mSX0    = useTransform(scrollYProgress, [0.00, 0.10], [0.03, 1])
+  const mX0_out = useTransform(scrollYProgress, [0.19, 0.25], ['0%', '112%'])
+  const mOp0    = useTransform(scrollYProgress, [0.00, 0.07, 0.19, 0.25], [0, 1, 1, 0])
 
   // Card 2 — OOH
-  const mSX1  = useTransform(scrollYProgress, [0.38, 0.51], [0.03, 1])
-  const mX1_out = useTransform(scrollYProgress, [0.63, 0.70], ['0%', '112%'])
-  const mOp1  = useTransform(scrollYProgress, [0.38, 0.46, 0.63, 0.70], [0, 1, 1, 0])
+  const mSX1    = useTransform(scrollYProgress, [0.26, 0.35], [0.03, 1])
+  const mX1_out = useTransform(scrollYProgress, [0.44, 0.50], ['0%', '112%'])
+  const mOp1    = useTransform(scrollYProgress, [0.26, 0.33, 0.44, 0.50], [0, 1, 1, 0])
 
-  // Card 3 — DOOH (no sale al bajar)
-  const mSX2  = useTransform(scrollYProgress, [0.72, 0.85], [0.03, 1])
-  const mOp2  = useTransform(scrollYProgress, [0.72, 0.80], [0, 1])
+  // Card 3 — DOOH (se queda hasta el final)
+  const mSX2 = useTransform(scrollYProgress, [0.52, 0.62], [0.03, 1])
+  const mOp2 = useTransform(scrollYProgress, [0.52, 0.59], [0, 1])
 
   useEffect(() => {
     const unsub = scrollYProgress.on('change', v => {
-      /* Umbral adaptado a los rangos del carrusel móvil y el grid desktop */
-      if (v >= 0.72) setVisibleCount(3)
-      else if (v >= 0.38) setVisibleCount(2)
-      else if (v >= 0.05) setVisibleCount(1)
+      if (v >= 0.52) setVisibleCount(3)
+      else if (v >= 0.26) setVisibleCount(2)
+      else if (v >= 0.04) setVisibleCount(1)
       else setVisibleCount(0)
     })
     return unsub
@@ -191,7 +199,8 @@ export default function Formats() {
   })
 
   return (
-    <div ref={ref} style={{ height: '300vh', position: 'relative' }}>
+    /* 500vh: cards entran en los primeros 250vh, luego 250vh de reposo con las 3 visibles */
+    <div ref={ref} style={{ height: '500vh', position: 'relative' }}>
       <section id="formatos" style={{
         position: 'sticky', top: 0, height: '100svh',
         overflow: 'hidden', background: 'transparent',
@@ -266,7 +275,8 @@ export default function Formats() {
         {isMobile && (
           <div style={{
             position: 'absolute',
-            /* Espacio a la derecha de la estatua, centrado verticalmente */
+            /* Alto fijo para que los hijos absolute tengan dimensiones */
+            height: 'clamp(200px, 52svh, 320px)',
             top: '50%', transform: 'translateY(-50%)',
             left: 'clamp(148px, 41vw, 224px)',
             right: '10px',
@@ -325,11 +335,11 @@ export default function Formats() {
           </div>
         )}
 
-        {/* ── Indicador de carrusel (barra) — solo en móvil, aparece desde el card 1 ── */}
+        {/* ── Indicador de carrusel (barra) ── */}
         {isMobile && visibleCount > 0 && (
           <div style={{
             position: 'absolute', bottom: '14px',
-            left: 'clamp(126px, 35vw, 196px)', right: '8px',
+            left: 'clamp(148px, 41vw, 224px)', right: '10px',
             display: 'flex', gap: 5, zIndex: 4, pointerEvents: 'none',
           }}>
             {formats.map((f, i) => (
