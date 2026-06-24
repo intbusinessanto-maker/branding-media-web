@@ -122,29 +122,31 @@ export default function LogoShowcase() {
           0%,100% { transform:translateY(0px); }
           50%      { transform:translateY(-16px); }
         }
-        /* ── Posiciones móvil: alrededor del eslogan, sin taparse ── */
+        /* ── Móvil: redes ARRIBA y ABAJO del eslogan, bien pegadas ── */
         @media (max-width: 767px) {
           .social-bubble { animation-duration: 5s !important; }
 
-          /* LinkedIn — arriba izquierda, más grande */
-          .social-linkedin { top: 6% !important; left: 4% !important; right: auto !important; }
-          .social-linkedin > div { width: 70px !important; height: 70px !important; }
+          /* === FILA SUPERIOR — muy cerca del eslogan === */
+          /* LinkedIn — arriba izquierda */
+          .social-linkedin { top: 18% !important; left: 5% !important; right: auto !important; }
+          .social-linkedin > div { width: 64px !important; height: 64px !important; }
 
           /* Instagram — arriba derecha */
-          .social-instagram { top: 8% !important; left: auto !important; right: 4% !important; }
-          .social-instagram > div { width: 60px !important; height: 60px !important; }
+          .social-instagram { top: 20% !important; left: auto !important; right: 5% !important; }
+          .social-instagram > div { width: 56px !important; height: 56px !important; }
 
-          /* Facebook — medio izquierda */
-          .social-facebook { top: 62% !important; left: 3% !important; right: auto !important; }
-          .social-facebook > div { width: 54px !important; height: 54px !important; }
+          /* === FILA INFERIOR — debajo del eslogan === */
+          /* Facebook — abajo izquierda */
+          .social-facebook { top: 62% !important; left: 6% !important; right: auto !important; }
+          .social-facebook > div { width: 52px !important; height: 52px !important; }
 
-          /* TikTok — medio derecha */
-          .social-tiktok { top: 65% !important; left: auto !important; right: 3% !important; }
-          .social-tiktok > div { width: 52px !important; height: 52px !important; }
+          /* WhatsApp — abajo centro */
+          .social-whatsapp { top: 65% !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; }
+          .social-whatsapp > div { width: 50px !important; height: 50px !important; }
 
-          /* WhatsApp — abajo derecha, separado del eslogan */
-          .social-whatsapp { top: 80% !important; left: auto !important; right: 5% !important; }
-          .social-whatsapp > div { width: 52px !important; height: 52px !important; }
+          /* TikTok — abajo derecha */
+          .social-tiktok { top: 62% !important; left: auto !important; right: 6% !important; }
+          .social-tiktok > div { width: 50px !important; height: 50px !important; }
         }
       `}</style>
 

@@ -134,19 +134,34 @@ export default function Formats() {
   const op2 = useTransform(scrollYProgress, [0.66, 0.79], [0, 1])
   const x2  = useTransform(scrollYProgress, [0.66, 0.86], [-480, 0])
 
-  /* Móvil: cards entran desde la izquierda (megáfono) en vertical */
-  const mOp0 = useTransform(scrollYProgress, [0.00, 0.14], [0, 1])
-  const mX0  = useTransform(scrollYProgress, [0.00, 0.22], [-300, 0])
-  const mOp1 = useTransform(scrollYProgress, [0.33, 0.47], [0, 1])
-  const mX1  = useTransform(scrollYProgress, [0.33, 0.55], [-340, 0])
-  const mOp2 = useTransform(scrollYProgress, [0.66, 0.80], [0, 1])
-  const mX2  = useTransform(scrollYProgress, [0.66, 0.88], [-380, 0])
+  /*
+   * ── MÓVIL: CARRUSEL — solo un card visible a la vez ──
+   * Entrada: "desdoblar" desde el megáfono (scaleX 0→1, origin=left)
+   * Salida al bajar: x desliza a la derecha (0→110%)
+   * Card 3 (DOOH) no sale al bajar, sí se dobla al subir
+   * Al subir todo es en reversa automáticamente (transforms bidireccionales)
+   */
+
+  // Card 1 — Activaciones
+  const mSX0  = useTransform(scrollYProgress, [0.00, 0.13], [0.03, 1])
+  const mX0_out = useTransform(scrollYProgress, [0.30, 0.37], ['0%', '112%'])
+  const mOp0  = useTransform(scrollYProgress, [0.00, 0.08, 0.30, 0.37], [0, 1, 1, 0])
+
+  // Card 2 — OOH
+  const mSX1  = useTransform(scrollYProgress, [0.38, 0.51], [0.03, 1])
+  const mX1_out = useTransform(scrollYProgress, [0.63, 0.70], ['0%', '112%'])
+  const mOp1  = useTransform(scrollYProgress, [0.38, 0.46, 0.63, 0.70], [0, 1, 1, 0])
+
+  // Card 3 — DOOH (no sale al bajar)
+  const mSX2  = useTransform(scrollYProgress, [0.72, 0.85], [0.03, 1])
+  const mOp2  = useTransform(scrollYProgress, [0.72, 0.80], [0, 1])
 
   useEffect(() => {
     const unsub = scrollYProgress.on('change', v => {
-      if (v >= 0.66) setVisibleCount(3)
-      else if (v >= 0.33) setVisibleCount(2)
-      else if (v >= 0.03) setVisibleCount(1)
+      /* Umbral adaptado a los rangos del carrusel móvil y el grid desktop */
+      if (v >= 0.72) setVisibleCount(3)
+      else if (v >= 0.38) setVisibleCount(2)
+      else if (v >= 0.05) setVisibleCount(1)
       else setVisibleCount(0)
     })
     return unsub
@@ -158,9 +173,9 @@ export default function Formats() {
     { f: formats[2], op: op2, x: x2 },
   ]
   const mobileLayers = [
-    { f: formats[0], op: mOp0, x: mX0 },
-    { f: formats[1], op: mOp1, x: mX1 },
-    { f: formats[2], op: mOp2, x: mX2 },
+    { f: formats[0], scaleX: mSX0, xOut: mX0_out, op: mOp0 },
+    { f: formats[1], scaleX: mSX1, xOut: mX1_out, op: mOp1 },
+    { f: formats[2], scaleX: mSX2, xOut: null,     op: mOp2 },
   ]
 
   const cardStyle = (f) => ({
@@ -247,47 +262,87 @@ export default function Formats() {
         </div>
         )}
 
-        {/* ── MÓVIL: 3 tarjetas verticales, vuelan desde el megáfono (izquierda) ── */}
+        {/* ── MÓVIL: CARRUSEL — un card a la vez, se desdobla desde el megáfono ── */}
         {isMobile && (
-        <div style={{
-          position: 'absolute',
-          /* Arranca debajo del header, a la derecha de la estatua */
-          top: '58px',
-          bottom: '40px',
-          left: 'clamp(130px, 36vw, 200px)',
-          right: '10px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          zIndex: 2,
-        }}>
-          {mobileLayers.map(({ f, op, x }) => (
-            <motion.div key={f.title} style={{ opacity: op, x, flex: 1 }} onClick={() => setActiveFormat(f)}>
-              <div style={{ ...cardStyle(f), height: '100%', gap: '6px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '2px 8px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{f.tag}</span>
-                  <span style={{ fontSize: '10px', color: f.color, fontWeight: 600 }}>Ver →</span>
+          /* Contenedor con overflow hidden para que las salidas a la derecha no se vean */
+          <div style={{
+            position: 'absolute',
+            top: '58px', bottom: '40px',
+            left: 'clamp(126px, 35vw, 196px)',
+            right: '8px',
+            overflow: 'hidden',
+            zIndex: 2,
+          }}>
+            {mobileLayers.map(({ f, scaleX, xOut, op }) => (
+              <motion.div
+                key={f.title}
+                style={{
+                  position: 'absolute', inset: 0,
+                  scaleX,
+                  x: xOut ?? '0%',
+                  opacity: op,
+                  transformOrigin: 'left center',
+                }}
+                onClick={() => setActiveFormat(f)}
+              >
+                <div style={{
+                  width: '100%', height: '100%',
+                  padding: '14px 16px', boxSizing: 'border-box',
+                  borderRadius: '14px', background: '#fff',
+                  border: `1px solid ${f.border}`, borderLeft: `4px solid ${f.color}`,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
+                  cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '8px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '2px 8px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{f.tag}</span>
+                    <span style={{ fontSize: '10px', color: f.color, fontWeight: 600 }}>Ver →</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 'clamp(1.4rem,5.5vw,1.9rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 4px' }}>{f.title}</h3>
+                    <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: '0 0 6px' }}>{f.subtitle}</p>
+                    <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.55, margin: 0 }}>{f.description}</p>
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px', marginTop: 'auto' }}>
+                    {f.features.map(feat => (
+                      <li key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '10px', color: '#666' }}>
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '4px' }} />
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div>
-                  <h3 style={{ fontSize: 'clamp(1.3rem,5vw,1.7rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 2px' }}>{f.title}</h3>
-                  <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: '0 0 4px' }}>{f.subtitle}</p>
-                  <p style={{ fontSize: '10px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
         )}
 
-        {/* ── Dots ── */}
-        <div style={{ position: 'absolute', bottom: isMobile ? '12px' : 'clamp(20px,3.5vh,36px)', left: 0, right: 0,
-          display: 'flex', justifyContent: 'center', gap: 8, zIndex: 4, pointerEvents: 'none' }}>
-          {formats.map((f, i) => (
-            <div key={f.title} style={{ height: 5, borderRadius: 3, transition: 'all 0.3s',
-              width: visibleCount > i ? 22 : 5,
-              background: visibleCount > i ? f.color : 'rgba(0,0,0,0.12)' }} />
-          ))}
-        </div>
+        {/* ── Indicador de carrusel (barra) — solo en móvil, aparece desde el card 1 ── */}
+        {isMobile && visibleCount > 0 && (
+          <div style={{
+            position: 'absolute', bottom: '14px',
+            left: 'clamp(126px, 35vw, 196px)', right: '8px',
+            display: 'flex', gap: 5, zIndex: 4, pointerEvents: 'none',
+          }}>
+            {formats.map((f, i) => (
+              <div key={f.title} style={{
+                flex: 1, height: 4, borderRadius: 2, transition: 'background 0.4s',
+                background: visibleCount > i ? f.color : 'rgba(0,0,0,0.12)',
+              }} />
+            ))}
+          </div>
+        )}
+
+        {/* ── Desktop dots ── */}
+        {!isMobile && (
+          <div style={{ position: 'absolute', bottom: 'clamp(20px,3.5vh,36px)', left: 0, right: 0,
+            display: 'flex', justifyContent: 'center', gap: 8, zIndex: 4, pointerEvents: 'none' }}>
+            {formats.map((f, i) => (
+              <div key={f.title} style={{ height: 5, borderRadius: 3, transition: 'all 0.3s',
+                width: visibleCount > i ? 22 : 5,
+                background: visibleCount > i ? f.color : 'rgba(0,0,0,0.12)' }} />
+            ))}
+          </div>
+        )}
 
       </section>
 

@@ -4,10 +4,11 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua_y_publico-removebg-preview%20(1)%20(1).png'
 const VIMEO_ID   = '1201924875'
 
+/* Frase única dividida en 3 tiempos para no sobrecargar la lectura */
 const PHRASES = [
-  { normal: 'contamos con una población', highlight: 'de más de 8 millones al mes' },
-  { normal: 'público constante,',  highlight: 'atención real' },
-  { normal: 'la nueva generación', highlight: 'ya está aquí' },
+  { normal: 'más de 8 millones',       highlight: 'de personas al mes' },
+  { normal: 'estudiantes, docentes,',  highlight: 'administrativos' },
+  { normal: 'y padres',                highlight: 'de familia' },
 ]
 
 export default function CinematicText() {
@@ -45,7 +46,7 @@ export default function CinematicText() {
 
   return (
     /* Contenedor 300vh — da espacio de scroll para las 3 frases */
-    <div ref={ref} style={{ height: '300vh', position: 'relative' }}>
+    <div ref={ref} id="cinematic-outer" style={{ height: '300vh', position: 'relative' }}>
 
       {/* Sección sticky — siempre visible mientras el usuario baja */}
       <div style={{
