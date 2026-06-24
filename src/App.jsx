@@ -10,6 +10,7 @@ import LogoShowcase  from './components/LogoShowcase'
 import Formats       from './components/Formats'
 import Audience      from './components/NewspaperAudience'
 import Cases         from './components/Cases'
+import Comparison    from './components/Comparison'
 import Blog          from './components/Blog'
 import Contact       from './components/Contact'
 import Footer        from './components/Footer'
@@ -61,7 +62,8 @@ function CustomCursor() {
         marginLeft: '-7px',
         marginTop: '-7px',
         borderRadius: '50%',
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#fff',
+        mixBlendMode: 'difference',
         pointerEvents: 'none',
         zIndex: 99999,
         willChange: 'transform',
@@ -161,6 +163,7 @@ export default function App() {
             <Formats />
             <Audience />
             <Cases />
+            <Comparison />
             <Blog />
             <Contact />
           </main>
