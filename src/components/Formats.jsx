@@ -206,32 +206,34 @@ export default function Formats() {
         overflow: 'hidden', background: 'transparent',
       }}>
 
-        {/* ── Estatua: en mobile ocupa mitad izquierda completa, card alineado con ella ── */}
+        {/*
+         * Estatua: en mobile ocupa la izquierda y queda ENCIMA de los cards (zIndex 5).
+         * Los cards empiezan en 34vw (solapamiento) para que la estatua los tape por la izq.
+         * Efecto: la estatua aparece "delante" de los bloques, como si los anunciara.
+         */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0,
-          width: isMobile ? '46vw' : 'clamp(220px, 30vw, 440px)',
-          height: isMobile ? '80%' : '92%',
-          pointerEvents: 'none', zIndex: 1,
+          width: isMobile ? '50vw' : 'clamp(220px, 30vw, 440px)',
+          height: isMobile ? '82%' : '92%',
+          pointerEvents: 'none', zIndex: isMobile ? 5 : 1,
         }}>
           <img src={STATUE_URL} alt="" loading="lazy"
             style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
         </div>
 
-        {/* ── Header ── */}
+        {/* ── Header: encima de todo (estatua Y bloques) ── */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '6px' : 'clamp(80px,11vh,100px)',
-          /* En mobile: sólo sobre el área del card (derecha de la estatua) */
-          left: isMobile ? '46vw' : 0,
-          right: isMobile ? '8px' : 0,
-          textAlign: isMobile ? 'left' : 'center',
-          pointerEvents: 'none', zIndex: 3,
-          padding: isMobile ? '0' : '0 1rem',
+          left: 0, right: 0,
+          textAlign: isMobile ? 'center' : 'center',
+          pointerEvents: 'none', zIndex: 6,
+          padding: isMobile ? '0 8px' : '0 1rem',
         }}>
           <span style={{ fontSize: isMobile ? '8px' : '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: isMobile ? 3 : 10 }}>
             Formatos
           </span>
-          <h2 style={{ fontSize: isMobile ? 'clamp(1rem,4.5vw,1.3rem)' : 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
+          <h2 style={{ fontSize: isMobile ? 'clamp(1rem,4.5vw,1.35rem)' : 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
             Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
           </h2>
         </div>
@@ -280,14 +282,15 @@ export default function Formats() {
           <div style={{
             position: 'absolute',
             /*
-             * La estatua tiene height=80% anclada abajo → su tope está en top=20%.
-             * El card se alinea en el mismo nivel: top=20%, bottom=44px (barra abajo).
-             * El card sale desde el megáfono (left edge = right edge de la estatua = 46vw).
+             * Estatua = 50vw, 82% tall → tope en top=18%.
+             * Cards empiezan en left=34vw (16vw solapados bajo la estatua) para que
+             * la estatua quede visualmente DELANTE de los bloques.
+             * top=18% alinea el inicio del card con el tope de la estatua.
              */
-            top: '20%',
+            top: '18%',
             bottom: '44px',
-            left: '46vw',
-            right: '8px',
+            left: '34vw',
+            right: '6px',
             overflow: 'hidden',
             zIndex: 2,
           }}>
@@ -343,11 +346,11 @@ export default function Formats() {
           </div>
         )}
 
-        {/* ── Barra de progreso: debajo del card, alineada con él ── */}
+        {/* ── Barra de progreso: alineada con el card, a la derecha de la estatua ── */}
         {isMobile && visibleCount > 0 && (
           <div style={{
             position: 'absolute', bottom: '14px',
-            left: '46vw', right: '8px',
+            left: '34vw', right: '6px',
             display: 'flex', gap: 5, zIndex: 4, pointerEvents: 'none',
           }}>
             {formats.map((f, i) => (
