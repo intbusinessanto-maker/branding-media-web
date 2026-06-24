@@ -8,7 +8,8 @@ const ESLOGAN = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/publ
 const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768
 
 export default function VideoIntro({ onDismiss }) {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible]       = useState(true)
+  const [videoReady, setVideoReady] = useState(false)  // diferir carga del video
 
   const dismiss = () => {
     setVisible(false)
@@ -23,9 +24,12 @@ export default function VideoIntro({ onDismiss }) {
     document.body.style.top      = `-${scrollY}px`
     document.body.style.width    = '100%'
 
-    const t = setTimeout(dismiss, IS_MOBILE ? 7000 : 12000)
+    /* Cargar el video 900ms después para no bloquear el render del intro */
+    const vt = setTimeout(() => setVideoReady(true), 900)
+    const t  = setTimeout(dismiss, IS_MOBILE ? 7000 : 12000)
 
     return () => {
+      clearTimeout(vt)
       clearTimeout(t)
       document.body.style.overflow = ''
       document.body.style.position = ''
@@ -51,7 +55,7 @@ export default function VideoIntro({ onDismiss }) {
           {/* ── Video YouTube (desktop) / Vimeo background=1 (móvil — sí hace autoplay en iOS) ── */}
           <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
             {IS_MOBILE ? (
-              <iframe
+              videoReady && <iframe
                 src="https://player.vimeo.com/video/1202877882?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0"
                 style={{
                   position: 'absolute', top: '50%', left: '50%',
