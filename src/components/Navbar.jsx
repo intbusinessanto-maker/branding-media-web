@@ -21,9 +21,15 @@ export default function Navbar() {
     const onScroll = () => {
       setScrolled(window.scrollY > 30)
 
-      /* Oscurecer gradualmente al entrar en la sección CinematicText (id="cinematic-outer") */
-      const el = document.getElementById('cinematic-outer')
-      if (!el) return
+      /* Oscurecer al entrar en secciones oscuras: CinematicText o Comparison */
+      const cinematic   = document.getElementById('cinematic-outer')
+      const comparison  = document.getElementById('comparison-outer')
+      const el = [cinematic, comparison].find(e => {
+        if (!e) return false
+        const r = e.getBoundingClientRect()
+        return r.top < window.innerHeight && r.bottom > 0
+      })
+      if (!el) { setDark(0); return }
       const rect  = el.getBoundingClientRect()
       const vh    = window.innerHeight
       const FADE  = 280  // px de transición suave antes/después

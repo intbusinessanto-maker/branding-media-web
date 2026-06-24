@@ -127,12 +127,12 @@ export default function LogoShowcase() {
           .social-bubble { animation-duration: 5s !important; }
 
           /* === FILA SUPERIOR — muy cerca del eslogan === */
-          /* LinkedIn — arriba izquierda */
-          .social-linkedin { top: 18% !important; left: 5% !important; right: auto !important; }
+          /* LinkedIn — arriba izquierda, más cerca del eslogan */
+          .social-linkedin { top: 30% !important; left: 3% !important; right: auto !important; }
           .social-linkedin > div { width: 64px !important; height: 64px !important; }
 
-          /* Instagram — arriba derecha */
-          .social-instagram { top: 20% !important; left: auto !important; right: 5% !important; }
+          /* Instagram — arriba derecha, más cerca del eslogan */
+          .social-instagram { top: 31% !important; left: auto !important; right: 3% !important; }
           .social-instagram > div { width: 56px !important; height: 56px !important; }
 
           /* === FILA INFERIOR — debajo del eslogan === */

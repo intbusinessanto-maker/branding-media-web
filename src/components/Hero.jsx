@@ -17,10 +17,26 @@ export default function Hero({ videoActive = true }) {
       {/* Fondo base */}
       <div style={{ position: 'absolute', inset: 0, background: '#0a0a0a', pointerEvents: 'none' }} />
 
-      {/* Móvil: gradiente visual ya que YouTube no hace autoplay en iOS/Android */}
+      {/* Móvil: Vimeo background continúa desde el VideoIntro (misma URL = caché caliente) */}
+      {!isDesktop && videoActive && (
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+          <iframe
+            src="https://player.vimeo.com/video/1202877882?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0"
+            style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 'max(100vw, 177.78vh)', height: 'max(100vh, 56.25vw)',
+              border: 'none',
+            }}
+            allow="autoplay; fullscreen"
+            title=""
+          />
+        </div>
+      )}
+      {/* Gradiente oscuro sobre el video en móvil */}
       {!isDesktop && (
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse at 25% 30%, rgba(139,63,168,0.45) 0%, transparent 55%), radial-gradient(ellipse at 75% 70%, rgba(0,196,173,0.25) 0%, transparent 55%)' }} />
+          background: 'radial-gradient(ellipse at 25% 30%, rgba(139,63,168,0.35) 0%, transparent 55%), rgba(0,0,0,0.45)' }} />
       )}
 
       {/* Video fondo YouTube — solo desktop */}

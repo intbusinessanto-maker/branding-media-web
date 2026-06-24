@@ -197,11 +197,11 @@ export default function Formats() {
         overflow: 'hidden', background: 'transparent',
       }}>
 
-        {/* ── Estatua: en mobile más pequeña y pegada abajo-izquierda ── */}
+        {/* ── Estatua: en mobile más grande ── */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0,
-          width: isMobile ? 'clamp(130px, 36vw, 200px)' : 'clamp(220px, 30vw, 440px)',
-          height: isMobile ? '55%' : '92%',
+          width: isMobile ? 'clamp(150px, 42vw, 230px)' : 'clamp(220px, 30vw, 440px)',
+          height: isMobile ? '72%' : '92%',
           pointerEvents: 'none', zIndex: 1,
         }}>
           <img src={STATUE_URL} alt="" loading="lazy"
@@ -262,14 +262,14 @@ export default function Formats() {
         </div>
         )}
 
-        {/* ── MÓVIL: CARRUSEL — un card a la vez, se desdobla desde el megáfono ── */}
+        {/* ── MÓVIL: CARRUSEL — tarjetas rectangulares estilo blog, desdoble desde megáfono ── */}
         {isMobile && (
-          /* Contenedor con overflow hidden para que las salidas a la derecha no se vean */
           <div style={{
             position: 'absolute',
-            top: '58px', bottom: '40px',
-            left: 'clamp(126px, 35vw, 196px)',
-            right: '8px',
+            /* Espacio a la derecha de la estatua, centrado verticalmente */
+            top: '50%', transform: 'translateY(-50%)',
+            left: 'clamp(148px, 41vw, 224px)',
+            right: '10px',
             overflow: 'hidden',
             zIndex: 2,
           }}>
@@ -285,26 +285,35 @@ export default function Formats() {
                 }}
                 onClick={() => setActiveFormat(f)}
               >
+                {/* Tarjeta con proporción rectangular fija, como las del Blog */}
                 <div style={{
-                  width: '100%', height: '100%',
-                  padding: '14px 16px', boxSizing: 'border-box',
-                  borderRadius: '14px', background: '#fff',
-                  border: `1px solid ${f.border}`, borderLeft: `4px solid ${f.color}`,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
-                  cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '8px',
+                  width: '100%',
+                  padding: '20px 18px',
+                  boxSizing: 'border-box',
+                  borderRadius: '16px',
+                  background: '#fff',
+                  border: `1px solid ${f.border}`,
+                  borderTop: `4px solid ${f.color}`,
+                  boxShadow: '0 6px 28px rgba(0,0,0,0.12)',
+                  cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', gap: '10px',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '2px 8px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{f.tag}</span>
-                    <span style={{ fontSize: '10px', color: f.color, fontWeight: 600 }}>Ver →</span>
+                    <span style={{ fontSize: '9px', fontWeight: 800, color: f.color, background: f.bg,
+                      border: `1px solid ${f.border}`, padding: '3px 10px', borderRadius: '100px',
+                      letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
+                    <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver ejemplos →</span>
                   </div>
                   <div>
-                    <h3 style={{ fontSize: 'clamp(1.4rem,5.5vw,1.9rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 4px' }}>{f.title}</h3>
-                    <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: '0 0 6px' }}>{f.subtitle}</p>
-                    <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.55, margin: 0 }}>{f.description}</p>
+                    <h3 style={{ fontSize: 'clamp(1.6rem, 6.5vw, 2.2rem)', fontWeight: 900, color: f.color,
+                      letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 5px' }}>{f.title}</h3>
+                    <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, margin: '0 0 8px' }}>{f.subtitle}</p>
+                    <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.6, margin: 0 }}>{f.description}</p>
                   </div>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px', marginTop: 'auto' }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid',
+                    gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
                     {f.features.map(feat => (
-                      <li key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '10px', color: '#666' }}>
+                      <li key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
                         <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '4px' }} />
                         {feat}
                       </li>

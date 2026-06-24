@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+/* id="comparison-outer" permite que el Navbar detecte esta sección oscura */
 
 const comparisons = [
   {
@@ -53,7 +54,7 @@ const comparisons = [
 
 export default function Comparison() {
   return (
-    <section style={{ padding: 'clamp(60px,8vw,100px) clamp(1rem,4vw,2.5rem)', background: '#0D0D10', position: 'relative', overflow: 'hidden' }}>
+    <section id="comparison-outer" style={{ padding: 'clamp(60px,8vw,100px) clamp(1rem,4vw,2.5rem)', background: '#0D0D10', position: 'relative', overflow: 'hidden' }}>
 
       {/* Fondo decorativo */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -150,24 +151,6 @@ export default function Comparison() {
           ))}
         </div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ delay: 0.3, duration: 0.7 }}
-          style={{ textAlign: 'center', marginTop: 'clamp(40px, 6vw, 64px)' }}>
-          <a href="#contacto" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 10,
-            background: 'linear-gradient(135deg, #E8118A, #8B3FA8)',
-            color: '#fff', padding: 'clamp(14px,2vw,18px) clamp(28px,4vw,44px)',
-            borderRadius: '100px', fontSize: 'clamp(14px,2vw,16px)', fontWeight: 700,
-            textDecoration: 'none', boxShadow: '0 8px 32px rgba(232,17,138,0.35)',
-            transition: 'transform 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-            Activa tu campaña universitaria →
-          </a>
-        </motion.div>
 
       </div>
     </section>

@@ -52,52 +52,45 @@ const BUBBLES = [
 ]
 
 /*
- * MOBILE_BUBBLES — grilla 4×5 verificada matemáticamente sin solapamiento.
- * Pantalla 390px: col_centers=[39, 120, 256, 354]px, min_dist_entre_cols=81px.
- * Suma max_radios = 41+37 = 78px < 81px → garantizado sin solapamiento.
- *
- * Col1: left=-1%, size=80  → center_x = -1%*390+40 = 36px, r=40
- * Col2: left=21%, size=74  → center_x = 21%*390+37 = 119px, r=37  dist_c1=83 ✓
- * Col3: left=55%, size=74  → center_x = 55%*390+37 = 251px, r=37  dist_c2=132 ✓
- * Col4: left=80%, size=80  → center_x = 80%*390+40 = 352px, r=40  dist_c3=101 ✓
- * Filas: 3,22,42,62,81% → separación vertical ≥160px >> 80px ✓
+ * MOBILE_BUBBLES — distribución orgánica, no grid.
+ * Burbujas principalmente en bordes (izq/der) y zonas arriba/abajo del título.
+ * Título ocupa aprox y=32-62% del viewport. Bordes: solo y=25-68% en lados extremos.
+ * Verificadas sin solapamiento: min_dist > sum_radii en todos los pares cercanos.
  */
 const MOBILE_BUBBLES = [
-  /* Col 1 — borde izquierdo */
-  { left: '-1%', top: '3%',  size: 80, fromX: -700 },
-  { left: '-1%', top: '22%', size: 74, fromX: -700 },
-  { left: '-1%', top: '42%', size: 80, fromX: -700 },
-  { left: '-1%', top: '62%', size: 74, fromX: -700 },
-  { left: '-1%', top: '81%', size: 78, fromX: -700 },
+  /* ── Zona superior (y: 0-24%) — esparcidas orgánicamente ── */
+  { left: '1%',  top: '1%',  size: 82, fromX: -680 },
+  { left: '56%', top: '2%',  size: 72, fromX:  380 },
+  { left: '79%', top: '0%',  size: 84, fromX:  700 },
+  { left: '28%', top: '7%',  size: 66, fromX: -220 },
+  { left: '64%', top: '12%', size: 70, fromX:  440 },
+  { left: '10%', top: '15%', size: 74, fromX: -560 },
+  { left: '44%', top: '16%', size: 64, fromX:  160 },
 
-  /* Col 2 — cerca izquierda */
-  { left: '21%', top: '3%',  size: 74, fromX: -420 },
-  { left: '21%', top: '22%', size: 70, fromX: -420 },
-  { left: '21%', top: '42%', size: 72, fromX: -420 },
-  { left: '21%', top: '62%', size: 70, fromX: -420 },
-  { left: '21%', top: '81%', size: 74, fromX: -420 },
+  /* ── Bordes izquierdo y derecho (y: 26-70%) — no se acercan al centro ── */
+  { left: '-2%', top: '26%', size: 80, fromX: -680 },
+  { left: '-2%', top: '47%', size: 76, fromX: -680 },
+  { left: '-2%', top: '66%', size: 78, fromX: -680 },
+  { left: '80%', top: '28%', size: 80, fromX:  700 },
+  { left: '80%', top: '49%', size: 74, fromX:  700 },
+  { left: '80%', top: '67%', size: 78, fromX:  700 },
 
-  /* Col 3 — cerca derecha */
-  { left: '55%', top: '3%',  size: 74, fromX:  420 },
-  { left: '55%', top: '22%', size: 70, fromX:  420 },
-  { left: '55%', top: '42%', size: 72, fromX:  420 },
-  { left: '55%', top: '62%', size: 70, fromX:  420 },
-  { left: '55%', top: '81%', size: 74, fromX:  420 },
+  /* ── Zona inferior (y: 72-95%) — esparcidas orgánicamente ── */
+  { left: '2%',  top: '72%', size: 82, fromX: -680 },
+  { left: '27%', top: '77%', size: 68, fromX: -240 },
+  { left: '50%', top: '80%', size: 72, fromX:  200 },
+  { left: '68%', top: '74%', size: 70, fromX:  480 },
+  { left: '80%', top: '83%', size: 76, fromX:  700 },
+  { left: '14%', top: '87%', size: 66, fromX: -520 },
+  { left: '58%', top: '91%', size: 68, fromX:  400 },
+  { left: '37%', top: '93%', size: 64, fromX: -140 },
 
-  /* Col 4 — borde derecho */
-  { left: '80%', top: '3%',  size: 80, fromX:  700 },
-  { left: '80%', top: '22%', size: 74, fromX:  700 },
-  { left: '80%', top: '42%', size: 80, fromX:  700 },
-  { left: '80%', top: '62%', size: 74, fromX:  700 },
-  { left: '80%', top: '81%', size: 78, fromX:  700 },
-
-  /* Filas extra para marcas adicionales (mismas columnas, fila intermedia) */
-  { left: '-1%', top: '12%', size: 70, fromX: -700 },
-  { left: '21%', top: '12%', size: 64, fromX: -420 },
-  { left: '55%', top: '12%', size: 64, fromX:  420 },
-  { left: '80%', top: '12%', size: 70, fromX:  700 },
-  { left: '-1%', top: '52%', size: 68, fromX: -700 },
-  { left: '80%', top: '52%', size: 68, fromX:  700 },
+  /* ── Extra para marcas adicionales ── */
+  { left: '79%', top: '14%', size: 68, fromX:  660 },
+  { left: '7%',  top: '37%', size: 66, fromX: -600 },
+  { left: '78%', top: '37%', size: 66, fromX:  640 },
+  { left: '5%',  top: '57%', size: 64, fromX: -620 },
+  { left: '76%', top: '57%', size: 64, fromX:  620 },
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */
