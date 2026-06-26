@@ -1,8 +1,12 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
 const BASE = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/'
+
+const IS_MOBILE_INIT = typeof window !== 'undefined'
+  ? window.matchMedia('(max-width: 767px)').matches
+  : false
 
 /* Fallback estático mientras carga o si Supabase no responde */
 const FALLBACK_IMAGES = [
@@ -291,20 +295,34 @@ function SectionHeader() {
 
 export default function Cases() {
   const ref = useRef(null)
-  const [activeBrand, setActiveBrand] = useState(null)   // objeto marca o null
-  const [isMobile, setIsMobile]       = useState(false)
+  const [activeBrand, setActiveBrand] = useState(null)
+  const [isMobile, setIsMobile]       = useState(IS_MOBILE_INIT)
   const [brands, setBrands]           = useState(FALLBACK_IMAGES)
 
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
+  /* Fetch diferido: solo cuando la sección está a ~1000px del viewport.
+     Evita un setState en el mount inicial que recrea 26 springs simultáneamente. */
   useEffect(() => {
-    supabase.from('brands').select('id,name,logo_url').eq('visible', true).order('created_at')
-      .then(({ data }) => { if (data?.length) setBrands(data) })
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        observer.disconnect()
+        supabase.from('brands').select('id,name,logo_url').eq('visible', true).order('created_at')
+          .then(({ data }) => { if (data?.length) setBrands(data) })
+      },
+      { rootMargin: '1000px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })

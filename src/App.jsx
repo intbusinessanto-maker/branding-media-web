@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Navbar        from './components/Navbar'
 import VideoIntro    from './components/VideoIntro'
 import Hero          from './components/Hero'
@@ -17,7 +17,15 @@ import Footer        from './components/Footer'
 
 const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
-/* Cursor personalizado — punto negro que sigue al mouse */
+/*
+ * matchMedia es más fiable que innerWidth — usa exactamente la misma lógica
+ * que las CSS media queries, incluyendo zoom del sistema y DPR correctos.
+ */
+const IS_MOBILE_INIT = typeof window !== 'undefined'
+  ? window.matchMedia('(max-width: 767px)').matches
+  : false
+
+/* Solo desktop: cursor personalizado con RAF loop */
 function CustomCursor() {
   const dotRef = useRef(null)
 
@@ -30,7 +38,6 @@ function CustomCursor() {
     const onLeave = () => { x = -100; y = -100 }
 
     const tick = () => {
-      // Lerp casi inmediato — sin delay perceptible
       cx += (x - cx) * 0.85
       cy += (y - cy) * 0.85
       if (dotRef.current) {
@@ -54,29 +61,22 @@ function CustomCursor() {
     <div
       ref={dotRef}
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '14px',
-        height: '14px',
-        marginLeft: '-7px',
-        marginTop: '-7px',
-        borderRadius: '50%',
-        backgroundColor: '#fff',
-        mixBlendMode: 'difference',
-        pointerEvents: 'none',
-        zIndex: 99999,
-        willChange: 'transform',
+        position: 'fixed', top: 0, left: 0,
+        width: '14px', height: '14px',
+        marginLeft: '-7px', marginTop: '-7px',
+        borderRadius: '50%', backgroundColor: '#fff',
+        mixBlendMode: 'difference', pointerEvents: 'none',
+        zIndex: 99999, willChange: 'transform',
       }}
     />
   )
 }
 
 /*
- * Fondo interactivo de la página:
- *  1. Fondo 2.png — imagen fija que se mueve sutilmente con el mouse (efecto papel)
- *  2. Capa #E9E9E9 + puntos — gran círculo fijo en el centro revela la imagen;
- *     los puntos solo aparecen en los bordes de la pantalla (vignette estática)
+ * Solo desktop: fondo de papel con parallax de mouse.
+ * En móvil NO se renderiza — en iOS los elementos position:fixed crean capas GPU
+ * independientes que pueden aparecer sobre el contenido normal, lo que causaba
+ * que el fondo de periódico (Fondo 2.png) se viera en el Hero en lugar del video.
  */
 function InteractiveBackground() {
   const bgRef = useRef(null)
@@ -92,17 +92,13 @@ function InteractiveBackground() {
     }
 
     const tick = () => {
-      // Lerp lento → inercia de papel al deslizarse
       cpx += (px - cpx) * 0.038
       cpy += (py - cpy) * 0.038
-
       if (bgRef.current) {
-        // ±11px máximo de desplazamiento
         const dx = (cpx - 0.5) * -22
         const dy = (cpy - 0.5) * -22
         bgRef.current.style.transform = `translate(${dx}px, ${dy}px) scale(1.12)`
       }
-
       rafId = requestAnimationFrame(tick)
     }
 
@@ -115,21 +111,17 @@ function InteractiveBackground() {
   }, [])
 
   return (
-    <>
-      {/* ① Fondo 2.png — se mueve con el mouse (efecto papel sutil) */}
-      <div
-        ref={bgRef}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          pointerEvents: 'none',
-          backgroundImage: `url(${PAGE_BG_URL})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          willChange: 'transform',
-        }}
-      />
-
-    </>
+    <div
+      ref={bgRef}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 0,
+        pointerEvents: 'none',
+        backgroundImage: `url(${PAGE_BG_URL})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        willChange: 'transform',
+      }}
+    />
   )
 }
 
@@ -137,6 +129,39 @@ export default function App() {
   const [introVisible, setIntroVisible] = useState(
     () => !sessionStorage.getItem('bm_intro_seen')
   )
+  /*
+   * Solo el Hero renderiza en t=0 (una sección, sin hooks de Framer Motion).
+   * Todo lo demás monta cuando el browser está idle o tras 700ms máximo.
+   * requestIdleCallback se adapta a la carga real del dispositivo; el fallback
+   * garantiza que en iOS < 15 (sin rIC) se use setTimeout como respaldo.
+   * Sin esto, los >100 motion values + fetch de Supabase del render inicial
+   * saturan el hilo principal y retrasan los IO callbacks de whileInView,
+   * haciendo que nada aparezca hasta que el usuario llega a Comparison.
+   */
+  const [deferred, setDeferred] = useState(false)
+  useEffect(() => {
+    const mount = () => setDeferred(true)
+    if (typeof requestIdleCallback !== 'undefined') {
+      const id = requestIdleCallback(mount, { timeout: 700 })
+      return () => cancelIdleCallback(id)
+    }
+    const id = setTimeout(mount, 600)
+    return () => clearTimeout(id)
+  }, [])
+
+  /*
+   * matchMedia: mismo mecanismo que CSS. Se suscribe a cambios (orientación, zoom)
+   * para mantener el valor correcto sin polling. useLayoutEffect corre antes del
+   * primer paint → nunca se renderiza InteractiveBackground en móvil.
+   */
+  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   return (
     <>
@@ -148,26 +173,30 @@ export default function App() {
       )}
 
       <div style={{ minHeight: '100vh', position: 'relative' }}>
-        <CustomCursor />
-        <InteractiveBackground />
+        {!isMobile && <CustomCursor />}
+        {!isMobile && <InteractiveBackground />}
 
         <div style={{ position: 'relative', zIndex: 2 }}>
           <Navbar />
           <main>
             <Hero videoActive={!introVisible} />
-            <Stats />
-            <BrandCarousel />
-            <CinematicText />
-            <ColombiaMap />
-            <LogoShowcase />
-            <Formats />
-            <Audience />
-            <Cases />
-            <Comparison />
-            <Blog />
-            <Contact />
+            {deferred && (
+              <>
+                <Stats />
+                <BrandCarousel />
+                <CinematicText />
+                <ColombiaMap />
+                <LogoShowcase />
+                <Formats />
+                <Audience />
+                <Cases />
+                <Comparison />
+                <Blog />
+                <Contact />
+              </>
+            )}
           </main>
-          <Footer />
+          {deferred && <Footer />}
         </div>
       </div>
     </>

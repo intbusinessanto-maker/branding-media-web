@@ -188,10 +188,7 @@ export default function ColombiaMap() {
     let cityTimers = []
     let tDone
 
-    /* Scroll suave a la sección sin bloquear */
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-
-    /* Pequeña pausa para que el scroll suave llegue antes de animar */
+    /* Pequeña pausa antes de animar las ciudades */
     const startTimer = setTimeout(() => {
       cityTimers = CITIES.map((_, i) =>
         setTimeout(() => setSeqIdx(i), i * STEP_MS)

@@ -28,7 +28,16 @@ export default function BrandCarousel() {
       })
   }, [])
 
-  if (images.length === 0) return null
+  /* No retornar null — causa layout shift de 0→800px cuando carga Supabase,
+     desplazando CinematicText y rompiendo su scroll tracking. */
+  if (images.length === 0) return (
+    <section style={{
+      padding: '80px 2rem', background: '#fff',
+      borderTop: '1px solid rgba(0,0,0,0.06)',
+      borderBottom: '1px solid rgba(0,0,0,0.06)',
+      minHeight: '200px',
+    }} />
+  )
 
   return (
     <section style={{
