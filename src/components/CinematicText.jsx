@@ -1,34 +1,49 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
-const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua_y_publico-removebg-preview%20(1)%20(1).png'
-const VIMEO_ID   = '1201924875'
-
-/* Frase única dividida en 3 tiempos para no sobrecargar la lectura */
 const PHRASES = [
   { normal: 'más de 8 millones',       highlight: 'de personas al mes' },
   { normal: 'estudiantes, docentes,',  highlight: 'administrativos' },
   { normal: 'y padres',                highlight: 'de familia' },
 ]
 
+const VIMEO_ID   = '1204931565'
+const VIMEO_HASH = '2f09718362'
+
+const IS_MOBILE_INIT = typeof window !== 'undefined'
+  ? window.matchMedia('(max-width: 767px)').matches
+  : false
+
 export default function CinematicText() {
   const ref = useRef(null)
+  const [isMobile, setIsMobile]   = useState(IS_MOBILE_INIT)
   const [showVideo, setShowVideo] = useState(false)
 
-  /* Cargar iframe Vimeo cuando la sección entra en el viewport (desktop y móvil).
-     Vimeo background=1 sí hace autoplay en móvil (a diferencia de YouTube). */
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  /*
+   * Desktop: rootMargin 600px → el video preacarga antes de que el usuario llegue.
+   * Móvil: rootMargin 0px → el video carga solo cuando la sección entra en viewport,
+   * después de que el texto ya sea visible. Evita bloquear el render en móvil.
+   */
   useEffect(() => {
+    if (showVideo) return
     const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setShowVideo(true); observer.disconnect() } },
-      { rootMargin: '200px' }
+      { rootMargin: isMobile ? '0px' : '600px' }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [isMobile, showVideo])
 
-  /* ── Progreso de scroll → activa las frases ── */
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
   const op0 = useTransform(scrollYProgress, [0.00, 0.06, 0.27, 0.33], [0, 1, 1, 0])
@@ -45,44 +60,42 @@ export default function CinematicText() {
   ]
 
   return (
-    /* Contenedor 300vh — da espacio de scroll para las 3 frases */
     <div ref={ref} id="cinematic-outer" style={{ height: '300vh', position: 'relative' }}>
-
-      {/* Sección sticky — siempre visible mientras el usuario baja */}
       <div style={{
         position: 'sticky', top: 0, height: '100vh',
         background: '#0D0D0D', overflow: 'hidden',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
 
-        {/* ① Video Vimeo — se carga solo cuando la sección entra en vista */}
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 1 }}>
+        {/* Video Vimeo como fondo — desktop preacarga, móvil carga al entrar */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', background: '#000' }}>
           {showVideo && (
             <iframe
-              src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0&quality=auto`}
+              src={`https://player.vimeo.com/video/${VIMEO_ID}?h=${VIMEO_HASH}&background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0`}
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
               style={{
                 position: 'absolute',
                 top: '50%', left: '50%',
+                width: 'max(100vw, 177.78vh)',
+                height: 'max(100vh, 56.25vw)',
                 transform: 'translate(-50%, -50%)',
-                width: 'calc(100vh * 1.7778)',
-                height: '100vh',
-                minWidth: '100%',
-                minHeight: '100%',
                 border: 'none',
+                pointerEvents: 'none',
               }}
-              allow="autoplay; fullscreen; picture-in-picture"
-              title=""
+              title="Branding Media cifras"
             />
           )}
         </div>
 
-        {/* ② Viñeta circular — centro semitransparente, bordes muy oscuros */}
+        {/* Viñeta circular: centro semitransparente, bordes muy oscuros */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
           background: 'radial-gradient(circle 44vmin at 50% 50%, rgba(13,13,13,0.18) 0%, rgba(13,13,13,0.42) 40%, rgba(13,13,13,0.78) 65%, rgba(13,13,13,0.97) 90%)',
         }} />
 
-        {/* ③ Puntos — solo en el área oscura alrededor del foco */}
+        {/* Puntos en el área oscura */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
           backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
@@ -91,9 +104,7 @@ export default function CinematicText() {
           WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
 
-        {/* ④ Imagen estatua — eliminada, el video de fondo se ve en todos los tamaños */}
-
-        {/* ⑤ Frases — una a la vez, controladas por scroll */}
+        {/* Frases — una a la vez, controladas por scroll */}
         {layers.map((layer, i) => (
           <motion.div
             key={i}

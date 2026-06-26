@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
 const MOBILE_IMG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/vista%20celuar.png'
@@ -10,7 +10,8 @@ const pillars = [
   { number: '04', title: 'Baja saturación publicitaria', body: 'El entorno universitario tiene menos ruido publicitario que canales digitales o vía pública masiva, generando mayor impacto.',                  color: '#00C4AD' },
 ]
 
-const VIMEO_ID = '1202877882'
+const VIMEO_ID   = '1204915287'
+const VIMEO_HASH = 'e67a7306af'
 
 /*
  * ── MÓVIL — scroll-based como CinematicText ──
@@ -113,18 +114,21 @@ function MobileAudience() {
   )
 }
 
+const IS_MOBILE_INIT = typeof window !== 'undefined'
+  ? window.matchMedia('(max-width: 767px)').matches
+  : false
+
 /* ── DESKTOP ── */
 export default function NewspaperAudience() {
-  /* Inicialización síncrona — evita que desktop Vimeo se cargue en móvil */
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  )
+  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
   const [showVideo, setShowVideo] = useState(false)
 
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   const ref = useRef(null)
@@ -180,7 +184,7 @@ export default function NewspaperAudience() {
          */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', background: '#000' }}>
           {showVideo && <iframe
-            src={`https://player.vimeo.com/video/${VIMEO_ID}?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0`}
+            src={`https://player.vimeo.com/video/${VIMEO_ID}?h=${VIMEO_HASH}&background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0`}
             frameBorder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             allowFullScreen
