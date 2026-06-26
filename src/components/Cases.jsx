@@ -31,7 +31,7 @@ const BUBBLES = [
   { left: '43%', top: '90%', size: 122, fromX:  -600 },
   { left: '55%', top: '0%',  size: 155, fromX:   750 },
   { left: '54%', top: '86%', size: 138, fromX:   750 },
-  { left: '65%', top: '7%',  size: 162, fromX:  1100 },
+  { left: '65%', top: '24%', size: 148, fromX:  1100 },
   { left: '67%', top: '51%', size: 135, fromX:  1100 },
   { left: '63%', top: '80%', size: 168, fromX:  1100 },
   { left: '76%', top: '3%',  size: 178, fromX:  1600 },
@@ -73,14 +73,14 @@ const MOBILE_BUBBLES = [
 
   /* ── Bordes izquierdo y derecho (y: 26-70%) — no se acercan al centro ── */
   { left: '-2%', top: '26%', size: 80, fromX: -680 },
-  { left: '-2%', top: '47%', size: 76, fromX: -680 },
+  { left: '-8%', top: '47%', size: 72, fromX: -680 },
   { left: '-2%', top: '66%', size: 78, fromX: -680 },
   { left: '80%', top: '28%', size: 80, fromX:  700 },
-  { left: '80%', top: '49%', size: 74, fromX:  700 },
+  { left: '86%', top: '49%', size: 70, fromX:  700 },
   { left: '80%', top: '67%', size: 78, fromX:  700 },
 
   /* ── Zona inferior (y: 72-95%) — esparcidas orgánicamente ── */
-  { left: '2%',  top: '72%', size: 82, fromX: -680 },
+  { left: '2%',  top: '78%', size: 76, fromX: -680 },
   { left: '27%', top: '77%', size: 68, fromX: -240 },
   { left: '50%', top: '80%', size: 72, fromX:  200 },
   { left: '68%', top: '74%', size: 70, fromX:  480 },
@@ -90,7 +90,7 @@ const MOBILE_BUBBLES = [
   { left: '37%', top: '93%', size: 64, fromX: -140 },
 
   /* ── Extra para marcas adicionales ── */
-  { left: '79%', top: '14%', size: 68, fromX:  660 },
+  { left: '86%', top: '20%', size: 58, fromX:  700 },
   { left: '7%',  top: '37%', size: 66, fromX: -600 },
   { left: '78%', top: '37%', size: 66, fromX:  640 },
   { left: '5%',  top: '57%', size: 64, fromX: -620 },

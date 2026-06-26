@@ -110,9 +110,11 @@ function FormatPopup({ format, onClose }) {
 
 /* ── Sección principal ── */
 export default function Formats() {
-  const ref = useRef(null)
+  const ref        = useRef(null)
+  const carouselRef = useRef(null)
   const [activeFormat, setActiveFormat] = useState(null)
   const [visibleCount, setVisibleCount] = useState(0)
+  const [activeCard, setActiveCard]     = useState(0)
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
   )
@@ -256,15 +258,15 @@ export default function Formats() {
       )}
 
       {/* ══════════════════════════════════════════════
-          MÓVIL: layout estático — estatua izquierda,
-          3 tarjetas apiladas a la derecha, misma base.
-          El megáfono apunta hacia los bloques.
+          MÓVIL: carrusel horizontal — DOOH → OOH → Activaciones.
+          Estatua fija en izquierda (no scroll), sobresale 8vw sobre
+          cada card. Dots táctiles para navegar entre slides.
           ══════════════════════════════════════════════ */}
       {isMobile && (
         <section id="formatos" style={{ background: 'transparent', padding: '32px 0 44px' }}>
 
           {/* Header */}
-          <div style={{ textAlign: 'center', padding: '0 8px 24px', position: 'relative', zIndex: 2 }}>
+          <div style={{ textAlign: 'center', padding: '0 8px 20px', position: 'relative', zIndex: 2 }}>
             <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 6 }}>
               Formatos
             </span>
@@ -274,14 +276,15 @@ export default function Formats() {
           </div>
 
           {/*
-           * Layout: estatua (izquierda absoluta) + cards (derecha en flujo normal).
-           * La estatua tiene top:0, bottom:0 → misma altura que el stack de cards.
-           * El solapamiento de 8vw (estatua 50vw, cards desde 42vw) coloca la
-           * estatua delante de los bloques, megáfono apuntando hacia ellos.
+           * Estatua + carrusel en contenedor relativo.
+           * La estatua está absolutamente posicionada (no scrollea con las cards).
+           * Cada slide = 100vw con paddingLeft:42vw → cards arrancan donde termina la estatua.
+           * El solapamiento 8vw hace que la estatua tape el borde izquierdo de cada card,
+           * apuntando el megáfono hacia el bloque visible.
            */}
-          <div style={{ position: 'relative', paddingLeft: '42vw', paddingRight: '12px' }}>
+          <div style={{ position: 'relative' }}>
 
-            {/* Estatua: anchada top y bottom — misma base que los cards */}
+            {/* Estatua fija — misma altura que el carrusel (top:0 bottom:0) */}
             <div style={{
               position: 'absolute', left: 0, top: 0, bottom: 0,
               width: '50vw', pointerEvents: 'none', zIndex: 5,
@@ -290,51 +293,98 @@ export default function Formats() {
                 style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
             </div>
 
-            {/* Cards apiladas — mismos tamaños que en la captura de referencia */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Carrusel horizontal con scroll-snap */}
+            <style>{`.fm-carousel::-webkit-scrollbar{display:none}`}</style>
+            <div
+              ref={carouselRef}
+              className="fm-carousel"
+              onScroll={() => {
+                if (!carouselRef.current) return
+                const idx = Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth)
+                setActiveCard(idx)
+              }}
+              style={{
+                display: 'flex',
+                overflowX: 'scroll',
+                scrollSnapType: 'x mandatory',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
               {formats.map((f, i) => (
-                <motion.div
-                  key={f.title}
-                  initial={{ opacity: 0, x: 24 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: '-20px' }}
-                  transition={{ delay: i * 0.1, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  onClick={() => setActiveFormat(f)}
-                >
-                  <div style={{
-                    padding: '18px 16px',
-                    borderRadius: '16px',
-                    background: '#fff',
-                    border: `1px solid ${f.border}`,
-                    borderTop: `4px solid ${f.color}`,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
-                    cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column', gap: '10px',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '9px', fontWeight: 800, color: f.color, background: f.bg,
-                        border: `1px solid ${f.border}`, padding: '4px 12px', borderRadius: '100px',
-                        letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
-                      <span style={{ fontSize: '11px', color: f.color, fontWeight: 700 }}>Ver ejemplos →</span>
+                <div key={f.title} style={{
+                  flexShrink: 0,
+                  width: '100vw',
+                  scrollSnapAlign: 'start',
+                  paddingLeft: '42vw',
+                  paddingRight: '12px',
+                  boxSizing: 'border-box',
+                }}>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-10px' }}
+                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    onClick={() => setActiveFormat(f)}
+                  >
+                    <div style={{
+                      padding: '18px 16px',
+                      borderRadius: '16px',
+                      background: '#fff',
+                      border: `1px solid ${f.border}`,
+                      borderTop: `4px solid ${f.color}`,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
+                      cursor: 'pointer',
+                      display: 'flex', flexDirection: 'column', gap: '10px',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{
+                          fontSize: '9px', fontWeight: 800, color: f.color, background: f.bg,
+                          border: `1px solid ${f.border}`, padding: '4px 12px', borderRadius: '100px',
+                          letterSpacing: '0.1em', textTransform: 'uppercase',
+                        }}>{f.tag}</span>
+                        <span style={{ fontSize: '11px', color: f.color, fontWeight: 700 }}>Ver ejemplos →</span>
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 4px' }}>{f.title}</h3>
+                        <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, margin: '0 0 6px' }}>{f.subtitle}</p>
+                        <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.55, margin: 0 }}>{f.description}</p>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                        {f.features.map(feat => (
+                          <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
+                            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
+                            {feat}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900, color: f.color,
-                        letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 4px' }}>{f.title}</h3>
-                      <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, margin: '0 0 6px' }}>{f.subtitle}</p>
-                      <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.55, margin: 0 }}>{f.description}</p>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                      {f.features.map(feat => (
-                        <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
-                          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
-                          {feat}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </div>
               ))}
             </div>
+
+            {/* Dots de navegación táctil */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, padding: '14px 0 0' }}>
+              {formats.map((f, i) => (
+                <button
+                  key={f.title}
+                  onClick={() => {
+                    if (!carouselRef.current) return
+                    carouselRef.current.scrollTo({ left: i * carouselRef.current.clientWidth, behavior: 'smooth' })
+                    setActiveCard(i)
+                  }}
+                  style={{
+                    all: 'unset', cursor: 'pointer', height: 5, borderRadius: 3,
+                    transition: 'all 0.3s ease',
+                    width: activeCard === i ? 22 : 5,
+                    background: activeCard === i ? f.color : 'rgba(0,0,0,0.12)',
+                  }}
+                />
+              ))}
+            </div>
+
           </div>
 
         </section>
