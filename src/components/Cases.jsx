@@ -2,7 +2,8 @@ import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
-const BASE = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/'
+const BASE     = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/'
+const FONDO_URL = `${BASE}Fondo%202.png`
 
 const IS_MOBILE_INIT = typeof window !== 'undefined'
   ? window.matchMedia('(max-width: 767px)').matches
@@ -62,39 +63,39 @@ const BUBBLES = [
  * Verificadas sin solapamiento: min_dist > sum_radii en todos los pares cercanos.
  */
 const MOBILE_BUBBLES = [
-  /* ── Zona superior (y: 0-24%) — esparcidas orgánicamente ── */
-  { left: '1%',  top: '1%',  size: 82, fromX: -680 },
-  { left: '56%', top: '2%',  size: 72, fromX:  380 },
-  { left: '79%', top: '0%',  size: 84, fromX:  700 },
-  { left: '28%', top: '7%',  size: 66, fromX: -220 },
-  { left: '64%', top: '12%', size: 70, fromX:  440 },
-  { left: '10%', top: '15%', size: 74, fromX: -560 },
-  { left: '44%', top: '16%', size: 64, fromX:  160 },
+  /* ── Zona superior (y: 5-24%) — bajadas para quedar cerca del título ── */
+  { left: '2%',  top: '8%',  size: 80, fromX: -680 },
+  { left: '54%', top: '7%',  size: 72, fromX:  380 },
+  { left: '78%', top: '5%',  size: 82, fromX:  700 },
+  { left: '27%', top: '12%', size: 66, fromX: -220 },
+  { left: '63%', top: '15%', size: 70, fromX:  440 },
+  { left: '10%', top: '20%', size: 74, fromX: -560 },
+  { left: '43%', top: '22%', size: 64, fromX:  160 },
 
-  /* ── Bordes izquierdo y derecho (y: 26-70%) — no se acercan al centro ── */
-  { left: '-2%', top: '26%', size: 80, fromX: -680 },
-  { left: '-8%', top: '47%', size: 72, fromX: -680 },
-  { left: '-2%', top: '66%', size: 78, fromX: -680 },
-  { left: '80%', top: '28%', size: 80, fromX:  700 },
-  { left: '86%', top: '49%', size: 70, fromX:  700 },
-  { left: '80%', top: '67%', size: 78, fromX:  700 },
+  /* ── Bordes izq/der (y: 26-65%) — parcialmente fuera pero visibles ── */
+  { left: '-2%', top: '28%', size: 78, fromX: -680 },
+  { left: '-3%', top: '47%', size: 72, fromX: -680 },
+  { left: '-2%', top: '63%', size: 76, fromX: -680 },
+  { left: '80%', top: '30%', size: 78, fromX:  700 },
+  { left: '82%', top: '48%', size: 70, fromX:  700 },
+  { left: '80%', top: '65%', size: 76, fromX:  700 },
 
-  /* ── Zona inferior (y: 72-95%) — esparcidas orgánicamente ── */
-  { left: '2%',  top: '78%', size: 76, fromX: -680 },
-  { left: '27%', top: '77%', size: 68, fromX: -240 },
+  /* ── Zona inferior (y: 70-95%) ── */
+  { left: '3%',  top: '74%', size: 78, fromX: -680 },
+  { left: '26%', top: '78%', size: 68, fromX: -240 },
   { left: '50%', top: '80%', size: 72, fromX:  200 },
-  { left: '68%', top: '74%', size: 70, fromX:  480 },
-  { left: '80%', top: '83%', size: 76, fromX:  700 },
+  { left: '67%', top: '74%', size: 70, fromX:  480 },
+  { left: '80%', top: '83%', size: 74, fromX:  700 },
   { left: '14%', top: '87%', size: 66, fromX: -520 },
-  { left: '58%', top: '91%', size: 68, fromX:  400 },
-  { left: '37%', top: '93%', size: 64, fromX: -140 },
+  { left: '56%', top: '91%', size: 68, fromX:  400 },
+  { left: '36%', top: '93%', size: 64, fromX: -140 },
 
   /* ── Extra para marcas adicionales ── */
-  { left: '86%', top: '20%', size: 58, fromX:  700 },
-  { left: '7%',  top: '37%', size: 66, fromX: -600 },
-  { left: '78%', top: '37%', size: 66, fromX:  640 },
-  { left: '5%',  top: '57%', size: 64, fromX: -620 },
-  { left: '76%', top: '57%', size: 64, fromX:  620 },
+  { left: '82%', top: '20%', size: 60, fromX:  700 },
+  { left: '7%',  top: '38%', size: 62, fromX: -600 },
+  { left: '74%', top: '40%', size: 58, fromX:  640 },
+  { left: '6%',  top: '55%', size: 60, fromX: -620 },
+  { left: '76%', top: '58%', size: 58, fromX:  620 },
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */
@@ -336,8 +337,11 @@ export default function Cases() {
   return (
     <section ref={ref} id="casos" style={{ height: '200vh', position: 'relative' }}>
       <div
-        style={{ position: 'sticky', top: 0, height: '100vh', background: 'transparent',
-          overflow: isMobile ? 'hidden' : 'visible' }}
+        style={{
+          position: 'sticky', top: 0, height: '100vh',
+          overflow: isMobile ? 'hidden' : 'visible',
+          background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent',
+        }}
         onClick={handleClose}
       >
         {/* Burbujas */}
@@ -352,9 +356,9 @@ export default function Cases() {
           )
         })}
 
-        {/* Título centrado */}
+        {/* Título centrado — zIndex 10 en móvil para quedar siempre sobre las burbujas */}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
-          justifyContent: 'center', zIndex: 2, pointerEvents: 'none' }}>
+          justifyContent: 'center', zIndex: isMobile ? 10 : 2, pointerEvents: 'none' }}>
           <div style={{ textAlign: 'center', maxWidth: '680px', padding: '0 1.5rem', width: '100%' }}>
             <motion.span initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.6 }}
