@@ -157,9 +157,6 @@ export default function LogoShowcase() {
         }
       `}</style>
 
-      {/* Solo blob magenta suave — sin verde */}
-      <div style={{ position:'absolute', width:'clamp(220px,38vw,480px)', height:'clamp(220px,38vw,480px)', bottom:'10%', right:'8%', background:'radial-gradient(circle,rgba(232,17,138,0.18) 0%,rgba(232,17,138,0.06) 55%,transparent 75%)', filter:'blur(60px)', pointerEvents:'none', zIndex:0 }} />
-      <div style={{ position:'absolute', width:'clamp(160px,26vw,340px)', height:'clamp(160px,26vw,340px)', top:'8%', left:'8%', background:'radial-gradient(circle,rgba(232,17,138,0.12) 0%,transparent 70%)', filter:'blur(50px)', pointerEvents:'none', zIndex:0 }} />
 
       {/* Burbujas de redes sociales */}
       {SOCIALS.map((s, i) => <SocialBubble key={s.id} s={s} i={i} />)}

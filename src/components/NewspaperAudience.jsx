@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useLayoutEffect } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useMotionValue } from 'framer-motion'
 
 const MOBILE_IMG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/vista%20celuar.png'
 
@@ -14,26 +14,36 @@ const VIMEO_ID   = '1204915287'
 const VIMEO_HASH = 'e67a7306af'
 
 /*
- * ── MÓVIL — scroll-based como CinematicText ──
- * 500vh: encabezado + 4 pilares, cada uno ~100vh de scroll.
- * Los pilares se revelan y desvanecen uno a uno mientras el usuario baja.
+ * ── MÓVIL — slides ACUMULATIVOS ──
+ * Cada pilar aparece al hacer scroll y se QUEDA visible (no desaparece).
+ * A medida que el usuario baja, los pilares se van apilando verticalmente
+ * hasta que los 4 están visibles al mismo tiempo.
+ * Altura: 450vh (encabezado + 4 × ~85vh de scroll por pilar).
  */
 function MobileAudience() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
-  /* Header aparece al entrar */
-  const headerOp = useTransform(scrollYProgress, [0, 0.05], [0, 1])
+  /* maxProgress — solo crece, nunca retrocede — igual que en Formats desktop */
+  const maxProgress = useMotionValue(0)
+  useEffect(() => {
+    return scrollYProgress.on('change', v => {
+      if (v > maxProgress.get()) maxProgress.set(v)
+    })
+  }, [scrollYProgress, maxProgress])
 
-  /* Pilares — fade in/out escalonado, uno visible a la vez */
-  const op0 = useTransform(scrollYProgress, [0.05, 0.11, 0.22, 0.27], [0, 1, 1, 0])
-  const y0  = useTransform(scrollYProgress, [0.05, 0.14], [22, 0])
-  const op1 = useTransform(scrollYProgress, [0.27, 0.33, 0.47, 0.52], [0, 1, 1, 0])
-  const y1  = useTransform(scrollYProgress, [0.27, 0.36], [22, 0])
-  const op2 = useTransform(scrollYProgress, [0.52, 0.58, 0.72, 0.77], [0, 1, 1, 0])
-  const y2  = useTransform(scrollYProgress, [0.52, 0.61], [22, 0])
-  const op3 = useTransform(scrollYProgress, [0.77, 0.83, 0.97, 1.00], [0, 1, 1, 0])
-  const y3  = useTransform(scrollYProgress, [0.77, 0.86], [22, 0])
+  /* Header aparece al entrar */
+  const headerOp = useTransform(maxProgress, [0, 0.06], [0, 1])
+
+  /* Pilares — solo fade-in/slide-in, SIN fade-out (se quedan) */
+  const op0 = useTransform(maxProgress, [0.06, 0.14], [0, 1])
+  const y0  = useTransform(maxProgress, [0.06, 0.16], [28, 0])
+  const op1 = useTransform(maxProgress, [0.28, 0.36], [0, 1])
+  const y1  = useTransform(maxProgress, [0.28, 0.38], [28, 0])
+  const op2 = useTransform(maxProgress, [0.50, 0.58], [0, 1])
+  const y2  = useTransform(maxProgress, [0.50, 0.60], [28, 0])
+  const op3 = useTransform(maxProgress, [0.72, 0.80], [0, 1])
+  const y3  = useTransform(maxProgress, [0.72, 0.82], [28, 0])
 
   const pillarMotions = [
     { op: op0, y: y0 },
@@ -43,19 +53,17 @@ function MobileAudience() {
   ]
 
   return (
-    <div ref={ref} style={{ height: '500vh', position: 'relative' }}>
+    <div ref={ref} style={{ height: '450vh', position: 'relative' }}>
       <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden', background: '#0D0D0D' }}>
 
         {/* Fondo único — eager para que cargue de inmediato */}
         <img src={MOBILE_IMG_URL} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
 
-        {/* Degradado: oscuro arriba para el header, oscuro abajo para las cards */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 35%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.96) 100%)' }} />
+        {/* Degradado */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.96) 100%)' }} />
 
-        {/* ── Encabezado fijo mientras dura la sección ── */}
-        <motion.div
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '2.4rem 1.4rem 0', opacity: headerOp, zIndex: 5 }}
-        >
+        {/* ── Encabezado ── */}
+        <motion.div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '2.4rem 1.4rem 0', opacity: headerOp, zIndex: 5 }}>
           <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', display: 'block', marginBottom: '6px' }}>
             La audiencia
           </span>
@@ -71,43 +79,50 @@ function MobileAudience() {
           </div>
         </motion.div>
 
-        {/* ── Pilares — uno a la vez, controlados por scroll ── */}
-        {pillars.map((p, i) => (
-          <motion.div
-            key={p.number}
-            style={{
-              position: 'absolute', top: '44%',
-              left: '1.4rem', right: '1.4rem',
-              opacity: pillarMotions[i].op,
-              y: pillarMotions[i].y,
-              zIndex: 5,
-            }}
-          >
-            <div style={{
-              display: 'flex', gap: '12px', padding: '18px',
-              borderRadius: '14px',
-              background: 'rgba(0,0,0,0.65)',
-              backdropFilter: 'blur(18px)',
-              WebkitBackdropFilter: 'blur(18px)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderLeft: `4px solid ${p.color}`,
-            }}>
-              <span style={{ fontSize: '10px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '4px 8px', borderRadius: '5px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
-                {p.number}
-              </span>
-              <div>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', marginBottom: '5px', lineHeight: 1.2 }}>{p.title}</h4>
-                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>{p.body}</p>
-              </div>
-            </div>
-            {/* Indicador de posición */}
-            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', marginTop: '12px' }}>
-              {pillars.map((_, j) => (
-                <div key={j} style={{ height: '4px', width: j === i ? '20px' : '4px', borderRadius: '2px', background: j === i ? p.color : 'rgba(255,255,255,0.22)', transition: 'all 0.3s' }} />
-              ))}
-            </div>
-          </motion.div>
-        ))}
+        {/*
+         * ── Pilares acumulativos ──
+         * Columna de pilares anclada al fondo, cada uno aparece (sin desaparecer).
+         * Usamos flexDirection column-reverse para que el último añadido
+         * empuje los anteriores hacia arriba.
+         */}
+        <div style={{
+          position: 'absolute',
+          bottom: '1.8rem', left: '1.4rem', right: '1.4rem',
+          display: 'flex', flexDirection: 'column', gap: '10px',
+          zIndex: 5,
+        }}>
+          {/* Renderizamos en orden inverso para que col-reverse funcione correctamente */}
+          {[...pillars].reverse().map((p, revI) => {
+            const i = pillars.length - 1 - revI
+            return (
+              <motion.div
+                key={p.number}
+                style={{
+                  opacity: pillarMotions[i].op,
+                  y: pillarMotions[i].y,
+                }}
+              >
+                <div style={{
+                  display: 'flex', gap: '12px', padding: '14px 16px',
+                  borderRadius: '14px',
+                  background: 'rgba(0,0,0,0.68)',
+                  backdropFilter: 'blur(18px)',
+                  WebkitBackdropFilter: 'blur(18px)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderLeft: `4px solid ${p.color}`,
+                }}>
+                  <span style={{ fontSize: '10px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '3px 7px', borderRadius: '5px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
+                    {p.number}
+                  </span>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginBottom: '4px', lineHeight: 1.2 }}>{p.title}</h4>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, margin: 0 }}>{p.body}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
 
       </section>
     </div>

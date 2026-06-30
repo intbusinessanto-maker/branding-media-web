@@ -14,6 +14,7 @@ import Comparison    from './components/Comparison'
 import Blog          from './components/Blog'
 import Contact       from './components/Contact'
 import Footer        from './components/Footer'
+import BlogPage      from './pages/BlogPage'
 
 const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
@@ -126,6 +127,10 @@ function InteractiveBackground() {
 }
 
 export default function App() {
+  /* Routing simple sin react-router — detecta /blog en el pathname */
+  const isBlogPage = typeof window !== 'undefined' && window.location.pathname === '/blog'
+  if (isBlogPage) return <BlogPage />
+
   const [introVisible, setIntroVisible] = useState(
     () => !sessionStorage.getItem('bm_intro_seen')
   )

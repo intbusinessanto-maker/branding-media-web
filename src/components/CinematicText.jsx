@@ -1,14 +1,31 @@
 import { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
+/*
+ * Frases 1 y 2: mantienen estilo grande y en mayúsculas (impacto visual).
+ * Frase 3: texto descriptivo largo, sin mayúsculas, tamaño legible,
+ *   color blanco con highlight en palabras clave — diferente tratamiento.
+ * Fondo: imagen estática (captura del video original, guardada en Supabase).
+ */
 const PHRASES = [
-  { normal: 'más de 8 millones',       highlight: 'de personas al mes' },
-  { normal: 'estudiantes, docentes,',  highlight: 'administrativos' },
-  { normal: 'y padres',                highlight: 'de familia' },
+  { normal: 'más de 8 millones',      highlight: 'de personas al mes', big: true },
+  { normal: 'estudiantes, docentes,', highlight: 'administrativos',    big: true },
+  {
+    // Frase larga — se renderiza como párrafo, no como display masivo
+    paragraph: true,
+    text: '15 universidades concesionadas en todo el país nos dan acceso a un ecosistema de más de 9 millones de personas: estudiantes, docentes, personal administrativo y, a través de ellos, miles de hogares y padres de familia que también toman decisiones de consumo.',
+    highlight: ['9 millones', '15 universidades'],
+    big: false,
+  },
 ]
 
-const VIMEO_ID   = '1204931565'
-const VIMEO_HASH = '2f09718362'
+/*
+ * Una vez que cargues cinematic-bg.jpg en tu bucket de Supabase
+ * (carpeta "Imagenes para la web"), descomenta esta línea y comenta la de abajo.
+ * Por ahora usa la imagen de fondo existente del sitio para mantener la estética.
+ */
+// const BG_IMG = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/cinematic-bg.jpg'
+const BG_IMG = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
 const IS_MOBILE_INIT = typeof window !== 'undefined'
   ? window.matchMedia('(max-width: 767px)').matches
@@ -16,8 +33,7 @@ const IS_MOBILE_INIT = typeof window !== 'undefined'
 
 export default function CinematicText() {
   const ref = useRef(null)
-  const [isMobile, setIsMobile]   = useState(IS_MOBILE_INIT)
-  const [showVideo, setShowVideo] = useState(false)
+  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
 
   useLayoutEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
@@ -26,23 +42,6 @@ export default function CinematicText() {
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
-
-  /*
-   * Desktop: rootMargin 600px → el video preacarga antes de que el usuario llegue.
-   * Móvil: rootMargin 0px → el video carga solo cuando la sección entra en viewport,
-   * después de que el texto ya sea visible. Evita bloquear el render en móvil.
-   */
-  useEffect(() => {
-    if (showVideo) return
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setShowVideo(true); observer.disconnect() } },
-      { rootMargin: isMobile ? '0px' : '600px' }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [isMobile, showVideo])
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
@@ -59,6 +58,24 @@ export default function CinematicText() {
     { ...PHRASES[2], op: op2, yMotion: y2 },
   ]
 
+  /* Resaltar palabras clave en el párrafo largo */
+  function renderParagraph(text, highlights) {
+    let result = [text]
+    for (const word of highlights) {
+      result = result.flatMap(part => {
+        if (typeof part !== 'string') return [part]
+        const idx = part.toLowerCase().indexOf(word.toLowerCase())
+        if (idx === -1) return [part]
+        return [
+          part.slice(0, idx),
+          <span key={word} style={{ color: '#E8118A' }}>{part.slice(idx, idx + word.length)}</span>,
+          part.slice(idx + word.length),
+        ]
+      })
+    }
+    return result
+  }
+
   return (
     <div ref={ref} id="cinematic-outer" style={{ height: '300vh', position: 'relative' }}>
       <div style={{
@@ -67,35 +84,28 @@ export default function CinematicText() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
 
-        {/* Video Vimeo como fondo — desktop preacarga, móvil carga al entrar */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', background: '#000' }}>
-          {showVideo && (
-            <iframe
-              src={`https://player.vimeo.com/video/${VIMEO_ID}?h=${VIMEO_HASH}&background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0`}
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
-              style={{
-                position: 'absolute',
-                top: '50%', left: '50%',
-                width: 'max(100vw, 177.78vh)',
-                height: 'max(100vh, 56.25vw)',
-                transform: 'translate(-50%, -50%)',
-                border: 'none',
-                pointerEvents: 'none',
-              }}
-              title="Branding Media cifras"
-            />
-          )}
+        {/* Imagen estática de fondo (reemplaza el video Vimeo) */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', background: '#0D0D0D' }}>
+          <img
+            src={BG_IMG}
+            alt=""
+            style={{
+              position: 'absolute', inset: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center',
+              opacity: 0.55,
+            }}
+            onError={e => { e.target.style.display = 'none' }}
+          />
         </div>
 
-        {/* Viñeta circular: centro semitransparente, bordes muy oscuros */}
+        {/* Viñeta circular */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
           background: 'radial-gradient(circle 44vmin at 50% 50%, rgba(13,13,13,0.18) 0%, rgba(13,13,13,0.42) 40%, rgba(13,13,13,0.78) 65%, rgba(13,13,13,0.97) 90%)',
         }} />
 
-        {/* Puntos en el área oscura */}
+        {/* Puntos decorativos */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
           backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
@@ -104,7 +114,7 @@ export default function CinematicText() {
           WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
 
-        {/* Frases — una a la vez, controladas por scroll */}
+        {/* Frases — una a la vez */}
         {layers.map((layer, i) => (
           <motion.div
             key={i}
@@ -113,37 +123,60 @@ export default function CinematicText() {
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               textAlign: 'center',
-              padding: '0 clamp(1.5rem, 8vw, 6rem)',
+              padding: layer.paragraph
+                ? '0 clamp(2rem, 10vw, 8rem)'
+                : '0 clamp(1.5rem, 8vw, 6rem)',
               zIndex: 5,
               opacity: layer.op,
               y: layer.yMotion,
               pointerEvents: 'none',
             }}
           >
-            <span style={{
-              display: 'block',
-              fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
-              fontWeight: 900,
-              letterSpacing: '-0.06em',
-              lineHeight: 1.0,
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.92)',
-              textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
-            }}>
-              {layer.normal}
-            </span>
-            <span style={{
-              display: 'block',
-              fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
-              fontWeight: 900,
-              letterSpacing: '-0.06em',
-              lineHeight: 1.0,
-              textTransform: 'uppercase',
-              color: '#E8118A',
-              textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)',
-            }}>
-              {layer.highlight}
-            </span>
+            {layer.paragraph ? (
+              /* Frase 3 — párrafo descriptivo, tamaño legible */
+              <p style={{
+                fontSize: isMobile
+                  ? 'clamp(1rem, 4.2vw, 1.3rem)'
+                  : 'clamp(1.05rem, 1.55vw, 1.4rem)',
+                fontWeight: 500,
+                lineHeight: 1.75,
+                color: 'rgba(255,255,255,0.88)',
+                textShadow: '0 2px 20px rgba(0,0,0,0.95)',
+                maxWidth: '760px',
+                margin: 0,
+                letterSpacing: '0.01em',
+              }}>
+                {renderParagraph(layer.text, layer.highlight)}
+              </p>
+            ) : (
+              /* Frases 1 y 2 — display grande en mayúsculas */
+              <>
+                <span style={{
+                  display: 'block',
+                  fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.06em',
+                  lineHeight: 1.0,
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.92)',
+                  textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
+                }}>
+                  {layer.normal}
+                </span>
+                <span style={{
+                  display: 'block',
+                  fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.06em',
+                  lineHeight: 1.0,
+                  textTransform: 'uppercase',
+                  color: '#E8118A',
+                  textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)',
+                }}>
+                  {layer.highlight}
+                </span>
+              </>
+            )}
           </motion.div>
         ))}
 

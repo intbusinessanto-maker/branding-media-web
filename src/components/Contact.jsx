@@ -95,7 +95,7 @@ export default function Contact() {
               <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '32px' }}>En menos de 24 horas te presentamos una propuesta de medios personalizada.</p>
 
               {/* Items de contacto — en móvil: fila con figura a la derecha */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'stretch', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
                   {INFO_ITEMS.map(item => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -105,10 +105,23 @@ export default function Contact() {
                   ))}
                 </div>
 
-                {/* Figura móvil — a la derecha de los items */}
-                <div className="contact-figura-mobile" style={{ flexShrink: 0, width: 'clamp(90px, 28vw, 140px)' }}>
+                {/*
+                 * Figura móvil — alineada desde el ícono de ubicación hasta el correo.
+                 * position:relative + figure como imagen que llena toda la altura disponible.
+                 */}
+                <div className="contact-figura-mobile" style={{
+                  flexShrink: 0,
+                  width: 'clamp(110px, 34vw, 160px)',
+                  position: 'relative',
+                }}>
                   <img src={FIGURA_URL} alt="" loading="lazy"
-                    style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      objectPosition: 'bottom center',
+                      display: 'block',
+                    }} />
                 </div>
               </div>
             </motion.div>

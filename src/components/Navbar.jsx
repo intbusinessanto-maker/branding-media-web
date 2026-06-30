@@ -8,8 +8,8 @@ const links = [
   { label: 'Nosotros', href: '#nosotros' },
   { label: 'Cobertura', href: '#mapa' },
   { label: 'Formatos', href: '#formatos' },
-  { label: 'Casos', href: '#casos' },
-  { label: 'Blog', href: '#blog' },
+  { label: 'Marcas', href: '#casos' },
+  { label: 'Blog', href: '/blog' },
 ]
 
 export default function Navbar() {

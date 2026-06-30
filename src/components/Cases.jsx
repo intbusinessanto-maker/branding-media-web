@@ -206,15 +206,27 @@ function CasePopup({ brand, isOpen, onToggle }) {
                   scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
               >
                 {items ? items.map((img) => (
-                  <div key={img.id} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
-                    aspectRatio: '16/9', overflow: 'hidden' }}>
+                  <div key={img.id} style={{
+                    flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
+                    background: '#1A1A1A',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    minHeight: '180px', maxHeight: '70vh',
+                  }}>
                     <img src={img.image_url} alt={img.title || ''} loading="lazy"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '70vh',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        display: 'block',
+                      }}
                       onError={e => { e.target.style.display = 'none' }} />
                   </div>
                 )) : [0,1,2].map(n => (
                   <div key={n} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
-                    aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: '#1A1A1A' }}>
                     <span style={{ fontSize: 32, opacity: 0.15 }}>🔒</span>
                   </div>
                 ))}
@@ -256,11 +268,17 @@ function CasePopup({ brand, isOpen, onToggle }) {
 }
 
 /* Burbuja individual — NO renderiza el popup (el transform del motion.div rompe position:fixed) */
+/*
+ * Las burbujas solo animan la ENTRADA (fly-in) y se quedan en su posición.
+ * Al eliminar el "tail" del transform ([..., 0.80, 1]) se evita que las
+ * burbujas que están arriba (Hatsu, Little Caesars, Todos Somos Una…)
+ * "vuelen de vuelta" cuando el scroll llega al final de la sección.
+ */
 function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOpen, onToggle }) {
-  const rawX    = useTransform(progress, [0, 0.20, 0.80, 1], [fromX, 0, 0, fromX])
+  const rawX    = useTransform(progress, [0, 0.20], [fromX, 0])
   const x       = useSpring(rawX, { stiffness: 80, damping: 22, mass: 0.6 })
-  const opacity = useTransform(progress, [0.04, 0.18, 0.82, 0.96], [0, 1, 1, 0])
-  const scale   = useTransform(progress, [0, 0.20, 0.80, 1], [0.25, 1, 1, 0.25])
+  const opacity = useTransform(progress, [0.04, 0.18], [0, 1])
+  const scale   = useTransform(progress, [0, 0.20], [0.25, 1])
 
   return (
     <motion.div
