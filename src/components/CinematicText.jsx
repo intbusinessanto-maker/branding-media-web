@@ -1,22 +1,19 @@
-import { useRef, useState, useEffect, useLayoutEffect } from 'react'
+import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
 /*
- * Frases 1 y 2: mantienen estilo grande y en mayúsculas (impacto visual).
- * Frase 3: texto descriptivo largo, sin mayúsculas, tamaño legible,
- *   color blanco con highlight en palabras clave — diferente tratamiento.
- * Fondo: imagen estática (captura del video original, guardada en Supabase).
+ * La frase original dividida en 3 tiempos cinematográficos:
+ * "15 universidades concesionadas en todo el país nos dan acceso a un
+ *  ecosistema de más de 9 millones de personas: estudiantes, docentes,
+ *  personal administrativo y, a través de ellos, miles de hogares y
+ *  padres de familia que también toman decisiones de consumo."
+ *
+ * Cada tiempo = impacto + color magenta en la parte clave.
  */
 const PHRASES = [
-  { normal: 'más de 8 millones',      highlight: 'de personas al mes', big: true },
-  { normal: 'estudiantes, docentes,', highlight: 'administrativos',    big: true },
-  {
-    // Frase larga — se renderiza como párrafo, no como display masivo
-    paragraph: true,
-    text: '15 universidades concesionadas en todo el país nos dan acceso a un ecosistema de más de 9 millones de personas: estudiantes, docentes, personal administrativo y, a través de ellos, miles de hogares y padres de familia que también toman decisiones de consumo.',
-    highlight: ['9 millones', '15 universidades'],
-    big: false,
-  },
+  { normal: '15 universidades concesionadas',  highlight: 'en todo el país' },
+  { normal: 'más de 9 millones',               highlight: 'de personas' },
+  { normal: 'hogares y padres de familia',     highlight: 'que también deciden' },
 ]
 
 /*
@@ -27,21 +24,8 @@ const PHRASES = [
 // const BG_IMG = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/cinematic-bg.jpg'
 const BG_IMG = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
-const IS_MOBILE_INIT = typeof window !== 'undefined'
-  ? window.matchMedia('(max-width: 767px)').matches
-  : false
-
 export default function CinematicText() {
   const ref = useRef(null)
-  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
-
-  useLayoutEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)')
-    setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
@@ -57,24 +41,6 @@ export default function CinematicText() {
     { ...PHRASES[1], op: op1, yMotion: y1 },
     { ...PHRASES[2], op: op2, yMotion: y2 },
   ]
-
-  /* Resaltar palabras clave en el párrafo largo */
-  function renderParagraph(text, highlights) {
-    let result = [text]
-    for (const word of highlights) {
-      result = result.flatMap(part => {
-        if (typeof part !== 'string') return [part]
-        const idx = part.toLowerCase().indexOf(word.toLowerCase())
-        if (idx === -1) return [part]
-        return [
-          part.slice(0, idx),
-          <span key={word} style={{ color: '#E8118A' }}>{part.slice(idx, idx + word.length)}</span>,
-          part.slice(idx + word.length),
-        ]
-      })
-    }
-    return result
-  }
 
   return (
     <div ref={ref} id="cinematic-outer" style={{ height: '300vh', position: 'relative' }}>
@@ -114,7 +80,7 @@ export default function CinematicText() {
           WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
 
-        {/* Frases — una a la vez */}
+        {/* 3 tiempos — misma tipografía display grande */}
         {layers.map((layer, i) => (
           <motion.div
             key={i}
@@ -123,60 +89,37 @@ export default function CinematicText() {
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               textAlign: 'center',
-              padding: layer.paragraph
-                ? '0 clamp(2rem, 10vw, 8rem)'
-                : '0 clamp(1.5rem, 8vw, 6rem)',
+              padding: '0 clamp(1.5rem, 8vw, 6rem)',
               zIndex: 5,
               opacity: layer.op,
               y: layer.yMotion,
               pointerEvents: 'none',
             }}
           >
-            {layer.paragraph ? (
-              /* Frase 3 — párrafo descriptivo, tamaño legible */
-              <p style={{
-                fontSize: isMobile
-                  ? 'clamp(1rem, 4.2vw, 1.3rem)'
-                  : 'clamp(1.05rem, 1.55vw, 1.4rem)',
-                fontWeight: 500,
-                lineHeight: 1.75,
-                color: 'rgba(255,255,255,0.88)',
-                textShadow: '0 2px 20px rgba(0,0,0,0.95)',
-                maxWidth: '760px',
-                margin: 0,
-                letterSpacing: '0.01em',
-              }}>
-                {renderParagraph(layer.text, layer.highlight)}
-              </p>
-            ) : (
-              /* Frases 1 y 2 — display grande en mayúsculas */
-              <>
-                <span style={{
-                  display: 'block',
-                  fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
-                  fontWeight: 900,
-                  letterSpacing: '-0.06em',
-                  lineHeight: 1.0,
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.92)',
-                  textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
-                }}>
-                  {layer.normal}
-                </span>
-                <span style={{
-                  display: 'block',
-                  fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
-                  fontWeight: 900,
-                  letterSpacing: '-0.06em',
-                  lineHeight: 1.0,
-                  textTransform: 'uppercase',
-                  color: '#E8118A',
-                  textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)',
-                }}>
-                  {layer.highlight}
-                </span>
-              </>
-            )}
+            <span style={{
+              display: 'block',
+              fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
+              fontWeight: 900,
+              letterSpacing: '-0.06em',
+              lineHeight: 1.0,
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.92)',
+              textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
+            }}>
+              {layer.normal}
+            </span>
+            <span style={{
+              display: 'block',
+              fontSize: 'clamp(2.4rem, 6.5vw, 6rem)',
+              fontWeight: 900,
+              letterSpacing: '-0.06em',
+              lineHeight: 1.0,
+              textTransform: 'uppercase',
+              color: '#E8118A',
+              textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)',
+            }}>
+              {layer.highlight}
+            </span>
           </motion.div>
         ))}
 
