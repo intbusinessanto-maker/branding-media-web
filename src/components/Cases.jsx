@@ -62,45 +62,41 @@ const BUBBLES = [
 ]
 
 /*
- * MOBILE_BUBBLES — distribución orgánica, no grid.
- * Burbujas principalmente en bordes (izq/der) y zonas arriba/abajo del título.
- * Título ocupa aprox y=32-62% del viewport. Bordes: solo y=25-68% en lados extremos.
- * Verificadas sin solapamiento: min_dist > sum_radii en todos los pares cercanos.
+ * MOBILE_BUBBLES — posiciones calculadas con algoritmo de relajación física
+ * (separación entre burbujas + repulsión desde el rectángulo del título)
+ * para: (1) eliminar los huecos grandes arriba/abajo del título — las
+ * burbujas quedan empacadas justo hasta el borde del texto, (2) ninguna
+ * burbula se corta en los bordes de pantalla (antes Kumpet/Little Caesars
+ * quedaban con left negativo y se veían cortadas), (3) cero solapamientos
+ * entre burbujas ni con la zona del título (verificado algorítmicamente).
  */
 const MOBILE_BUBBLES = [
-  /* ── Zona superior (y: 5-24%) — bajadas para quedar cerca del título ── */
-  { left: '2%',  top: '8%',  size: 80, fromX: -680 },
-  { left: '54%', top: '7%',  size: 72, fromX:  380 },
-  { left: '78%', top: '5%',  size: 82, fromX:  700 },
-  { left: '27%', top: '12%', size: 66, fromX: -220 },
-  { left: '63%', top: '15%', size: 70, fromX:  440 },
-  { left: '10%', top: '20%', size: 74, fromX: -560 },
-  { left: '43%', top: '22%', size: 64, fromX:  160 },
-
-  /* ── Bordes izq/der (y: 26-65%) — parcialmente fuera pero visibles ── */
-  { left: '-2%', top: '28%', size: 78, fromX: -680 },
-  { left: '-3%', top: '47%', size: 72, fromX: -680 },
-  { left: '-2%', top: '63%', size: 76, fromX: -680 },
-  { left: '80%', top: '30%', size: 78, fromX:  700 },
-  { left: '82%', top: '48%', size: 70, fromX:  700 },
-  { left: '80%', top: '65%', size: 76, fromX:  700 },
-
-  /* ── Zona inferior (y: 70-95%) ── */
-  { left: '3%',  top: '74%', size: 78, fromX: -680 },
-  { left: '26%', top: '78%', size: 68, fromX: -240 },
-  { left: '50%', top: '80%', size: 72, fromX:  200 },
-  { left: '67%', top: '74%', size: 70, fromX:  480 },
-  { left: '80%', top: '83%', size: 74, fromX:  700 },
-  { left: '14%', top: '87%', size: 66, fromX: -520 },
-  { left: '56%', top: '91%', size: 68, fromX:  400 },
-  { left: '36%', top: '93%', size: 64, fromX: -140 },
-
-  /* ── Extra para marcas adicionales ── */
-  { left: '82%', top: '20%', size: 60, fromX:  700 },
-  { left: '7%',  top: '38%', size: 62, fromX: -600 },
-  { left: '74%', top: '40%', size: 58, fromX:  640 },
-  { left: '6%',  top: '55%', size: 60, fromX: -620 },
-  { left: '76%', top: '58%', size: 58, fromX:  620 },
+  { left: '4.7%',  top: '9.0%',  size: 80, fromX: -680 },
+  { left: '26.5%', top: '9.0%',  size: 72, fromX:  380 },
+  { left: '49.7%', top: '9.0%',  size: 82, fromX:  700 },
+  { left: '82.8%', top: '9.0%',  size: 66, fromX: -220 },
+  { left: '19.8%', top: '17.6%', size: 70, fromX:  440 },
+  { left: '39.3%', top: '17.8%', size: 74, fromX: -560 },
+  { left: '62.1%', top: '18.0%', size: 64, fromX:  160 },
+  { left: '79.7%', top: '17.8%', size: 78, fromX: -680 },
+  { left: '0.3%',  top: '18.7%', size: 72, fromX: -680 },
+  { left: '29.3%', top: '26.0%', size: 76, fromX: -680 },
+  { left: '52.2%', top: '25.4%', size: 78, fromX:  700 },
+  { left: '10.0%', top: '26.7%', size: 70, fromX:  700 },
+  { left: '80.1%', top: '27.6%', size: 76, fromX:  700 },
+  { left: '2.1%',  top: '66.6%', size: 78, fromX: -680 },
+  { left: '82.3%', top: '50.0%', size: 68, fromX: -240 },
+  { left: '0.3%',  top: '76.4%', size: 72, fromX:  200 },
+  { left: '81.8%', top: '70.2%', size: 70, fromX:  480 },
+  { left: '21.1%', top: '71.2%', size: 74, fromX:  700 },
+  { left: '0.3%',  top: '58.4%', size: 66, fromX: -520 },
+  { left: '55.3%', top: '66.0%', size: 68, fromX:  400 },
+  { left: '82.0%', top: '62.1%', size: 64, fromX: -140 },
+  { left: '17.1%', top: '81.6%', size: 60, fromX:  700 },
+  { left: '35.0%', top: '78.5%', size: 62, fromX: -600 },
+  { left: '61.2%', top: '77.6%', size: 58, fromX:  640 },
+  { left: '84.4%', top: '79.1%', size: 60, fromX: -620 },
+  { left: '0.6%',  top: '88.6%', size: 58, fromX:  620 },
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */

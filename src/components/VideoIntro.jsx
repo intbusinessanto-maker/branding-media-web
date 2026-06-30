@@ -117,18 +117,25 @@ export default function VideoIntro({ onDismiss }) {
             alignItems: isMobile ? 'flex-start' : 'flex-end',
             gap: isMobile ? '16px' : '20px',
           }}>
-            <div>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 600 }}>
-                Circuito de pauta dentro de las universidades más grandes de Latinoamérica
-              </p>
+            {/* Eslogan + tag — fila, tag a la derecha del eslogan, ambos anclados abajo */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', gap: isMobile ? '12px' : '20px' }}>
               <img src={ESLOGAN} alt="Movemos marcas en universidades"
                 style={{
-                  height: isMobile ? 'clamp(36px, 8vw, 52px)' : 'clamp(52px, 10vw, 120px)',
-                  width: 'auto', maxWidth: '78vw',
+                  height: isMobile ? 'clamp(34px, 7.5vw, 48px)' : 'clamp(52px, 10vw, 120px)',
+                  width: 'auto', maxWidth: isMobile ? '46vw' : '50vw',
                   objectFit: 'contain', objectPosition: 'left center', display: 'block',
                   filter: 'drop-shadow(0 2px 18px rgba(0,0,0,0.9))',
+                  flexShrink: 0,
                 }}
               />
+              <p style={{
+                color: 'rgba(255,255,255,0.55)', fontSize: isMobile ? '9px' : '10px',
+                letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600,
+                lineHeight: 1.5, margin: 0, marginBottom: isMobile ? '2px' : '4px',
+                maxWidth: isMobile ? '40vw' : '220px',
+              }}>
+                Circuito de pauta dentro de las universidades más grandes de Latinoamérica
+              </p>
             </div>
 
             <button
