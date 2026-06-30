@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 
 const ESLOGAN_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/eslogan.webp'
+const FONDO_URL    = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
 /* Burbujas ordenadas por tamaño: LinkedIn > Instagram > Facebook > TikTok > WhatsApp */
 const SOCIALS = [
@@ -112,7 +113,7 @@ export default function LogoShowcase() {
   }, [])
 
   return (
-    <section ref={ref} style={{
+    <section ref={ref} className="logo-showcase-section" style={{
       height: '100vh',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative', overflow: 'hidden', background: 'transparent',
@@ -124,6 +125,12 @@ export default function LogoShowcase() {
         }
         /* ── Móvil: redes ARRIBA y ABAJO del eslogan, bien pegadas ── */
         @media (max-width: 767px) {
+          .logo-showcase-section {
+            background-image: url(${FONDO_URL}) !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+          }
           .social-bubble { animation-duration: 5s !important; }
 
           /* === FILA SUPERIOR — muy cerca del eslogan === */

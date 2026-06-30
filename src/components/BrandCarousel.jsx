@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useLayoutEffect } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
 const BUCKET = 'Imagenes para la web'
 const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'svg', 'avif']
+const FONDO_URL = `https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/${encodeURIComponent(BUCKET)}/Fondo%202.png`
+
+const IS_MOBILE_INIT = typeof window !== 'undefined'
+  ? window.matchMedia('(max-width: 767px)').matches
+  : false
 
 function isImage(name) {
   return IMAGE_EXTS.some(ext => name.toLowerCase().endsWith(`.${ext}`))
@@ -16,6 +21,15 @@ function publicUrl(name) {
 export default function BrandCarousel() {
   const [images, setImages] = useState([])
   const [hovered, setHovered] = useState(null)
+  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     supabase.storage.from(BUCKET).list('', { limit: 100 })
@@ -28,23 +42,28 @@ export default function BrandCarousel() {
       })
   }, [])
 
+  const sectionBg = isMobile
+    ? { backgroundImage: `url(${FONDO_URL})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }
+    : { background: '#fff' }
+
   /* No retornar null — causa layout shift de 0→800px cuando carga Supabase,
      desplazando CinematicText y rompiendo su scroll tracking. */
   if (images.length === 0) return (
     <section style={{
-      padding: '80px 2rem', background: '#fff',
+      padding: '80px 2rem',
       borderTop: '1px solid rgba(0,0,0,0.06)',
       borderBottom: '1px solid rgba(0,0,0,0.06)',
       minHeight: '200px',
+      ...sectionBg,
     }} />
   )
 
   return (
     <section style={{
       padding: '80px 2rem',
-      background: '#fff',
       borderTop: '1px solid rgba(0,0,0,0.06)',
       borderBottom: '1px solid rgba(0,0,0,0.06)',
+      ...sectionBg,
     }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 

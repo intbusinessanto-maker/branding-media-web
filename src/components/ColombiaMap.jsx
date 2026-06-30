@@ -11,52 +11,40 @@ const FONDO_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/pu
  * interpolada sobre los 7 tonos magenta del proyecto.
  */
 
-/* labelDx/Dy: offset del punto al texto; labelAnchor: alineación SVG */
 const CITIES = [
   {
     city: 'Barranquilla', x: 277.8,  y: 67,  count: 1,
     institutions: ['U. del Norte'],
-    color: '#E8118A', labelAnchor: 'middle', labelDx: 0,   labelDy: -39,
+    color: '#E8118A',
   },
   {
     city: 'Cartagena',    x: 264.5,  y: 94,  count: 1,
     institutions: ['U. de los Andes'],
-    color: '#00C4AD', labelAnchor: 'end',    labelDx: -37, labelDy: 3,
+    color: '#00C4AD',
   },
   {
     city: 'Bucaramanga',  x: 342.7, y: 219.9,  count: 1,
     institutions: ['UPB Bucaramanga'],
-    color: '#00C4AD', labelAnchor: 'start',  labelDx: 43,  labelDy: 3,
+    color: '#00C4AD',
   },
   {
     city: 'Medellín',     x: 250.1,  y: 217.6, count: 2,
     institutions: ['UPB Medellín', 'EAFIT'],
-    color: '#E8118A', labelAnchor: 'start',  labelDx: 43,  labelDy: 3,
+    color: '#E8118A',
   },
   {
     city: 'Bogotá',       x: 310.6,  y: 345.4, count: 9,
     institutions: ['U. del Rosario','U. de los Andes','U. Externado','Javeriana','Sergio Arboleda','U. La Sabana','U. La Salle','U. Sanitas','U. América'],
-    color: '#E8118A', labelAnchor: 'start',  labelDx: 43,  labelDy: 3,
+    color: '#E8118A',
   },
   {
     city: 'Cali',         x: 214.5,  y: 344.5, count: 1,
     institutions: ['ICESI'],
-    color: '#00C4AD', labelAnchor: 'end',    labelDx: -37, labelDy: 3,
+    color: '#00C4AD',
   },
 ]
 
 const STEP_MS = 1200
-
-/* Devuelve los bounds del rect blanco detrás del label */
-function labelBg(name, lx, ly, anchor) {
-  const w = name.length * 10.36 + 5.6  // ancho estimado del texto
-  const pad = 8.4
-  const total = w + pad * 2
-  const rx = anchor === 'end'    ? lx - total + pad
-           : anchor === 'middle' ? lx - total / 2
-           :                       lx - pad
-  return { x: rx, y: ly - 16.8, w: total, h: 28 }
-}
 
 /* ── CityCard simplificado (sin auto-reveal) ── */
 function CityCard({ c, isActive, onToggle, index }) {
@@ -346,9 +334,6 @@ export default function ColombiaMap() {
 
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)
-                const lx = c.x + c.labelDx
-                const ly = c.y + c.labelDy
-                const bg = labelBg(c.city, lx, ly, c.labelAnchor)
 
                 return (
                   <g key={c.city} onClick={() => toggleManual(c.city)} style={{ cursor: 'pointer' }}>
@@ -377,28 +362,6 @@ export default function ColombiaMap() {
                       transition={{ delay: 0.5 + i * 0.15 }}>
                       {c.count}
                     </motion.text>
-
-                    {/* Label ciudad — bloque blanco detrás del texto */}
-                    <motion.g style={{ pointerEvents: 'none' }}
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      transition={{ delay: 0.7 + i * 0.15 }}>
-                      <rect
-                        x={bg.x} y={bg.y} width={bg.w} height={bg.h}
-                        rx={7} fill="white"
-                        style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.08))' }}
-                      />
-                      <text
-                        x={lx} y={ly + 1.5}
-                        textAnchor={c.labelAnchor}
-                        dominantBaseline="middle"
-                        fontSize="18" fontWeight="700"
-                        fill={active ? '#E8118A' : '#1A1A1A'}
-                        fontFamily="system-ui"
-                        style={{ transition: 'fill 0.2s' }}
-                      >
-                        {c.city}
-                      </text>
-                    </motion.g>
                   </g>
                 )
               })}

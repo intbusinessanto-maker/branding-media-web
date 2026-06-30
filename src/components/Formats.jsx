@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from
 import { supabase } from '../lib/supabase'
 
 const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua%20megafono.png'
+const FONDO_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
 const formats = [
   {
@@ -263,7 +264,13 @@ export default function Formats() {
           cada card. Dots táctiles para navegar entre slides.
           ══════════════════════════════════════════════ */}
       {isMobile && (
-        <section id="formatos" style={{ background: 'transparent', padding: '32px 0 44px' }}>
+        <section id="formatos" style={{
+          padding: '32px 0 44px',
+          backgroundImage: `url(${FONDO_URL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}>
 
           {/* Header */}
           <div style={{ textAlign: 'center', padding: '0 8px 20px', position: 'relative', zIndex: 2 }}>
