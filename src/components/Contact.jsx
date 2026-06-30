@@ -77,6 +77,11 @@ export default function Contact() {
                   width: 'clamp(240px, 24vw, 360px)', maxWidth: 'none',
                   height: 'auto', objectFit: 'contain', display: 'block',
                   pointerEvents: 'none',
+                  /* El PNG tiene ~13.5% de relleno transparente abajo —
+                     se compensa con translateY (relativo a su propia altura,
+                     por eso escala bien en cualquier tamaño) para que la base
+                     visible de la figura quede a la altura de la línea del correo */
+                  transform: 'translateY(13.5%)',
                 }} />
             </motion.div>
 
