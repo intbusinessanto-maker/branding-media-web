@@ -19,40 +19,45 @@ const FALLBACK_IMAGES = [
 
 const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
 
+/*
+ * BUBBLES — posiciones verificadas algorítmicamente (relajación física)
+ * para que ningún par de burbujas se solape entre sí en viewport 1280x800,
+ * incluyendo las de "extensión" que antes no se chequeaban contra las originales
+ * (causaba choques tipo Electrolit/Casa Toro). Zona central (35-65% / 30-70%)
+ * se mantiene libre para el título.
+ */
 const BUBBLES = [
-  /* ── originales (17) ── */
-  { left: '8%',  top: '4%',  size: 180, fromX: -1600 },
-  { left: '8%',  top: '40%', size: 150, fromX: -1600 },
-  { left: '8%',  top: '70%', size: 172, fromX: -1600 },
-  { left: '19%', top: '6%',  size: 135, fromX: -1100 },
-  { left: '19%', top: '54%', size: 163, fromX: -1100 },
-  { left: '16%', top: '80%', size: 132, fromX: -1100 },
-  { left: '31%', top: '0%',  size: 142, fromX:  -750 },
-  { left: '30%', top: '85%', size: 126, fromX:  -750 },
-  { left: '43%', top: '90%', size: 122, fromX:  -600 },
-  { left: '55%', top: '0%',  size: 155, fromX:   750 },
-  { left: '54%', top: '86%', size: 138, fromX:   750 },
-  { left: '65%', top: '24%', size: 148, fromX:  1100 },
-  { left: '67%', top: '51%', size: 135, fromX:  1100 },
-  { left: '63%', top: '80%', size: 168, fromX:  1100 },
-  { left: '76%', top: '3%',  size: 178, fromX:  1600 },
+  { left: '6%',  top: '4%',  size: 180, fromX: -1600 },
+  { left: '5%',  top: '40%', size: 150, fromX: -1600 },
+  { left: '5%',  top: '74%', size: 172, fromX: -1600 },
+  { left: '21%', top: '6%',  size: 135, fromX: -1100 },
+  { left: '21%', top: '48%', size: 163, fromX: -1100 },
+  { left: '18%', top: '84%', size: 132, fromX: -1100 },
+  { left: '30%', top: '-4%', size: 142, fromX:  -750 },
+  { left: '28%', top: '88%', size: 126, fromX:  -750 },
+  { left: '40%', top: '82%', size: 122, fromX:  -600 },
+  { left: '54%', top: '-6%', size: 155, fromX:   750 },
+  { left: '51%', top: '76%', size: 138, fromX:   750 },
+  { left: '61%', top: '28%', size: 148, fromX:  1100 },
+  { left: '67%', top: '45%', size: 135, fromX:  1100 },
+  { left: '66%', top: '81%', size: 168, fromX:  1100 },
+  { left: '76%', top: '-3%', size: 178, fromX:  1600 },
   { left: '77%', top: '36%', size: 146, fromX:  1600 },
-  { left: '75%', top: '67%', size: 184, fromX:  1600 },
-  /* ── extensión para marcas adicionales (18-32) ── */
-  { left: '24%', top: '22%', size: 138, fromX:  -950 },
-  { left: '23%', top: '65%', size: 126, fromX:  -950 },
-  { left: '35%', top: '8%',  size: 130, fromX:  -680 },
-  { left: '34%', top: '78%', size: 132, fromX:  -680 },
-  { left: '45%', top: '3%',  size: 124, fromX:  -520 },
-  { left: '44%', top: '95%', size: 118, fromX:  -520 },
-  { left: '58%', top: '6%',  size: 128, fromX:   520 },
+  { left: '78%', top: '68%', size: 184, fromX:  1600 },
+  { left: '25%', top: '22%', size: 138, fromX:  -950 },
+  { left: '23%', top: '69%', size: 126, fromX:  -950 },
+  { left: '36%', top: '13%', size: 130, fromX:  -680 },
+  { left: '33%', top: '68%', size: 132, fromX:  -680 },
+  { left: '44%', top: '3%',  size: 124, fromX:  -520 },
+  { left: '48%', top: '92%', size: 118, fromX:  -520 },
+  { left: '60%', top: '11%', size: 128, fromX:   520 },
   { left: '57%', top: '92%', size: 122, fromX:   520 },
-  { left: '70%', top: '20%', size: 148, fromX:   950 },
-  { left: '71%', top: '68%', size: 140, fromX:   950 },
-  { left: '84%', top: '12%', size: 160, fromX:  1550 },
-  { left: '83%', top: '52%', size: 148, fromX:  1550 },
-  { left: '84%', top: '82%', size: 155, fromX:  1550 },
-  { left: '12%', top: '30%', size: 142, fromX: -1300 },
+  { left: '72%', top: '19%', size: 148, fromX:   950 },
+  { left: '67%', top: '63%', size: 140, fromX:   950 },
+  { left: '86%', top: '15%', size: 160, fromX:  1550 },
+  { left: '85%', top: '50%', size: 148, fromX:  1550 },
+  { left: '87%', top: '87%', size: 155, fromX:  1550 },
+  { left: '13%', top: '26%', size: 142, fromX: -1300 },
   { left: '11%', top: '58%', size: 136, fromX: -1300 },
 ]
 
