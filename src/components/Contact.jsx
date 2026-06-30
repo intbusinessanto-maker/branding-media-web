@@ -42,8 +42,16 @@ export default function Contact() {
   return (
     <section id="contacto" style={{ padding: 'clamp(60px,8vw,100px) 1.5rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
       <style>{`
-        /* Desktop: 3 columnas — figura | info | formulario */
-        .contact-outer { display: grid; grid-template-columns: clamp(120px,12vw,180px) 1.3fr 1.1fr; gap: clamp(32px, 4vw, 60px); align-items: stretch; }
+        /*
+         * Desktop: 2 columnas — [grupo izq: figura | info] | formulario.
+         * El grupo izquierdo es su propio flex con align-items:stretch,
+         * así la figura toma exactamente la altura del título+info
+         * (CONTACTO → email), sin depender de la altura del formulario.
+         * El formulario recibe más fr que antes para extenderse a la derecha.
+         */
+        .contact-outer { display: grid; grid-template-columns: 1.45fr 1.25fr; gap: clamp(32px, 4vw, 60px); align-items: start; }
+        .contact-left-group { display: flex; gap: clamp(24px, 3vw, 44px); align-items: stretch; }
+        .contact-figura-desktop { flex: 0 0 clamp(120px,12vw,180px); }
         /* Móvil: 1 columna, figura inline con los items */
         @media (max-width: 768px) {
           .contact-outer { grid-template-columns: 1fr; gap: 32px; }
@@ -53,47 +61,49 @@ export default function Contact() {
           .contact-figura-mobile { display: none !important; }
         }
       `}</style>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div className="contact-outer">
 
-          {/* ── Col 1: Figura (solo desktop) ── */}
-          <motion.div className="contact-figura-desktop"
-            initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.8 }}
-            style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <img src={FIGURA_URL} alt="" loading="lazy"
-              style={{ width: '100%', height: '100%', maxHeight: '100%', objectFit: 'contain', objectPosition: 'bottom center', display: 'block' }} />
-          </motion.div>
+          <div className="contact-left-group">
+            {/* ── Figura (solo desktop) — alto = altura del bloque título+info ── */}
+            <motion.div className="contact-figura-desktop"
+              initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.8 }}
+              style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <img src={FIGURA_URL} alt="" loading="lazy"
+                style={{ width: '100%', height: '100%', maxHeight: '100%', objectFit: 'contain', objectPosition: 'bottom center', display: 'block' }} />
+            </motion.div>
 
-          {/* ── Col 2: Título + info ── */}
-          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '12px' }}>Contacto</span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '20px' }}>
-              Activa tu campaña{' '}
-              <span style={{ color: '#00C4AD' }}>universitaria</span>
-            </h2>
-            <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '32px' }}>En menos de 24 horas te presentamos una propuesta de medios personalizada.</p>
+            {/* ── Título + info ── */}
+            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '12px' }}>Contacto</span>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, marginBottom: '20px' }}>
+                Activa tu campaña{' '}
+                <span style={{ color: '#00C4AD' }}>universitaria</span>
+              </h2>
+              <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '32px' }}>En menos de 24 horas te presentamos una propuesta de medios personalizada.</p>
 
-            {/* Items de contacto — en móvil: fila con figura a la derecha */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
-                {INFO_ITEMS.map(item => (
-                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
-                    <span style={{ fontSize: '14px', color: '#555' }}>{item.label}</span>
-                  </div>
-                ))}
+              {/* Items de contacto — en móvil: fila con figura a la derecha */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                  {INFO_ITEMS.map(item => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
+                      <span style={{ fontSize: '14px', color: '#555' }}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Figura móvil — a la derecha de los items */}
+                <div className="contact-figura-mobile" style={{ flexShrink: 0, width: 'clamp(90px, 28vw, 140px)' }}>
+                  <img src={FIGURA_URL} alt="" loading="lazy"
+                    style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
+                </div>
               </div>
+            </motion.div>
+          </div>
 
-              {/* Figura móvil — a la derecha de los items */}
-              <div className="contact-figura-mobile" style={{ flexShrink: 0, width: 'clamp(90px, 28vw, 140px)' }}>
-                <img src={FIGURA_URL} alt="" loading="lazy"
-                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
-              </div>
-            </div>
-          </motion.div>
-
-          {/* ── Col 3: Formulario ── */}
+          {/* ── Formulario — columna independiente, más ancha ── */}
           <motion.div initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
             {sent ? (
               <div style={{ padding: '48px', borderRadius: '16px', background: '#fff', border: '1px solid rgba(0,196,173,0.2)', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '14px', alignItems: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}>
