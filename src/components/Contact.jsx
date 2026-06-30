@@ -51,7 +51,8 @@ export default function Contact() {
          */
         .contact-outer { display: grid; grid-template-columns: 1.45fr 1.25fr; gap: clamp(32px, 4vw, 60px); align-items: start; }
         .contact-left-group { display: flex; gap: clamp(24px, 3vw, 44px); align-items: stretch; }
-        .contact-figura-desktop { flex: 0 0 clamp(120px,12vw,180px); }
+        /* Ancla angosta — la imagen real es absoluta y el doble de ancha, creciendo hacia la izquierda */
+        .contact-figura-desktop { flex: 0 0 clamp(90px,9vw,140px); position: relative; overflow: visible; }
         /* Móvil: 1 columna, figura inline con los items */
         @media (max-width: 768px) {
           .contact-outer { grid-template-columns: 1fr; gap: 32px; }
@@ -65,13 +66,18 @@ export default function Contact() {
         <div className="contact-outer">
 
           <div className="contact-left-group">
-            {/* ── Figura (solo desktop) — alto = altura del bloque título+info ── */}
+            {/* ── Figura (solo desktop) — el doble de tamaño, anclada abajo-derecha
+                 y creciendo hacia la izquierda/arriba desde una base angosta ── */}
             <motion.div className="contact-figura-desktop"
               initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.8 }}
-              style={{ display: 'flex', alignItems: 'flex-end' }}>
+              viewport={{ once: true }} transition={{ duration: 0.8 }}>
               <img src={FIGURA_URL} alt="" loading="lazy"
-                style={{ width: '100%', height: '100%', maxHeight: '100%', objectFit: 'contain', objectPosition: 'bottom center', display: 'block' }} />
+                style={{
+                  position: 'absolute', bottom: 0, right: 0,
+                  width: 'clamp(240px, 24vw, 360px)', maxWidth: 'none',
+                  height: 'auto', objectFit: 'contain', display: 'block',
+                  pointerEvents: 'none',
+                }} />
             </motion.div>
 
             {/* ── Título + info ── */}
