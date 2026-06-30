@@ -2,13 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 
 /*
- * Mapa de Colombia 3D — 33 departamentos en colores de terreno reales.
- * Técnica: SVG con paths geográficos reales + CSS perspective + rotateX/Z.
- * Sin imágenes externas — el mismo enfoque del croquis pero con efecto 3D.
- *
- * Terreno: Andes (blanco/gris claro) → Llanura/Amazonia (gris oscuro).
- * La perspectiva CSS da profundidad real como un mapa topográfico visto
- * desde el noreste a unos 30° de ángulo.
+ * Mapa 3D con 33 departamentos + cordilleras de los Andes + etiquetas.
+ * Técnica: SVG paths reales + CSS perspective + rotateX/Z.
+ * Cordilleras: polylines triple-capa (sombra, ridge, cima) simulando
+ * el relieve de las tres ramas andinas colombianas.
  */
 
 const CITIES = [
@@ -20,12 +17,12 @@ const CITIES = [
   {
     city: 'Cartagena', x: 264.5, y: 94, count: 1,
     institutions: ['U. de los Andes – Sede Caribe'],
-    color: '#00C4AD',
+    color: '#E8118A',
   },
   {
     city: 'Bucaramanga', x: 342.7, y: 219.9, count: 1,
     institutions: ['UPB Bucaramanga'],
-    color: '#00C4AD',
+    color: '#E8118A',
   },
   {
     city: 'Medellín', x: 250.1, y: 217.6, count: 2,
@@ -40,7 +37,7 @@ const CITIES = [
   {
     city: 'Cali', x: 214.5, y: 344.5, count: 2,
     institutions: ['ICESI', 'Javeriana Cali'],
-    color: '#00C4AD',
+    color: '#E8118A',
   },
 ]
 
@@ -54,24 +51,23 @@ function CityCard({ c, isActive, onToggle, index }) {
       viewport={{ once: true }}
       transition={{ delay: index * 0.08, duration: 0.5 }}
       onClick={onToggle}
-      whileHover={{ y: -2, boxShadow: `0 8px 28px ${c.color}22` }}
+      whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(232,17,138,0.18)' }}
       style={{
         padding: '14px 16px', borderRadius: '12px', cursor: 'pointer',
-        background: isActive ? `${c.color}08` : '#fff',
-        border: `1.5px solid ${isActive ? c.color : 'rgba(0,0,0,0.07)'}`,
-        boxShadow: isActive ? `0 4px 20px ${c.color}18` : '0 2px 8px rgba(0,0,0,0.04)',
+        background: isActive ? 'rgba(232,17,138,0.08)' : '#fff',
+        border: `1.5px solid ${isActive ? '#E8118A' : 'rgba(0,0,0,0.07)'}`,
+        boxShadow: isActive ? '0 4px 20px rgba(232,17,138,0.15)' : '0 2px 8px rgba(0,0,0,0.04)',
         transition: 'border-color 0.25s, background 0.25s, box-shadow 0.25s',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isActive ? '12px' : 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Pin icon */}
-          <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
-            <path d="M7 0C3.13 0 0 3.13 0 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill={c.color}/>
-            <circle cx="7" cy="7" r="2.5" fill="white"/>
+          <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+            <path d="M6 0C2.69 0 0 2.69 0 6c0 4.5 6 10 6 10s6-5.5 6-10c0-3.31-2.69-6-6-6z" fill="#E8118A"/>
+            <circle cx="6" cy="6" r="2" fill="white"/>
           </svg>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '14px', color: isActive ? c.color : '#1A1A1A', transition: 'color 0.2s' }}>
+            <div style={{ fontWeight: 700, fontSize: '14px', color: isActive ? '#E8118A' : '#1A1A1A', transition: 'color 0.2s' }}>
               {c.city}
             </div>
             <div style={{ fontSize: '11px', color: '#AAA', marginTop: '1px' }}>
@@ -84,7 +80,7 @@ function CityCard({ c, isActive, onToggle, index }) {
           transition={{ duration: 0.25 }}
           style={{
             width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
-            background: isActive ? c.color : 'rgba(0,0,0,0.04)',
+            background: isActive ? '#E8118A' : 'rgba(0,0,0,0.04)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '15px', color: isActive ? '#fff' : '#999',
             transition: 'background 0.25s, color 0.25s',
@@ -112,7 +108,7 @@ function CityCard({ c, isActive, onToggle, index }) {
                   transition={{ delay: j * 0.05 }}
                   style={{ fontSize: '12px', color: '#555', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: c.color, flexShrink: 0, display: 'inline-block' }} />
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#E8118A', flexShrink: 0, display: 'inline-block' }} />
                   {inst}
                 </motion.li>
               ))}
@@ -159,30 +155,14 @@ export default function ColombiaMap() {
   useEffect(() => {
     if (!inView || started.current) return
     started.current = true
-
     const release = () => { releaseRef.current = null }
     releaseRef.current = release
-
-    let cityTimers = []
-    let tDone
-
+    let cityTimers = [], tDone
     const startTimer = setTimeout(() => {
-      cityTimers = CITIES.map((_, i) =>
-        setTimeout(() => setSeqIdx(i), i * STEP_MS)
-      )
-      tDone = setTimeout(() => {
-        setSeqIdx(-1)
-        setSeqDone(true)
-        release()
-      }, CITIES.length * STEP_MS)
+      cityTimers = CITIES.map((_, i) => setTimeout(() => setSeqIdx(i), i * STEP_MS))
+      tDone = setTimeout(() => { setSeqIdx(-1); setSeqDone(true); release() }, CITIES.length * STEP_MS)
     }, 650)
-
-    return () => {
-      clearTimeout(startTimer)
-      cityTimers.forEach(clearTimeout)
-      clearTimeout(tDone)
-      release()
-    }
+    return () => { clearTimeout(startTimer); cityTimers.forEach(clearTimeout); clearTimeout(tDone); release() }
   }, [inView])
 
   return (
@@ -192,26 +172,15 @@ export default function ColombiaMap() {
       display: 'flex', flexDirection: 'column', position: 'relative',
     }}>
       <style>{`
-        .map-grid {
-          display: grid;
-          grid-template-columns: 1fr 300px;
-          gap: 20px;
-          flex: 1; min-height: 0; align-items: center;
-        }
-        @media (max-width: 900px) {
-          .map-grid { grid-template-columns: 1.3fr 1fr; gap: 10px; }
-        }
+        .map-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; flex: 1; min-height: 0; align-items: center; }
+        @media (max-width: 900px) { .map-grid { grid-template-columns: 1.3fr 1fr; gap: 10px; } }
         @media (max-width: 600px) {
           .colombia-section { height: auto !important; min-height: 100svh !important; overflow: visible !important; }
           .map-wrapper { padding: 16px 10px 20px !important; }
           .map-grid { grid-template-columns: 1fr !important; gap: 10px !important; flex: none !important; }
           .map-cards-col { overflow-y: visible !important; max-height: none !important; }
-          .map-3d-container { perspective: none !important; }
           .map-3d-svg { transform: none !important; filter: none !important; }
-        }
-        @keyframes pin-pulse {
-          0%,100% { opacity: 0.7; r: 14; }
-          50%      { opacity: 0; r: 50; }
+          .map-3d-wrap { perspective: none !important; }
         }
       `}</style>
 
@@ -220,8 +189,6 @@ export default function ColombiaMap() {
         padding: '16px 20px 14px',
         display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0,
       }}>
-
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6 }}
@@ -238,17 +205,16 @@ export default function ColombiaMap() {
 
         <div className="map-grid">
 
-          {/* Mapa 3D — SVG con perspectiva CSS */}
+          {/* Mapa 3D con perspectiva CSS */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            className="map-3d-container"
+            className="map-3d-wrap"
             style={{
               display: 'flex', justifyContent: 'center', alignItems: 'center',
               minHeight: 0, padding: '8px',
-              /* Cámara posicionada al noreste, mirando ligeramente desde arriba */
               perspective: '1100px',
               perspectiveOrigin: '52% -8%',
             }}
@@ -258,14 +224,19 @@ export default function ColombiaMap() {
               viewBox="0 0 613 694"
               style={{
                 width: '100%', maxWidth: '480px', height: 'auto',
-                /* Inclinación 3D: rotateX tilt hacia atrás, rotateZ rotación leve */
                 transform: 'rotateX(28deg) rotateZ(-9deg)',
                 transformOrigin: 'center 52%',
-                /* Sombra que acentúa la profundidad del terreno */
                 filter: 'drop-shadow(12px 28px 18px rgba(0,0,0,0.22)) drop-shadow(2px 4px 6px rgba(0,0,0,0.12))',
               }}
             >
-              {/* 33 departamentos con colores de terreno real */}
+              <defs>
+                {/* Sombra para las etiquetas de ciudad */}
+                <filter id="ls" x="-15%" y="-20%" width="130%" height="140%">
+                  <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="rgba(0,0,0,0.18)"/>
+                </filter>
+              </defs>
+
+              {/* 33 departamentos con colores de terreno */}
               <g>
                 <path d="m 303.16,543.59916 1.41,-0.35 0.82,-0.27 5.34,-1.93 6.54,-2.22 5.06,-1.68 2.87,-0.86 3.41,0.2 2.23,-0.04 0.93,0.48 2.8,1.76 1.81,2.72 3.76,0.43 4.06,-0.11 2.62,-0.02 2.8,2.12 0.76,0.56 1.48,0.68 4.61,-0.38 0.66,-1.18 0.38,-0.89 1.28,-1.33 1.5,0 0.93,0.55 1.02,1.24 0.51,1.04 1.14,0.31 1.1,0.05 1.26,-0.05 1.02,-0.3 1.22,-1.24 2.05,-0.29 1.23,1.48 1.54,1.76 3.67,2.2 1.22,0.07 0.76,-1.46 3.4,-3.61 1.68,-0.13 0.48,1.4 3.07,1.49 0.9,0 1.01,-0.48 1.3,-1.09 -0.13,-2.32 0.29,-0.84 0.74,-1.99 0.69,-1.4 0.49,-0.76 0.84,-0.93 5.51,-5.31 1.08,-0.51 1.13,-0.02 1.12,0.23 2.4,0.65 1.8,0.11 1.53,-1.11 0.8,-1.2 0.56,-0.97 0.38,-0.79 0.52,-1.01 0.46,-0.84 0.74,-0.97 3.44,-2.82 4.09,-4.34 1.61,-1.9 0.5,-1.18 -0.22,-1.64 0.76,-0.62 3.04,0.14 1.89,0.93 0.98,0.75 8.52,5.18 4.11,1.3 1.58,-0.65 2.08,2.2 1.04,1.96 1.69,7.58 1.62,2.64 3.01,-1.22 0.7,-1.33 10.41,3.36 1.61,1.66 0.6,0.94 1.32,1.24 2.75,0.9 1.46,-0.33 -0.72,-1.21 2.46,-1.85 2.02,1.06 0.71,0.92 -1.5,5.54 0.06,4.82 -1.33,2.12 0.06,1.57 1.04,0.9 0.95,0.98 0.34,1.76 -1.08,0.84 -1.42,0.83 -0.27,0.89 0.32,0.98 0.51,0.86 5.07,4.02 1.15,0.09 0.84,-0.36 0.69,-0.77 0.32,-0.95 -0.6,-0.61 -1.19,-0.3 -0.59,-0.66 0.06,-0.84 0.65,-0.88 1.36,-0.88 5.83,-0.39 0.2,1.52 -1.12,3.18 0.29,0.84 1.36,0.23 0.82,-0.3 2.85,-1.32 4.23,-1.02 3.25,2.81 -0.06,0.91 0.78,3.54 6.72,-0.9 -0.14,-3.16 1.01,-2.19 0.44,0.95 0.8,3.72 0.9,4.68 0.47,3.76 -0.51,1.78 -2.54,5.92 -2.88,15.9 -2.95,16.26 -0.56,3.08 -0.75,3.93 -0.39,2.14 -6.5,36.27 -3.66,20.56 -2.53,11.98 -0.56,1.01 0.01,-1.13 -1.32,-1.37 -1.34,-0.91 -0.81,-0.54 -3.39,-2.8 -0.54,-0.89 -0.33,-0.78 -0.34,-1.06 -0.42,-1.27 -0.79,-1.54 -2.17,-2.72 -3.65,-2.95 -0.77,-0.38 -0.85,-0.09 -1.82,0.6 -0.72,0.56 -2.29,1.39 -0.88,0.38 -1.12,0 -3.28,-1.22 -4.8,-2.04 2.14,-3.36 1.84,-2.82 2.54,-3.92 4.89,-7.55 1.44,-2.24 14.21,-22.11 -1.28,-2.34 -0.91,0.13 -3.05,-2.36 -0.59,-1.42 -0.41,-1.6 -3.15,-2.83 -1.66,-0.36 -0.83,0.23 -0.91,0.56 -7.69,-0.75 -0.74,-0.39 -2.77,-3.39 -0.33,-1.76 -8.3,-5.44 -4.84,2.17 -5.14,1.37 -3.58,2 -7.16,-0.56 -2.08,-2.69 -4.45,-1.92 -2.33,0.09 -4.02,-0.48 -0.41,-1.18 0.04,-1.21 -0.41,-0.77 -1.18,0.46 -3.57,2.94 -2.59,3.67 -0.76,2.35 -1.72,0.05 -2.09,-0.39 -3.62,1.57 -6.49,3.73 -2.97,-0.3 -1.16,-0.35 -5.07,-1.7 -5.75,-1.4 -3.84,1.34 -5.41,2.05 -2.77,0.67 -0.85,-2.16 -1.32,-2.2 -1.67,0.07 -1.15,0.36 -2.92,-1.6 -1.27,-1 -0.44,-0.75 -0.68,-3.38 1.26,-0.58 0.97,-1.3 0.8,-2.24 -1.32,-9.09 -1.75,-3.05 -2.65,-1.75 -1.72,1.6 -2.39,1.15 -4.93,-2.34 -3.05,-2.03 -0.7,-0.76 0.84,-3.85 0.42,-0.73 1.23,-1.08 -1.23,-2.36 -1.78,-2.42 -0.94,-1.04 -0.19,-1.29 -0.34,-2.51 -4.03,-3.72 -2.45,-0.22 -1.62,0.44 -3.66,-1.01 -1.11,-2.32 -8.65,-5.56 -5.67,-1.55 -1.04,-0.9 -0.6,-1.07 -1.13,-2.31 0.76,-1.29 0.68,-1.85 -1.75,-1.8 -1.07,-1.15 -0.94,-3.08 -0.79,-3 z" fill="#A0A0A0" stroke="rgba(0,0,0,0.08)" strokeWidth="0.7" />
                 <path d="m 291.15,283.37916 -1.19,-0.2 -6.32,1.84 -5.31,0.6 -1.95,0.46 -1.04,1.36 -0.71,1.01 -3.99,2.79 -1.27,-0.58 -1.38,-1.06 -1.35,-1.25 -0.84,-0.35 -4.43,-0.34 -6.45,-1.91 -1.58,-0.51 -1.36,-0.2 -0.06,1.18 0.61,3.82 0.17,3.01 -0.7,0.52 -2.61,-0.26 -1.85,-0.18 -2.31,0.29 -1.12,0.29 -3.06,1.62 -0.84,0.11 -3.51,0.08 -0.59,-0.34 -1.56,-1.45 -0.87,-0.98 -1.93,-2.48 -0.36,-1.02 0.74,-1.64 0.11,-1.26 -0.24,-1.18 -0.63,-1.54 -0.62,-1.14 -0.43,-1.08 -0.18,-0.99 0.18,-0.98 0.63,-1.2 0.21,-3.15 -2.37,-0.47 -0.84,-0.28 -0.74,-0.66 -0.61,-1.65 -0.15,-1.25 -0.05,-1.32 -0.21,-2.85 -0.6,-0.7 -1.88,-1.01 -0.96,-0.14 -9.57,1.69 -1.19,0.37 -0.9,0.11 -4.32,-0.19 -3.39,-4.76 -0.29,-0.96 0.01,-1.09 -0.01,-3.37 -0.28,-1.55 -3.67,-7.77 -0.88,-0.82 -2.1,-1.34 -0.39,-5.42 2.27,-0.76 1.57,0.11 1.48,0.53 1.93,-1.61 0.08,-1.51 -0.51,-1.41 -0.75,-1.72 0.67,-1.01 5.86,-0.22 2.94,0.6 1.4,0.7 0.83,0.23 0.77,-0.42 1.17,-7.02 -0.41,-1.66 -0.56,-1.36 -0.6,-0.91 -2.07,-2.81 -1.55,-0.43 -0.9,-0.46 -2.5,-2 -7.58,-7.72 -0.88,-0.92 -0.81,-0.87 -2.48,-2.81 -1.29,-1.6 -3.06,-0.68 -0.57,-3.8 1.5,-0.45 0.95,-0.59 0.89,-0.96 0.6,-1.53 0.23,-1.46 0.44,-2.18 0.53,-0.75 2.35,-1.66 1.1,-0.34 1.39,-0.41 1.23,-1.93 0.19,0.17 0.06,1.77 -0.17,2.48 -1.39,-0.34 -0.93,-0.5 -0.98,0.63 -0.44,1.9 0.15,2.05 2.14,1.1 2.27,0.18 2.43,-0.59 0.55,-0.68 0.52,-4.28 -0.29,-2.12 -0.59,-4.42 -0.5,-5.93 -0.35,-2.92 -1.98,-2.94 -2.26,-1.62 -2.12,-0.65 -0.01,-1.29 1.8,-2.23 2.75,-0.49 5.94,-1.77 9.95,-8.28 0.24,-1.24 0.7,0.55 0.42,0.73 0.29,0.81 0.08,0.84 0.02,1.5 0.12,1.09 0.22,1.28 0.56,2.02 0.58,1.07 0.59,0.76 0.79,0.74 0.93,0.58 1.2,0.62 1.07,0.42 1.47,0.74 0.61,0.73 0.19,1.05 -0.03,1.77 -0.07,1.35 -0.2,1.37 -0.34,1.08 -0.63,1.08 -0.75,0.87 -1.19,1.18 -0.81,0.57 -1.96,2 -1.03,1.19 -0.99,2.06 -0.47,1.42 -0.31,1.42 -0.36,2.16 -0.14,1.13 -0.09,2.08 -0.47,1.61 -1.57,1.56 -0.98,0.96 -0.78,1.33 -0.38,4.27 -0.02,1.46 0.06,0.93 0.33,2.16 0.34,1.49 0.34,1.15 0.61,1.12 1.56,2.39 3.88,5.04 1.41,0.23 1.23,-0.05 0.91,-0.1 2.82,-0.11 8.05,-0.05 2.01,0.03 2.99,0.15 1.28,-0.32 6.91,-8.57 0.53,-3.06 1.2,-2.04 0.51,-0.73 1.05,-1.02 1.28,-0.23 0.9,0.48 1.29,1.14 0.87,0.28 0.69,-0.62 0.43,-1.96 0.83,-2.31 1.01,-0.35 1.36,-0.45 1.1,-0.52 0.93,-1.28 0.29,-0.82 0.48,-1.17 4.57,-4.35 1.14,-0.3 2.45,0.1 2.17,0.17 2.34,0 1.13,-0.05 1.02,-0.29 0.85,-0.41 0.82,-0.62 0.64,-0.76 0.48,-0.73 1.29,-1.85 1.26,-1.35 2.08,1.77 2.23,1.88 0.8,0.59 1.7,1.12 2.16,1.29 1.11,0.7 0.81,0.62 0.96,1.05 0.37,0.78 0.21,1.01 0.02,0.89 -0.02,3.09 0.19,1.99 0.88,1.08 -0.96,4.56 -2.76,6.89 0,0.97 0.42,0.75 0.61,0.73 3.33,3.42 2.18,-1.69 0.51,-0.81 0.95,-1.95 0.88,-1.15 0.81,-0.53 0.78,0.33 0.51,1.04 0.11,1.44 -0.48,0.8 -0.93,1.1 -0.79,1.49 -0.21,1 -0.27,3.95 0.13,1.21 2.39,7.11 1.46,0.22 1.21,-0.02 1.57,-0.39 4.36,-3.77 1.26,-1.15 1.93,-1.91 2.32,-2.33 2.24,-2.25 -0.22,0.75 -0.21,1.22 0.01,0.85 0.49,4.36 0.53,1.04 0.77,0.93 0.46,1.64 -0.07,1.05 -1.86,1.7 -1.87,0.84 -1.4,0.75 -2.12,2.27 -1.08,1.8 -0.78,1.36 -0.64,0.63 -1.27,1.01 -4.87,3.79 -2.71,1.26 -1.3,0.04 -1.49,1.85 -0.39,1.41 0.33,3.53 1.05,1.73 -0.35,0.86 -3.89,4.33 -0.97,0.72 -1.64,0.7 -0.5,0.57 -0.61,0.82 -1.12,3.44 0,1.72 0.17,5.11 -0.7,0.71 -1.41,5.04 z" fill="#EEEEEE" stroke="rgba(0,0,0,0.08)" strokeWidth="0.7" />
@@ -302,67 +273,130 @@ export default function ColombiaMap() {
                 <path d="m 506.27,561.61916 -1.01,2.19 0.14,3.16 -6.72,0.9 -0.78,-3.54 0.06,-0.91 -3.25,-2.81 -4.23,1.02 -2.85,1.32 -0.82,0.3 -1.36,-0.23 -0.29,-0.84 1.12,-3.18 -0.2,-1.52 -5.83,0.39 -1.36,0.88 -0.65,0.88 -0.06,0.84 0.59,0.66 1.19,0.3 0.6,0.61 -0.32,0.95 -0.69,0.77 -0.84,0.36 -1.15,-0.09 -5.07,-4.02 -0.51,-0.86 -0.32,-0.98 0.27,-0.89 1.42,-0.83 1.08,-0.84 -0.34,-1.76 -0.95,-0.98 -1.04,-0.9 -0.06,-1.57 1.33,-2.12 -0.06,-4.82 1.5,-5.54 -0.71,-0.92 -2.02,-1.06 -2.46,1.85 0.72,1.21 -1.46,0.33 -2.75,-0.9 -1.32,-1.24 -0.6,-0.94 -1.61,-1.66 -10.41,-3.36 -0.7,1.33 -3.01,1.22 -1.62,-2.64 -1.69,-7.58 -1.04,-1.96 -2.08,-2.2 -1.58,0.65 -4.11,-1.3 -8.52,-5.18 -0.98,-0.75 -1.89,-0.93 -3.04,-0.14 -0.76,0.62 -0.39,0.42 -0.91,0.25 -3.81,-2.1 -3.27,-2.07 -3,-2.73 -2.59,-0.66 -1.44,-4.41 -2.74,-4.78 -2.77,-3.2 -0.8,-0.69 0.07,-0.12 0.73,-0.81 5.29,-5.05 3.59,-3.38 0.25,-1.12 0.36,-1.25 0.55,-0.83 1.31,-1.01 1.36,-0.32 1,-0.12 2.62,-2.55 3.08,-4.22 0.02,-2.2 -0.17,-1.14 -0.07,-1.07 2.49,-6.2 0.69,-1.18 2.85,-1.97 5.08,-5.72 2.78,-3.73 4.03,-2.49 1.25,-0.26 1.87,0.07 0.89,-0.43 5.39,-4.19 4.67,0.38 2.31,0.04 2.17,-0.21 12.49,-3.43 7.48,-2.87 1.04,0.04 0.11,0.23 0.51,2.37 -0.63,0.93 -0.99,0.49 0.28,3.72 0.97,1.37 2.07,1.78 1.62,1.27 1.19,0.41 1.28,0.08 1.14,0.17 3.78,0.92 1.37,1.12 0.15,0.51 0,25.63 5.11,-0.01 4.32,-0.23 7.35,1.62 2.41,-0.74 1.58,-0.67 3.03,1.6 1.52,1.42 3.61,5.55 -0.78,4.53 1.3,4.46 -3.38,1.13 -3.2,-0.27 -1.71,-1.37 -5.37,-3.28 -9.24,2.43 -2.74,1.77 -1.89,1.33 -5.22,0.15 -2.52,0 -2.52,0.52 -0.07,3.02 -0.08,5.85 -0.05,2.52 -0.12,6.68 -0.13,5.88 -0.08,3.61 -0.02,2.84 1.5,1.89 3.63,4.12 8,6.2 0.92,0.21 1.18,0.24 2.39,1.12 0.99,1.06 1.36,4.71 -0.38,1.35 -0.56,1.33 -0.78,0.98 0.11,1.29 3.91,7.27 1.52,0.88 1.92,1.89 z" fill="#B8B8B8" stroke="rgba(0,0,0,0.08)" strokeWidth="0.7" />
               </g>
 
-              {/* Pines de ubicación — pure SVG, no foreignObject */}
+              {/* Cordilleras de los Andes — 3 capas por rama */}
+              
+  {/* ── CORDILLERAS DE LOS ANDES ── */}
+  {/* Capa exterior — sombra suave */}
+  <polyline points="187,185 180,225 171,268 163,315 158,368 155,422 158,458"
+    fill="none" stroke="rgba(40,40,40,0.18)" strokeWidth="36"
+    strokeLinecap="round" strokeLinejoin="round" />
+  <polyline points="236,150 240,198 245,248 247,305 243,355 240,400 237,435"
+    fill="none" stroke="rgba(40,40,40,0.18)" strokeWidth="36"
+    strokeLinecap="round" strokeLinejoin="round" />
+  <polyline points="354,170 341,218 326,272 313,318 305,362 297,408"
+    fill="none" stroke="rgba(40,40,40,0.18)" strokeWidth="36"
+    strokeLinecap="round" strokeLinejoin="round" />
+
+  {/* Capa media — ridge más definido */}
+  <polyline points="187,185 180,225 171,268 163,315 158,368 155,422 158,458"
+    fill="none" stroke="rgba(50,50,50,0.22)" strokeWidth="20"
+    strokeLinecap="round" strokeLinejoin="round" />
+  <polyline points="236,150 240,198 245,248 247,305 243,355 240,400 237,435"
+    fill="none" stroke="rgba(50,50,50,0.22)" strokeWidth="20"
+    strokeLinecap="round" strokeLinejoin="round" />
+  <polyline points="354,170 341,218 326,272 313,318 305,362 297,408"
+    fill="none" stroke="rgba(50,50,50,0.22)" strokeWidth="20"
+    strokeLinecap="round" strokeLinejoin="round" />
+
+  {/* Capa interior — cima más clara */}
+  <polyline points="187,185 180,225 171,268 163,315 158,368 155,422 158,458"
+    fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="7"
+    strokeLinecap="round" strokeLinejoin="round" />
+  <polyline points="236,150 240,198 245,248 247,305 243,355 240,400 237,435"
+    fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="7"
+    strokeLinecap="round" strokeLinejoin="round" />
+  <polyline points="354,170 341,218 326,272 313,318 305,362 297,408"
+    fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="7"
+    strokeLinecap="round" strokeLinejoin="round" />
+
+
+              {/* Etiquetas de ciudad sobre el mapa */}
+              
+  {/* ── ETIQUETAS DE CIUDAD ── */}
+  {/* Barranquilla — arriba del pin */}
+  <g style="{pointerEvents:'none'}">
+    <rect x="228" y="23" width="101" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
+    <text x="278.5" y="34" textAnchor="middle" dominantBaseline="middle"
+      fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Barranquilla</text>
+  </g>
+
+  {/* Cartagena — a la izquierda */}
+  <g style="{pointerEvents:'none'}">
+    <rect x="183" y="83" width="76" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
+    <text x="221" y="94" textAnchor="middle" dominantBaseline="middle"
+      fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Cartagena</text>
+  </g>
+
+  {/* Medellín — a la izquierda */}
+  <g style="{pointerEvents:'none'}">
+    <rect x="172" y="207" width="72" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
+    <text x="208" y="218" textAnchor="middle" dominantBaseline="middle"
+      fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Medellín</text>
+  </g>
+
+  {/* Bucaramanga — a la derecha */}
+  <g style="{pointerEvents:'none'}">
+    <rect x="355" y="209" width="96" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
+    <text x="403" y="220" textAnchor="middle" dominantBaseline="middle"
+      fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Bucaramanga</text>
+  </g>
+
+  {/* Bogotá — a la derecha */}
+  <g style="{pointerEvents:'none'}">
+    <rect x="328" y="335" width="65" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
+    <text x="360.5" y="346" textAnchor="middle" dominantBaseline="middle"
+      fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Bogotá</text>
+  </g>
+
+  {/* Cali — a la izquierda */}
+  <g style="{pointerEvents:'none'}">
+    <rect x="170" y="334" width="40" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
+    <text x="190" y="345" textAnchor="middle" dominantBaseline="middle"
+      fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Cali</text>
+  </g>
+
+
+              {/* Pines magenta de ubicación */}
               {CITIES.map((c, i) => {
                 const active = isActive(c.city, i)
-                const py = c.y  // punta del pin en la coordenada de la ciudad
-                const px = c.x
-                const PR = active ? 12 : 9   // radio del círculo cabeza del pin
-                const PT = active ? 28 : 20  // altura del cuerpo (punta hacia abajo)
+                const px = c.x, py = c.y
+                const PR = active ? 12 : 9
+                const PT = active ? 28 : 20
 
                 return (
                   <g key={c.city} onClick={() => toggleManual(c.city)} style={{ cursor: 'pointer' }}>
-                    {/* Halo de pulso — solo cuando activo */}
                     {active && (
                       <>
-                        <circle cx={px} cy={py - PT} r={PR}
-                          fill="none" stroke={c.color} strokeWidth="1.2"
-                          opacity="0">
-                          <animate attributeName="r" from={PR} to={PR * 5} dur="2.2s" repeatCount="indefinite" begin="0s"/>
-                          <animate attributeName="opacity" from="0.7" to="0" dur="2.2s" repeatCount="indefinite" begin="0s"/>
+                        <circle cx={px} cy={py - PT} r={PR} fill="none" stroke="#E8118A" strokeWidth="1.2" opacity="0">
+                          <animate attributeName="r" from={PR} to={PR * 5} dur="2.2s" repeatCount="indefinite"/>
+                          <animate attributeName="opacity" from="0.7" to="0" dur="2.2s" repeatCount="indefinite"/>
                         </circle>
-                        <circle cx={px} cy={py - PT} r={PR}
-                          fill="none" stroke={c.color} strokeWidth="0.8"
-                          opacity="0">
+                        <circle cx={px} cy={py - PT} r={PR} fill="none" stroke="#E8118A" strokeWidth="0.8" opacity="0">
                           <animate attributeName="r" from={PR} to={PR * 7} dur="2.2s" repeatCount="indefinite" begin="0.7s"/>
                           <animate attributeName="opacity" from="0.4" to="0" dur="2.2s" repeatCount="indefinite" begin="0.7s"/>
                         </circle>
                       </>
                     )}
 
-                    {/* Cuerpo del pin: teardrop shape */}
+                    {/* Teardrop pin magenta */}
                     <motion.path
-                      d={`
-                        M ${px} ${py}
-                        C ${px - 4} ${py - 6} ${px - PR - 4} ${py - PT * 0.3}
-                          ${px - PR - 4} ${py - PT}
-                        C ${px - PR - 4} ${py - PT - PR * 2}
-                          ${px + PR + 4} ${py - PT - PR * 2}
-                          ${px + PR + 4} ${py - PT}
-                        C ${px + PR + 4} ${py - PT * 0.3}
-                          ${px + 4} ${py - 6} ${px} ${py}
-                        Z
-                      `}
-                      fill={c.color}
+                      d={`M ${px} ${py}
+                         C ${px-4} ${py-6} ${px-PR-4} ${py-PT*0.3} ${px-PR-4} ${py-PT}
+                         C ${px-PR-4} ${py-PT-PR*2} ${px+PR+4} ${py-PT-PR*2} ${px+PR+4} ${py-PT}
+                         C ${px+PR+4} ${py-PT*0.3} ${px+4} ${py-6} ${px} ${py} Z`}
+                      fill="#E8118A"
                       initial={{ scale: 0, y: -10 }}
                       animate={{ scale: 1, y: 0 }}
                       transition={{ delay: 0.3 + i * 0.15, type: 'spring', stiffness: 300 }}
                       style={{ transformOrigin: `${px}px ${py}px` }}
                     />
-
-                    {/* Punto blanco interior */}
-                    <motion.circle
-                      cx={px} cy={py - PT} r={PR * 0.4}
+                    <motion.circle cx={px} cy={py - PT} r={PR * 0.38}
                       fill="white"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       transition={{ delay: 0.5 + i * 0.15 }}
                     />
-
-                    {/* Conteo de unis si > 1 */}
                     {c.count > 1 && (
-                      <motion.text
-                        x={px} y={py - PT + PR * 0.15}
+                      <motion.text x={px} y={py - PT + PR * 0.14}
                         textAnchor="middle" dominantBaseline="middle"
                         fontSize={active ? '8' : '6.5'} fontWeight="900"
                         fill="white" fontFamily="system-ui"
@@ -379,12 +413,11 @@ export default function ColombiaMap() {
             </svg>
           </motion.div>
 
-          {/* Panel derecho — cards */}
+          {/* Panel derecho */}
           <div className="map-cards-col" style={{
             display: 'flex', flexDirection: 'column', gap: '6px',
             overflowY: 'auto', minHeight: 0, paddingRight: '4px',
           }}>
-            {/* Badge total */}
             <motion.div
               initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.5 }}
@@ -415,7 +448,6 @@ export default function ColombiaMap() {
         </div>
       </div>
 
-      {/* Skip */}
       <AnimatePresence>
         {!seqDone && (
           <motion.button
@@ -426,9 +458,8 @@ export default function ColombiaMap() {
               position: 'absolute', bottom: '20px', right: '24px',
               padding: '8px 18px', borderRadius: '100px',
               border: '1px solid rgba(0,0,0,0.12)', background: 'rgba(255,255,255,0.92)',
-              backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-              fontSize: '12px', fontWeight: 700, color: '#555', cursor: 'pointer',
-              letterSpacing: '0.04em', boxShadow: '0 2px 10px rgba(0,0,0,0.08)', zIndex: 20,
+              backdropFilter: 'blur(8px)', fontSize: '12px', fontWeight: 700, color: '#555',
+              cursor: 'pointer', letterSpacing: '0.04em', boxShadow: '0 2px 10px rgba(0,0,0,0.08)', zIndex: 20,
             }}
           >
             Saltar →
