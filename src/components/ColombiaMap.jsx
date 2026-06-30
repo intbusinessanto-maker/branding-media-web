@@ -314,42 +314,42 @@ export default function ColombiaMap() {
               
   {/* ── ETIQUETAS DE CIUDAD ── */}
   {/* Barranquilla — arriba del pin */}
-  <g style="{pointerEvents:'none'}">
+  <g style={{ pointerEvents: 'none' }}>
     <rect x="228" y="23" width="101" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
     <text x="278.5" y="34" textAnchor="middle" dominantBaseline="middle"
       fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Barranquilla</text>
   </g>
 
   {/* Cartagena — a la izquierda */}
-  <g style="{pointerEvents:'none'}">
+  <g style={{ pointerEvents: 'none' }}>
     <rect x="183" y="83" width="76" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
     <text x="221" y="94" textAnchor="middle" dominantBaseline="middle"
       fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Cartagena</text>
   </g>
 
   {/* Medellín — a la izquierda */}
-  <g style="{pointerEvents:'none'}">
+  <g style={{ pointerEvents: 'none' }}>
     <rect x="172" y="207" width="72" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
     <text x="208" y="218" textAnchor="middle" dominantBaseline="middle"
       fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Medellín</text>
   </g>
 
   {/* Bucaramanga — a la derecha */}
-  <g style="{pointerEvents:'none'}">
+  <g style={{ pointerEvents: 'none' }}>
     <rect x="355" y="209" width="96" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
     <text x="403" y="220" textAnchor="middle" dominantBaseline="middle"
       fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Bucaramanga</text>
   </g>
 
   {/* Bogotá — a la derecha */}
-  <g style="{pointerEvents:'none'}">
+  <g style={{ pointerEvents: 'none' }}>
     <rect x="328" y="335" width="65" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
     <text x="360.5" y="346" textAnchor="middle" dominantBaseline="middle"
       fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Bogotá</text>
   </g>
 
   {/* Cali — a la izquierda */}
-  <g style="{pointerEvents:'none'}">
+  <g style={{ pointerEvents: 'none' }}>
     <rect x="170" y="334" width="40" height="20" rx="5" fill="white" opacity="0.93" filter="url(#ls)" />
     <text x="190" y="345" textAnchor="middle" dominantBaseline="middle"
       fontSize="13" fontWeight="800" fill="#E8118A" fontFamily="system-ui" letterSpacing="-0.02em">Cali</text>

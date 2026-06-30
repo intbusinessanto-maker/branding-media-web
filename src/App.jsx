@@ -126,11 +126,18 @@ function InteractiveBackground() {
   )
 }
 
-export default function App() {
-  /* Routing simple sin react-router — detecta /blog en el pathname */
-  const isBlogPage = typeof window !== 'undefined' && window.location.pathname === '/blog'
-  if (isBlogPage) return <BlogPage />
+/*
+ * Root router — detecta /blog ANTES de renderizar App para no violar
+ * Rules of Hooks (no se puede tener un return condicional antes de hooks).
+ */
+export default function Root() {
+  if (typeof window !== 'undefined' && window.location.pathname === '/blog') {
+    return <BlogPage />
+  }
+  return <App />
+}
 
+function App() {
   const [introVisible, setIntroVisible] = useState(
     () => !sessionStorage.getItem('bm_intro_seen')
   )
