@@ -13,18 +13,10 @@ const pillars = [
 const VIMEO_ID   = '1204915287'
 const VIMEO_HASH = 'e67a7306af'
 
-/*
- * ── MÓVIL — slides ACUMULATIVOS ──
- * Cada pilar aparece al hacer scroll y se QUEDA visible (no desaparece).
- * A medida que el usuario baja, los pilares se van apilando verticalmente
- * hasta que los 4 están visibles al mismo tiempo.
- * Altura: 450vh (encabezado + 4 × ~85vh de scroll por pilar).
- */
 function MobileAudience() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
-  /* maxProgress — solo crece, nunca retrocede — igual que en Formats desktop */
   const maxProgress = useMotionValue(0)
   useEffect(() => {
     return scrollYProgress.on('change', v => {
@@ -32,18 +24,16 @@ function MobileAudience() {
     })
   }, [scrollYProgress, maxProgress])
 
-  /* Header aparece al entrar */
-  const headerOp = useTransform(maxProgress, [0, 0.06], [0, 1])
-
-  /* Pilares — solo fade-in/slide-in, SIN fade-out (se quedan) */
-  const op0 = useTransform(maxProgress, [0.06, 0.14], [0, 1])
-  const y0  = useTransform(maxProgress, [0.06, 0.16], [28, 0])
-  const op1 = useTransform(maxProgress, [0.28, 0.36], [0, 1])
-  const y1  = useTransform(maxProgress, [0.28, 0.38], [28, 0])
-  const op2 = useTransform(maxProgress, [0.50, 0.58], [0, 1])
-  const y2  = useTransform(maxProgress, [0.50, 0.60], [28, 0])
-  const op3 = useTransform(maxProgress, [0.72, 0.80], [0, 1])
-  const y3  = useTransform(maxProgress, [0.72, 0.82], [28, 0])
+  // Pilar 01 aparece inmediatamente con y grande (efecto "desde el centro de pantalla")
+  const op0 = useTransform(maxProgress, [0.00, 0.10], [0, 1])
+  const y0  = useTransform(maxProgress, [0.00, 0.15], [180, 0])
+  // Pilares 02-04: aparecen escalonados con y pequeño
+  const op1 = useTransform(maxProgress, [0.25, 0.36], [0, 1])
+  const y1  = useTransform(maxProgress, [0.25, 0.38], [40, 0])
+  const op2 = useTransform(maxProgress, [0.48, 0.58], [0, 1])
+  const y2  = useTransform(maxProgress, [0.48, 0.60], [40, 0])
+  const op3 = useTransform(maxProgress, [0.70, 0.80], [0, 1])
+  const y3  = useTransform(maxProgress, [0.70, 0.82], [40, 0])
 
   const pillarMotions = [
     { op: op0, y: y0 },
@@ -54,74 +44,71 @@ function MobileAudience() {
 
   return (
     <div ref={ref} style={{ height: '450vh', position: 'relative' }}>
-      <section id="audiencia" style={{ position: 'sticky', top: 0, height: '100svh', minHeight: '600px', overflow: 'hidden', background: '#0D0D0D' }}>
-
-        {/* Fondo único — eager para que cargue de inmediato */}
+      <section
+        id="audiencia"
+        style={{
+          position: 'sticky', top: 0, height: '100svh',
+          overflow: 'hidden', background: '#0D0D0D',
+          touchAction: 'pan-y',
+          display: 'flex', flexDirection: 'column',
+        }}
+      >
+        {/* Fondo */}
         <img src={MOBILE_IMG_URL} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
-
         {/* Degradado */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.96) 100%)' }} />
 
-        {/* ── Encabezado ── */}
-        <motion.div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '2.4rem 1.4rem 0', opacity: headerOp, zIndex: 5 }}>
+        {/* Encabezado — siempre visible desde que entra la sección */}
+        <div style={{
+          padding: 'calc(65px + 0.8rem) 1.4rem 0.8rem',
+          flexShrink: 0, position: 'relative', zIndex: 5,
+        }}>
           <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', display: 'block', marginBottom: '6px' }}>
             La audiencia
           </span>
-          <h2 style={{ fontSize: 'clamp(1.7rem, 6.5vw, 2.4rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: '14px' }}>
+          <h2 style={{ fontSize: 'clamp(1.45rem, 5.5vw, 2rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: '10px' }}>
             ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
           </h2>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderRadius: '10px', background: 'rgba(232,17,138,0.14)', border: '1px solid rgba(232,17,138,0.22)' }}>
-            <span style={{ fontSize: '28px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1 }}>3–6h</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '7px 13px', borderRadius: '10px', background: 'rgba(232,17,138,0.14)', border: '1px solid rgba(232,17,138,0.22)' }}>
+            <span style={{ fontSize: '26px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1 }}>3–6h</span>
             <div>
               <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Tiempo en campus</div>
               <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Promedio diario del estudiante</div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/*
-         * ── Pilares acumulativos ──
-         * Columna de pilares anclada al fondo, cada uno aparece (sin desaparecer).
-         * Usamos flexDirection column-reverse para que el último añadido
-         * empuje los anteriores hacia arriba.
-         */}
+        {/* Pilares en orden normal (01→04), apilados hacia abajo desde el header */}
         <div style={{
-          position: 'absolute',
-          bottom: '1.8rem', left: '1.4rem', right: '1.4rem',
-          display: 'flex', flexDirection: 'column', gap: '10px',
-          zIndex: 5,
+          flex: 1, overflow: 'hidden',
+          padding: '0.5rem 1.4rem 1.2rem',
+          position: 'relative', zIndex: 5,
+          display: 'flex', flexDirection: 'column', gap: '8px',
         }}>
-          {/* Renderizamos en orden inverso para que col-reverse funcione correctamente */}
-          {[...pillars].reverse().map((p, revI) => {
-            const i = pillars.length - 1 - revI
-            return (
-              <motion.div
-                key={p.number}
-                style={{
-                  opacity: pillarMotions[i].op,
-                  y: pillarMotions[i].y,
-                }}
-              >
-                <div style={{
-                  display: 'flex', gap: '12px', padding: '16px 18px',
-                  borderRadius: '16px',
-                  background: 'rgba(0,0,0,0.72)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderLeft: `4px solid ${p.color}`,
-                }}>
-                  <span style={{ fontSize: '11px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '4px 8px', borderRadius: '6px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
-                    {p.number}
-                  </span>
-                  <div>
-                    <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', marginBottom: '5px', lineHeight: 1.2 }}>{p.title}</h4>
-                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.58)', lineHeight: 1.55, margin: 0 }}>{p.body}</p>
-                  </div>
+          {pillars.map((p, i) => (
+            <motion.div
+              key={p.number}
+              style={{ opacity: pillarMotions[i].op, y: pillarMotions[i].y }}
+            >
+              <div style={{
+                display: 'flex', gap: '12px', padding: '12px 14px',
+                borderRadius: '14px',
+                background: 'rgba(0,0,0,0.72)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderLeft: `4px solid ${p.color}`,
+              }}>
+                <span style={{ fontSize: '10px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '3px 7px', borderRadius: '5px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
+                  {p.number}
+                </span>
+                <div>
+                  <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '4px', lineHeight: 1.2 }}>{p.title}</h4>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.58)', lineHeight: 1.5, margin: 0 }}>{p.body}</p>
                 </div>
-              </motion.div>
-            )
-          })}
+              </div>
+            </motion.div>
+          ))}
         </div>
 
       </section>
