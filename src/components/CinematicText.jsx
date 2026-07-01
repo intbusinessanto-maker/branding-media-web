@@ -32,7 +32,8 @@ const PHRASES = [
   },
 ]
 
-const BG_IMG = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
+const BG_IMG      = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
+const WALKING_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/caminando.png'
 
 /* Resalta fragmentos del texto en color magenta */
 function Highlighted({ text, keywords }) {
@@ -99,6 +100,23 @@ export default function CinematicText() {
           maskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
           WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
+
+        {/* Figura caminando */}
+        <img
+          src={WALKING_URL}
+          alt=""
+          loading="eager"
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 'clamp(0px, 3vw, 40px)',
+            width: 'clamp(140px, 22vw, 340px)',
+            height: 'auto',
+            zIndex: 4,
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        />
 
         {layers.map((layer, i) => (
           <motion.div
