@@ -71,37 +71,45 @@ const BUBBLES = [
  * entre burbujas ni con la zona del título (verificado algorítmicamente).
  */
 /*
- * Posiciones intercaladas top/bottom para que con cualquier cantidad de marcas
- * la distribución sea equitativa. Con 17 marcas: índices pares=arriba (9),
- * índices impares=abajo (8) → 9 arriba / 8 abajo en lugar de 13/4.
+ * Posiciones intercaladas: índices pares = TOP (arriba del título),
+ * índices impares = BOTTOM (abajo del título).
+ * TOP: 2 filas de 5 (sin solitarios con hasta ~20 marcas).
+ * BOTTOM: 3 filas de 3 que llenan hasta el 85% del alto (sin óvalo vacío).
  */
 const MOBILE_BUBBLES = [
-  { left: '6.0%',  top: '9.0%',  size: 80, fromX: -680 }, // [0]  TOP
-  { left: '2.5%',  top: '63.4%', size: 78, fromX: -680 }, // [1]  BOT
-  { left: '29.7%', top: '9.7%',  size: 72, fromX:  380 }, // [2]  TOP
-  { left: '82.3%', top: '60.0%', size: 68, fromX: -240 }, // [3]  BOT
-  { left: '53.5%', top: '9.0%',  size: 82, fromX:  700 }, // [4]  TOP
-  { left: '24.8%', top: '69.1%', size: 72, fromX:  200 }, // [5]  BOT
-  { left: '80.0%', top: '9.5%',  size: 66, fromX: -220 }, // [6]  TOP
-  { left: '59.2%', top: '67.9%', size: 70, fromX:  480 }, // [7]  BOT
-  { left: '19.6%', top: '17.3%', size: 70, fromX:  440 }, // [8]  TOP
-  { left: '80.8%', top: '66.9%', size: 74, fromX:  700 }, // [9]  BOT
-  { left: '38.5%', top: '17.7%', size: 74, fromX: -560 }, // [10] TOP
-  { left: '5.5%',  top: '71.3%', size: 66, fromX: -520 }, // [11] BOT
-  { left: '61.6%', top: '18.8%', size: 64, fromX:  160 }, // [12] TOP
-  { left: '40.3%', top: '73.6%', size: 68, fromX:  400 }, // [13] BOT
-  { left: '79.7%', top: '17.8%', size: 78, fromX: -680 }, // [14] TOP
-  { left: '72.3%', top: '73.2%', size: 64, fromX: -140 }, // [15] BOT
-  { left: '0.3%',  top: '18.4%', size: 72, fromX: -680 }, // [16] TOP
-  { left: '14.5%', top: '77.4%', size: 60, fromX:  700 }, // [17] BOT
-  { left: '26.9%', top: '25.9%', size: 76, fromX: -680 }, // [18] TOP
-  { left: '49.1%', top: '79.7%', size: 62, fromX: -600 }, // [19] BOT
-  { left: '47.9%', top: '25.8%', size: 78, fromX:  700 }, // [20] TOP
-  { left: '66.2%', top: '79.1%', size: 58, fromX:  640 }, // [21] BOT
-  { left: '8.0%',  top: '26.7%', size: 70, fromX:  700 }, // [22] TOP
-  { left: '30.0%', top: '83.0%', size: 60, fromX: -620 }, // [23] BOT
-  { left: '68.9%', top: '26.0%', size: 76, fromX:  700 }, // [24] TOP
-  { left: '82.5%', top: '81.0%', size: 58, fromX:  620 }, // [25] BOT
+  // ── TOP fila 1 (top ~7-9%): índices 0,2,4,6,8 ──
+  { left: '0%',  top: '8%',  size: 68, fromX: -600 }, // [0]  TOP
+  // ── BOT fila 1 (top ~60-63%): índices 1,3,5 ──
+  { left: '0%',  top: '62%', size: 74, fromX: -600 }, // [1]  BOT
+  { left: '21%', top: '7%',  size: 64, fromX: -400 }, // [2]  TOP
+  { left: '41%', top: '60%', size: 76, fromX: -300 }, // [3]  BOT
+  { left: '42%', top: '9%',  size: 72, fromX:  500 }, // [4]  TOP
+  { left: '82%', top: '63%', size: 70, fromX:  600 }, // [5]  BOT
+  { left: '63%', top: '7%',  size: 62, fromX:  400 }, // [6]  TOP
+  // ── BOT fila 2 (top ~71-74%): índices 7,9,11 ──
+  { left: '1%',  top: '73%', size: 68, fromX: -500 }, // [7]  BOT
+  { left: '83%', top: '8%',  size: 66, fromX:  600 }, // [8]  TOP
+  { left: '42%', top: '71%', size: 70, fromX:  400 }, // [9]  BOT
+  // ── TOP fila 2 (top ~19-21%): índices 10,12,14,16,18 ──
+  { left: '2%',  top: '20%', size: 66, fromX: -500 }, // [10] TOP
+  { left: '83%', top: '74%', size: 66, fromX:  600 }, // [11] BOT
+  { left: '23%', top: '21%', size: 64, fromX: -350 }, // [12] TOP
+  // ── BOT fila 3 (top ~82-85%): índices 13,15,17 ──
+  { left: '0%',  top: '84%', size: 72, fromX: -600 }, // [13] BOT
+  { left: '44%', top: '19%', size: 66, fromX:  450 }, // [14] TOP
+  { left: '42%', top: '82%', size: 68, fromX:  300 }, // [15] BOT
+  { left: '65%', top: '21%', size: 62, fromX:  350 }, // [16] TOP
+  { left: '83%', top: '85%', size: 64, fromX:  600 }, // [17] BOT
+  { left: '84%', top: '20%', size: 60, fromX:  550 }, // [18] TOP  ← antes solitaria; ahora en fila 2
+  // ── BOT overflow (top ~91%+): índices 19,21,23,25 ──
+  { left: '15%', top: '91%', size: 60, fromX: -400 }, // [19] BOT
+  // ── TOP overflow (top ~29-31%): índices 20,22,24 ──
+  { left: '8%',  top: '30%', size: 64, fromX: -500 }, // [20] TOP
+  { left: '52%', top: '93%', size: 58, fromX:  400 }, // [21] BOT
+  { left: '43%', top: '28%', size: 66, fromX:  400 }, // [22] TOP
+  { left: '80%', top: '91%', size: 56, fromX:  600 }, // [23] BOT
+  { left: '75%', top: '31%', size: 62, fromX:  600 }, // [24] TOP
+  { left: '35%', top: '97%', size: 54, fromX: -300 }, // [25] BOT
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */

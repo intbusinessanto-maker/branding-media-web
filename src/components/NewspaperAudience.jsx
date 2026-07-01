@@ -47,7 +47,7 @@ function MobileAudience() {
       <section
         id="audiencia"
         style={{
-          position: 'sticky', top: 0, height: '100svh',
+          position: 'sticky', top: 0, height: '100dvh',
           overflow: 'hidden', background: '#0D0D0D',
           touchAction: 'pan-y',
           display: 'flex', flexDirection: 'column',
