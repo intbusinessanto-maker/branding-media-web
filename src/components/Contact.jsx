@@ -116,11 +116,13 @@ export default function Contact() {
                 }}>
                   <img src={FIGURA_URL} alt="" loading="lazy"
                     style={{
+                      position: 'absolute',
+                      bottom: 0,
                       width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      objectPosition: 'bottom center',
+                      height: 'auto',
                       display: 'block',
+                      transform: 'translateY(13.5%)',
+                      pointerEvents: 'none',
                     }} />
                 </div>
               </div>

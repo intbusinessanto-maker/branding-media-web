@@ -173,7 +173,7 @@ export default function Comparison() {
     { cards: [comparisons[4], comparisons[5]], op: row2op, y: row2y },
   ]
 
-  /* ── MOBILE: sección scrolleable normal, sin animación de telón ── */
+  /* ── MOBILE: sección scrolleable normal, CON efecto de telón de entrada ── */
   if (isMobile) {
     return (
       <section id="comparison-outer" style={{
@@ -185,11 +185,33 @@ export default function Comparison() {
       }}>
         <div style={{ position: 'absolute', inset: 0, background: BG_GRAD, pointerEvents: 'none' }} />
 
+        {/* ── Telón de apertura — cubre el primer viewport de la sección ── */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100dvh', overflow: 'hidden', pointerEvents: 'none', zIndex: 10 }}>
+          <motion.div
+            initial={{ y: '0%' }} whileInView={{ y: '-100%' }}
+            viewport={{ once: true, amount: 0 }}
+            transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
+            style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(0 0 50% 0)' }}
+          >
+            <img src={TRAY_URL} alt="" draggable={false} loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
+          </motion.div>
+          <motion.div
+            initial={{ y: '0%' }} whileInView={{ y: '100%' }}
+            viewport={{ once: true, amount: 0 }}
+            transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
+            style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(50% 0 0 0)' }}
+          >
+            <img src={TRAY_URL} alt="" draggable={false} loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
+          </motion.div>
+        </div>
+
         {/* Título */}
         <motion.div
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.5 }}
-          style={{ textAlign: 'center', marginBottom: '1.4rem', position: 'relative' }}
+          viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }}
+          style={{ textAlign: 'center', marginBottom: '1.4rem', position: 'relative', zIndex: 1 }}
         >
           <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', display: 'block', marginBottom: 8 }}>
             Comparativa de medios
@@ -200,13 +222,13 @@ export default function Comparison() {
         </motion.div>
 
         {/* 6 cards apiladas */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', zIndex: 1 }}>
           {comparisons.map((c, i) => (
             <motion.div key={c.vs}
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.07 }}
+              transition={{ duration: 0.4, delay: 0.55 + i * 0.07 }}
             >
               <MobileCard c={c} />
             </motion.div>
