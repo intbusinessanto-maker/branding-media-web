@@ -1,5 +1,3 @@
-const ESLOGAN_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/eslogan.webp'
-
 const SOCIALS = [
   {
     label: 'WhatsApp',
@@ -71,12 +69,21 @@ export default function Footer() {
 
           {/* Eslogan + descripción */}
           <div style={{ maxWidth: '280px' }}>
-            <img src={ESLOGAN_URL} alt="Movemos marcas en universidades"
-              style={{ height: 'clamp(44px, 7vw, 72px)', width: 'auto', objectFit: 'contain', marginBottom: '16px', display: 'block',
-                filter: 'brightness(0) invert(1)' }} />
-            <p style={{ fontSize: '12px', color: '#AAA', lineHeight: 1.6 }}>
+            <img
+              src="https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/eslogan.webp"
+              alt="Branding Media"
+              style={{ width: '200px', display: 'block', marginBottom: '14px' }}
+            />
+            <p style={{ fontSize: '12px', color: '#AAA', lineHeight: 1.6, marginBottom: '14px' }}>
               Circuito de pauta dentro de las universidades más grandes de Latinoamérica.
             </p>
+            <a href="/blog"
+              style={{ fontSize: '13px', color: '#AAA', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#00C4AD'}
+              onMouseLeave={e => e.currentTarget.style.color = '#AAA'}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="14" height="14"><path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+              Blog
+            </a>
           </div>
 
           {/* Contacto */}
@@ -159,7 +166,7 @@ export default function Footer() {
               Danger
             </a>
           </p>
-          <p style={{ fontSize: '12px', color: '#666' }}>Movemos marcas en universidades</p>
+          <p style={{ fontSize: '12px', color: '#666' }}>Colombia · 2026</p>
         </div>
 
       </div>

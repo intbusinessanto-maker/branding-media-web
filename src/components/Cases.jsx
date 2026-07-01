@@ -27,24 +27,24 @@ const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
  * se mantiene libre para el título.
  */
 const BUBBLES = [
-  { left: '6%',  top: '4%',  size: 180, fromX: -1600 },
+  { left: '6%',  top: '9%',  size: 180, fromX: -1600 },
   { left: '5%',  top: '40%', size: 150, fromX: -1600 },
   { left: '5%',  top: '74%', size: 172, fromX: -1600 },
-  { left: '21%', top: '6%',  size: 135, fromX: -1100 },
+  { left: '21%', top: '11%', size: 135, fromX: -1100 },
   { left: '21%', top: '48%', size: 163, fromX: -1100 },
   { left: '18%', top: '84%', size: 132, fromX: -1100 },
-  { left: '30%', top: '-4%', size: 142, fromX:  -750 },
+  { left: '30%', top: '10%', size: 142, fromX:  -750 },
   { left: '28%', top: '88%', size: 126, fromX:  -750 },
   { left: '40%', top: '82%', size: 122, fromX:  -600 },
-  { left: '54%', top: '-6%', size: 155, fromX:   750 },
+  { left: '54%', top: '10%', size: 155, fromX:   750 },
   { left: '51%', top: '76%', size: 138, fromX:   750 },
   { left: '61%', top: '28%', size: 148, fromX:  1100 },
   { left: '67%', top: '45%', size: 135, fromX:  1100 },
   { left: '66%', top: '81%', size: 168, fromX:  1100 },
-  { left: '76%', top: '-3%', size: 178, fromX:  1600 },
+  { left: '76%', top: '10%', size: 178, fromX:  1600 },
   { left: '77%', top: '36%', size: 146, fromX:  1600 },
   { left: '78%', top: '68%', size: 184, fromX:  1600 },
-  { left: '25%', top: '22%', size: 138, fromX:  -950 },
+  { left: '25%', top: '30%', size: 138, fromX:  -950 },
   { left: '23%', top: '69%', size: 126, fromX:  -950 },
   { left: '36%', top: '13%', size: 130, fromX:  -680 },
   { left: '33%', top: '68%', size: 132, fromX:  -680 },
@@ -84,19 +84,19 @@ const MOBILE_BUBBLES = [
   { left: '47.9%', top: '25.8%', size: 78, fromX:  700 },
   { left: '8.0%',  top: '26.7%', size: 70, fromX:  700 },
   { left: '68.9%', top: '26.0%', size: 76, fromX:  700 },
-  { left: '2.5%',  top: '65.0%', size: 78, fromX: -680 },
-  { left: '82.3%', top: '60.7%', size: 68, fromX: -240 },
-  { left: '24.8%', top: '72.1%', size: 72, fromX:  200 },
-  { left: '59.2%', top: '70.6%', size: 70, fromX:  480 },
-  { left: '80.8%', top: '69.3%', size: 74, fromX:  700 },
-  { left: '5.5%',  top: '74.8%', size: 66, fromX: -520 },
-  { left: '40.3%', top: '77.7%', size: 68, fromX:  400 },
-  { left: '72.3%', top: '77.2%', size: 64, fromX: -140 },
-  { left: '14.5%', top: '82.5%', size: 60, fromX:  700 },
-  { left: '49.1%', top: '85.4%', size: 62, fromX: -600 },
-  { left: '66.2%', top: '84.6%', size: 58, fromX:  640 },
-  { left: '30.0%', top: '89.5%', size: 60, fromX: -620 },
-  { left: '82.5%', top: '87.0%', size: 58, fromX:  620 },
+  { left: '2.5%',  top: '63.4%', size: 78, fromX: -680 },
+  { left: '82.3%', top: '60.0%', size: 68, fromX: -240 },
+  { left: '24.8%', top: '69.1%', size: 72, fromX:  200 },
+  { left: '59.2%', top: '67.9%', size: 70, fromX:  480 },
+  { left: '80.8%', top: '66.9%', size: 74, fromX:  700 },
+  { left: '5.5%',  top: '71.3%', size: 66, fromX: -520 },
+  { left: '40.3%', top: '73.6%', size: 68, fromX:  400 },
+  { left: '72.3%', top: '73.2%', size: 64, fromX: -140 },
+  { left: '14.5%', top: '77.4%', size: 60, fromX:  700 },
+  { left: '49.1%', top: '79.7%', size: 62, fromX: -600 },
+  { left: '66.2%', top: '79.1%', size: 58, fromX:  640 },
+  { left: '30.0%', top: '83.0%', size: 60, fromX: -620 },
+  { left: '82.5%', top: '81.0%', size: 58, fromX:  620 },
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */
@@ -158,7 +158,10 @@ function CasePopup({ brand, isOpen, onToggle }) {
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         onClick={e => e.stopPropagation()}
         style={{ background: '#fff', borderRadius: '22px', overflow: 'hidden',
-          width: 'min(700px, 96vw)', boxShadow: '0 32px 90px rgba(0,0,0,0.30)' }}
+          width: 'min(700px, 96vw)',
+          maxHeight: 'calc(100vh - 32px)',
+          display: 'flex', flexDirection: 'column',
+          boxShadow: '0 32px 90px rgba(0,0,0,0.30)' }}
       >
         {/* Header con logo de la marca */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -185,9 +188,9 @@ function CasePopup({ brand, isOpen, onToggle }) {
         </div>
 
         {/* Carrusel */}
-        <div style={{ position: 'relative', background: '#F5F5F5' }}>
+        <div style={{ position: 'relative', background: '#F5F5F5', flex: '1 1 auto', overflow: 'hidden' }}>
           {loading ? (
-            <div style={{ aspectRatio: '16/9', display: 'flex', alignItems: 'center',
+            <div style={{ height: '240px', display: 'flex', alignItems: 'center',
               justifyContent: 'center', fontSize: 13, color: '#CCC' }}>
               Cargando imágenes…
             </div>
@@ -210,14 +213,12 @@ function CasePopup({ brand, isOpen, onToggle }) {
                     flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
                     background: '#1A1A1A',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    minHeight: '180px', maxHeight: '70vh',
                   }}>
                     <img src={img.image_url} alt={img.title || ''} loading="lazy"
                       style={{
-                        maxWidth: '100%',
-                        maxHeight: '70vh',
-                        width: 'auto',
+                        width: '100%',
                         height: 'auto',
+                        maxHeight: 'calc(100vh - 180px)',
                         objectFit: 'contain',
                         display: 'block',
                       }}
@@ -225,7 +226,7 @@ function CasePopup({ brand, isOpen, onToggle }) {
                   </div>
                 )) : [0,1,2].map(n => (
                   <div key={n} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
-                    aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: '#1A1A1A' }}>
                     <span style={{ fontSize: 32, opacity: 0.15 }}>🔒</span>
                   </div>
@@ -268,16 +269,11 @@ function CasePopup({ brand, isOpen, onToggle }) {
 }
 
 /* Burbuja individual — NO renderiza el popup (el transform del motion.div rompe position:fixed) */
-/*
- * Las burbujas solo animan la ENTRADA (fly-in) y se quedan en su posición.
- * Al eliminar el "tail" del transform ([..., 0.80, 1]) se evita que las
- * burbujas que están arriba (Hatsu, Little Caesars, Todos Somos Una…)
- * "vuelen de vuelta" cuando el scroll llega al final de la sección.
- */
 function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOpen, onToggle }) {
   const rawX    = useTransform(progress, [0, 0.20], [fromX, 0])
   const x       = useSpring(rawX, { stiffness: 80, damping: 22, mass: 0.6 })
-  const opacity = useTransform(progress, [0.04, 0.18], [0, 1])
+  /* Fade-in al entrar, fade-out suave al salir — evita que las burbujas de arriba "desaparezcan" abruptamente */
+  const opacity = useTransform(progress, [0.04, 0.18, 0.82, 1.0], [0, 1, 1, 0])
   const scale   = useTransform(progress, [0, 0.20], [0.25, 1])
 
   return (
@@ -358,7 +354,7 @@ export default function Cases() {
       <div
         style={{
           position: 'sticky', top: 0, height: '100vh',
-          overflow: isMobile ? 'hidden' : 'visible',
+          overflow: 'hidden',
           background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent',
         }}
         onClick={handleClose}

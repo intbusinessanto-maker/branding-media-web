@@ -103,20 +103,20 @@ function MobileAudience() {
                 }}
               >
                 <div style={{
-                  display: 'flex', gap: '12px', padding: '14px 16px',
-                  borderRadius: '14px',
-                  background: 'rgba(0,0,0,0.68)',
-                  backdropFilter: 'blur(18px)',
-                  WebkitBackdropFilter: 'blur(18px)',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  display: 'flex', gap: '12px', padding: '16px 18px',
+                  borderRadius: '16px',
+                  background: 'rgba(0,0,0,0.72)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   borderLeft: `4px solid ${p.color}`,
                 }}>
-                  <span style={{ fontSize: '10px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '3px 7px', borderRadius: '5px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 900, color: p.color, background: `${p.color}22`, padding: '4px 8px', borderRadius: '6px', flexShrink: 0, height: 'fit-content', marginTop: '2px' }}>
                     {p.number}
                   </span>
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#fff', marginBottom: '4px', lineHeight: 1.2 }}>{p.title}</h4>
-                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, margin: 0 }}>{p.body}</p>
+                    <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', marginBottom: '5px', lineHeight: 1.2 }}>{p.title}</h4>
+                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.58)', lineHeight: 1.55, margin: 0 }}>{p.body}</p>
                   </div>
                 </div>
               </motion.div>

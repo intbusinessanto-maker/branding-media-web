@@ -22,14 +22,13 @@ const PHRASES = [
   },
   {
     display: true,
-    normal: 'nos dan acceso a un ecosistema de',
+    normal: 'Nos dan acceso a un ecosistema de',
     highlight: 'más de 9 millones de personas:',
   },
   {
     display: false,
-    text: 'Estudiantes, docentes, personal administrativo y, a través de ellos, miles de hogares y padres de familia que también toman decisiones de consumo.',
-    // Fragmentos del texto que van en magenta
-    highlights: ['Estudiantes, docentes', 'padres de familia'],
+    before: 'Estudiantes, docentes, personal administrativo y, a través de ellos, miles de hogares y padres de familia que ',
+    underline: 'también toman decisiones de consumo.',
   },
 ]
 
@@ -127,7 +126,6 @@ export default function CinematicText() {
                   fontWeight: 900,
                   letterSpacing: '-0.05em',
                   lineHeight: 1.05,
-                  textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.92)',
                   textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
                 }}>
@@ -139,7 +137,6 @@ export default function CinematicText() {
                   fontWeight: 900,
                   letterSpacing: '-0.05em',
                   lineHeight: 1.05,
-                  textTransform: 'uppercase',
                   color: '#E8118A',
                   textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)',
                 }}>
@@ -147,18 +144,23 @@ export default function CinematicText() {
                 </span>
               </>
             ) : (
-              /* Tiempo 3 — párrafo largo, legible, no uppercase */
+              /* Tiempo 3 — párrafo único con palabras clave en magenta */
               <p style={{
-                fontSize: 'clamp(1.05rem, 2vw, 1.55rem)',
-                fontWeight: 500,
-                lineHeight: 1.8,
-                color: 'rgba(255,255,255,0.88)',
-                textShadow: '0 2px 20px rgba(0,0,0,0.95)',
-                maxWidth: '780px',
+                maxWidth: '820px',
+                fontSize: 'clamp(1.1rem, 2.3vw, 2.3rem)',
+                fontWeight: 900,
+                lineHeight: 1.2,
+                letterSpacing: '-0.03em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.92)',
+                textShadow: '0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.6)',
+                textAlign: 'center',
                 margin: 0,
-                letterSpacing: '0.01em',
               }}>
-                <Highlighted text={layer.text} keywords={layer.highlights} />
+                {layer.before}
+                <span style={{ color: '#E8118A', textShadow: '0 2px 28px rgba(232,17,138,0.60), 0 0 60px rgba(0,0,0,0.5)' }}>
+                  {layer.underline}
+                </span>
               </p>
             )}
           </motion.div>

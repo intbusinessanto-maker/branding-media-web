@@ -1,55 +1,50 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 
+const MAP_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/mapa%20de%20colombia.png'
+const PIN_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/pin%20ubi.png'
+
 /*
- * Mapa de Colombia con imagen de relieve real (Wikimedia Commons, CC-BY-SA).
- * Los pines se superponen como SVG sobre la imagen usando coordenadas
- * calculadas a partir de la latitud/longitud real de cada ciudad.
- *
- * Imagen: 2028×2294 px, relieve físico de Colombia y sus vecinos.
- * Extensión geográfica aprox: -82°W a -64°W, -7°S a +14°N
- * → Fórmula: xPct = (lon_abs - 64) / 18 * 88.4,  yPct = (14 - lat) / 21 * 100
+ * Posiciones calibradas sobre la imagen de referencia (misma base 425×587 px).
+ * xPct = x_pixel / 425 * 100,  yPct = y_pixel / 587 * 100
+ * En SVG: px = xPct,  py = yPct * 1.381  (viewBox "0 0 100 138.1")
  */
-
-const TERRAIN_URL = 'https://upload.wikimedia.org/wikipedia/commons/2/2b/Colombia_relief_location_map.jpg'
-
-/* Posiciones en % del mapa calculadas desde lat/lon reales */
 const CITIES = [
   {
-    city: 'Barranquilla', xPct: 40.0, yPct: 14.5, count: 1,
-    institutions: ['U. del Norte'],
-    color: '#E8118A', labelSide: 'right',
-  },
-  {
-    city: 'Cartagena', xPct: 36.1, yPct: 17.2, count: 1,
+    city: 'Cartagena', xPct: 36.9, yPct: 18.2, count: 1,
     institutions: ['U. de los Andes – Sede Caribe'],
     color: '#E8118A', labelSide: 'left',
   },
   {
-    city: 'Bucaramanga', xPct: 49.3, yPct: 32.7, count: 1,
+    city: 'Barranquilla', xPct: 45.9, yPct: 20.4, count: 1,
+    institutions: ['U. del Norte'],
+    color: '#E8118A', labelSide: 'right',
+  },
+  {
+    city: 'Bucaramanga', xPct: 47.1, yPct: 31.7, count: 1,
     institutions: ['UPB Bucaramanga'],
     color: '#E8118A', labelSide: 'right',
   },
   {
-    city: 'Medellín', xPct: 35.8, yPct: 36.9, count: 2,
+    city: 'Medellín', xPct: 26.4, yPct: 32.9, count: 2,
     institutions: ['UPB Medellín', 'EAFIT'],
     color: '#E8118A', labelSide: 'left',
   },
   {
-    city: 'Bogotá', xPct: 44.1, yPct: 44.2, count: 9,
+    city: 'Bogotá', xPct: 41.9, yPct: 42.6, count: 9,
     institutions: ['U. del Rosario','U. de los Andes','U. Externado','Javeriana','Sergio Arboleda','U. La Sabana','U. La Salle','U. Sanitas','U. América'],
     color: '#E8118A', labelSide: 'right',
   },
   {
-    city: 'Cali', xPct: 30.4, yPct: 50.3, count: 2,
+    city: 'Cali', xPct: 21.2, yPct: 50.3, count: 2,
     institutions: ['ICESI', 'Javeriana Cali'],
     color: '#E8118A', labelSide: 'left',
   },
 ]
 
 const STEP_MS = 1200
-/* Aspecto real de la imagen: 2028 / 2294 ≈ 0.884 */
-const IMG_ASPECT = 2028 / 2294
+/* Aspecto del PNG 3D Colombia: 425 / 587 ≈ 0.724, height/width = 1.381 */
+const IMG_ASPECT = 425 / 587
 
 function CityCard({ c, isActive, onToggle, index }) {
   return (
@@ -185,8 +180,7 @@ export default function ColombiaMap() {
           .map-wrapper { padding: 16px 10px 20px !important; }
           .map-grid { grid-template-columns: 1fr !important; gap: 10px !important; flex: none !important; }
           .map-cards-col { overflow-y: visible !important; max-height: none !important; }
-          .map-3d-svg { transform: none !important; }
-          .map-3d-wrap { perspective: none !important; }
+          .map-3d-svg { max-width: 340px !important; margin: 0 auto; }
         }
       `}</style>
 
@@ -211,136 +205,111 @@ export default function ColombiaMap() {
 
         <div className="map-grid">
 
-          {/* ── Mapa HD de terreno real con pines superpuestos ── */}
+          {/* ── Mapa 3D Colombia: PNG con bg transparente + SVG de interacción ── */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             className="map-3d-wrap"
-            style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              minHeight: 0, padding: '8px',
-              perspective: '1100px',
-              perspectiveOrigin: '52% -8%',
-            }}
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 0, padding: '8px' }}
           >
-            {/*
-             * Contenedor 3D — imagen + SVG de pines comparten el mismo transform.
-             * position:relative permite que el SVG se superponga exactamente.
-             */}
             <div
               className="map-3d-svg"
-              style={{
-                width: '100%', maxWidth: '460px',
-                transform: 'rotateX(28deg) rotateZ(-9deg)',
-                transformOrigin: 'center 52%',
-                filter: 'drop-shadow(12px 28px 18px rgba(0,0,0,0.22))',
-                position: 'relative',
-                flexShrink: 0,
-              }}
+              style={{ width: '100%', maxWidth: '460px', flexShrink: 0, position: 'relative' }}
             >
-              {/* Imagen de relieve real — Colombia terrain map (Wikimedia CC-BY-SA) */}
-              <img
-                src={TERRAIN_URL}
-                alt="Mapa relieve Colombia"
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                  display: 'block',
-                  /* Escala de grises suave para que los pines magenta resalten */
-                  filter: 'grayscale(0.85) brightness(1.08) contrast(1.06)',
-                }}
-                crossOrigin="anonymous"
-              />
+              {/*
+               * drop-shadow en CSS con PNG de fondo transparente = la sombra sigue
+               * el contorno exacto de Colombia (no un rectángulo), dando el efecto
+               * de que el país flota sobre la página con profundidad real.
+               * HD: contrast + brightness + saturate suaves potencian el relieve.
+               */}
+              <div style={{ filter: 'drop-shadow(0 22px 48px rgba(0,0,0,0.28)) drop-shadow(0 6px 14px rgba(0,0,0,0.16))' }}>
+                <img
+                  src={MAP_URL}
+                  alt="Colombia mapa 3D"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    filter: 'contrast(1.10) brightness(1.02) saturate(1.06)',
+                  }}
+                />
+              </div>
 
               {/*
-               * SVG overlay — mismas dimensiones que la imagen (100% × 100%).
-               * viewBox="0 0 100 113.1" reproduce el aspecto real de la imagen
-               * (2028 / 2294 ≈ 0.884 → inverso = 1.131).
-               * Las coordenadas de los pines son % del área de la imagen
-               * calculadas desde la latitud/longitud de cada ciudad.
+               * SVG overlay — pines visuales propios sobre el mapa 3D limpio.
+               * viewBox "0 0 100 138.1" → aspecto 425/587 = 0.724, h/w = 1.381
+               * px = c.xPct,  py = c.yPct * 1.381,  cy (centro pin) = py - 4.6
                */}
               <svg
-                viewBox="0 0 100 113.1"
+                viewBox="0 0 100 138.1"
                 preserveAspectRatio="none"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}
               >
                 <defs>
-                  <filter id="lbl-shadow" x="-20%" y="-30%" width="140%" height="160%">
-                    <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="rgba(0,0,0,0.22)"/>
+                  <filter id="lbl-sh" x="-12%" y="-30%" width="124%" height="160%">
+                    <feDropShadow dx="0" dy="0.4" stdDeviation="0.7" floodColor="#000" floodOpacity="0.18"/>
                   </filter>
                 </defs>
 
                 {CITIES.map((c, i) => {
                   const active = isActive(c.city, i)
-                  /* x/y en el espacio viewBox (0-100 horizontal, 0-113.1 vertical) */
                   const px = c.xPct
-                  const py = c.yPct * 1.131   /* escala y al aspecto real */
-                  const PR = active ? 3.5 : 2.6
-                  const PT = active ? 8.0 : 5.8
+                  const py = c.yPct * 1.381
+                  /* Pin PNG: 7×9 SVG units, punta en (px, py).
+                   * cy = centro visual (cabeza del pin, ≈72% de la altura desde la punta) */
+                  const pinW = 14
+                  const pinH = 18
+                  const cy   = py - pinH * 0.72
 
-                  /* Etiqueta de ciudad */
-                  const LW = c.city.length * 1.6 + 3
-                  const LH = 4.5
-                  const lx = c.labelSide === 'right' ? px + PR + 2.5 : px - PR - LW - 1.5
-                  const ly = py - PT - LH / 2
+                  const pillW = c.city.length * 1.45 + 3
+                  const pillX = c.labelSide === 'right' ? px + 4 : px - 4 - pillW
 
                   return (
                     <g key={c.city} onClick={() => toggleManual(c.city)} style={{ cursor: 'pointer' }}>
-                      {/* Pulso cuando activo */}
+
+                      {/* Anillos de pulso centrados en la cabeza del pin */}
                       {active && (
                         <>
-                          <circle cx={px} cy={py - PT} r={PR} fill="none" stroke="#E8118A" strokeWidth="0.4" opacity="0">
-                            <animate attributeName="r" from={PR} to={PR * 5} dur="2.2s" repeatCount="indefinite"/>
-                            <animate attributeName="opacity" from="0.7" to="0" dur="2.2s" repeatCount="indefinite"/>
+                          <circle cx={px} cy={cy} r="3" fill="none" stroke="#E8118A" strokeWidth="0.4" opacity="0">
+                            <animate attributeName="r" from="3" to="20" dur="2.2s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" from="0.8" to="0" dur="2.2s" repeatCount="indefinite"/>
                           </circle>
-                          <circle cx={px} cy={py - PT} r={PR} fill="none" stroke="#E8118A" strokeWidth="0.25" opacity="0">
-                            <animate attributeName="r" from={PR} to={PR * 8} dur="2.2s" repeatCount="indefinite" begin="0.7s"/>
-                            <animate attributeName="opacity" from="0.4" to="0" dur="2.2s" repeatCount="indefinite" begin="0.7s"/>
+                          <circle cx={px} cy={cy} r="3" fill="none" stroke="#E8118A" strokeWidth="0.25" opacity="0">
+                            <animate attributeName="r" from="3" to="32" dur="2.2s" repeatCount="indefinite" begin="0.7s"/>
+                            <animate attributeName="opacity" from="0.45" to="0" dur="2.2s" repeatCount="indefinite" begin="0.7s"/>
                           </circle>
                         </>
                       )}
 
-                      {/* Pin teardrop magenta */}
-                      <path
-                        d={`M ${px} ${py}
-                           C ${px - 1.2} ${py - 1.8}
-                             ${px - PR - 1.2} ${py - PT * 0.3}
-                             ${px - PR - 1.2} ${py - PT}
-                           C ${px - PR - 1.2} ${py - PT - PR * 2.2}
-                             ${px + PR + 1.2} ${py - PT - PR * 2.2}
-                             ${px + PR + 1.2} ${py - PT}
-                           C ${px + PR + 1.2} ${py - PT * 0.3}
-                             ${px + 1.2} ${py - 1.8}
-                             ${px} ${py} Z`}
-                        fill="#E8118A"
-                        stroke="rgba(255,255,255,0.6)"
-                        strokeWidth="0.3"
+                      {/* Pin como imagen PNG */}
+                      <image
+                        href={PIN_URL}
+                        x={px - pinW / 2}
+                        y={py - pinH}
+                        width={pinW}
+                        height={pinH}
+                        style={{ pointerEvents: 'none' }}
                       />
-                      <circle cx={px} cy={py - PT} r={PR * 0.38} fill="white" />
-                      {c.count > 1 && (
-                        <text x={px} y={py - PT + PR * 0.15}
-                          textAnchor="middle" dominantBaseline="middle"
-                          fontSize={active ? '2.5' : '2'} fontWeight="900" fill="white" fontFamily="system-ui"
-                          style={{ pointerEvents: 'none' }}>
-                          {c.count}
-                        </text>
-                      )}
 
-                      {/* Etiqueta de ciudad — fondo blanco + texto magenta */}
-                      <g style={{ pointerEvents: 'none' }}>
-                        <rect x={lx} y={ly} width={LW} height={LH} rx="1.2"
-                          fill="white" opacity="0.92" filter="url(#lbl-shadow)" />
-                        <text
-                          x={lx + LW / 2} y={ly + LH / 2}
-                          textAnchor="middle" dominantBaseline="middle"
-                          fontSize="2.8" fontWeight="800" fill="#E8118A" fontFamily="system-ui"
-                          letterSpacing="-0.05em"
-                          style={{ pointerEvents: 'none' }}>
-                          {c.city}
-                        </text>
+                      {/* Etiqueta ciudad — píldora blanca con texto magenta */}
+                      <g filter="url(#lbl-sh)">
+                        <rect
+                          x={pillX} y={cy - 2.2}
+                          width={pillW} height={4.4}
+                          rx="1.5" fill="white" opacity="0.96"
+                        />
                       </g>
+                      <text
+                        x={pillX + 1.5} y={cy}
+                        dominantBaseline="central"
+                        fill="#E8118A" fontSize="2.4" fontWeight="700"
+                        fontFamily="system-ui,-apple-system,sans-serif"
+                      >{c.city}</text>
+
+                      {/* Área clickeable invisible */}
+                      <circle cx={px} cy={cy} r="8" fill="transparent"/>
                     </g>
                   )
                 })}

@@ -111,7 +111,7 @@ export default function Contact() {
                  */}
                 <div className="contact-figura-mobile" style={{
                   flexShrink: 0,
-                  width: 'clamp(110px, 34vw, 160px)',
+                  width: 'clamp(140px, 44vw, 200px)',
                   position: 'relative',
                 }}>
                   <img src={FIGURA_URL} alt="" loading="lazy"

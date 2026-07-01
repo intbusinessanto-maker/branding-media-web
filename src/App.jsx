@@ -11,7 +11,6 @@ import Formats       from './components/Formats'
 import Audience      from './components/NewspaperAudience'
 import Cases         from './components/Cases'
 import Comparison    from './components/Comparison'
-import Blog          from './components/Blog'
 import Contact       from './components/Contact'
 import Footer        from './components/Footer'
 import BlogPage      from './pages/BlogPage'
@@ -203,7 +202,6 @@ function App() {
                 <Audience />
                 <Cases />
                 <Comparison />
-                <Blog />
                 <Contact />
               </>
             )}
