@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useLayoutEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 
 const TRAY_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/bandeja.png'
@@ -54,32 +54,26 @@ const comparisons = [
   },
 ]
 
+/* ─── Card desktop ─── */
 function ComparisonCard({ c }) {
   return (
     <div style={{
-      borderRadius: '12px',
-      overflow: 'hidden',
+      borderRadius: '12px', overflow: 'hidden',
       border: '1px solid rgba(255,255,255,0.07)',
       background: '#111116',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
+      display: 'flex', flexDirection: 'column', height: '100%',
     }}>
-      {/* Header */}
       <div style={{
         background: `linear-gradient(135deg, ${c.color}20, ${c.color}08)`,
         borderBottom: `1px solid ${c.color}25`,
         padding: '8px 14px',
-        display: 'flex', alignItems: 'center', gap: 8,
-        flexShrink: 0,
+        display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
       }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: c.color, flexShrink: 0, boxShadow: `0 0 7px ${c.color}80` }} />
         <span style={{ fontSize: 'clamp(8px, 0.9vw, 10px)', fontWeight: 800, color: c.color, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
           {c.vs}
         </span>
       </div>
-
-      {/* Dos columnas */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, minHeight: 0 }}>
         <div style={{ padding: 'clamp(10px, 1.4vw, 16px)', background: `${c.color}09`, borderRight: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
@@ -102,59 +96,135 @@ function ComparisonCard({ c }) {
   )
 }
 
-/*
- * Flujo acumulativo:
- *   1. Telón abre mientras la sección sube hacia el viewport (p 0.02→0.13)
- *   2. Fila 1 aparece (p 0.16→0.24) y SE QUEDA
- *   3. Fila 2 aparece (p 0.34→0.44) y SE QUEDA
- *   4. Fila 3 aparece (p 0.54→0.64) y SE QUEDA
- *   5. Las 3 filas visibles juntas hasta p≈0.85
- *   6. Telón cierra (p 0.85→0.96)
- *
- * 620vh de sección + offset ['start end','end start'] = 720vh de scroll total.
- * Las 3 filas usan flex:1 para repartirse el espacio disponible → siempre caben.
- */
+/* ─── Card mobile — paneles apilados verticalmente, texto legible ─── */
+function MobileCard({ c }) {
+  return (
+    <div style={{
+      borderRadius: '12px', overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.07)',
+      background: '#111116',
+    }}>
+      <div style={{
+        background: `linear-gradient(135deg, ${c.color}22, ${c.color}09)`,
+        borderBottom: `1px solid ${c.color}28`,
+        padding: '10px 14px',
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <div style={{ width: 6, height: 6, borderRadius: '50%', background: c.color, flexShrink: 0, boxShadow: `0 0 7px ${c.color}90` }} />
+        <span style={{ fontSize: '10px', fontWeight: 800, color: c.color, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          {c.vs}
+        </span>
+      </div>
+      {/* Branding Media */}
+      <div style={{ padding: '12px 14px', background: `${c.color}0B`, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 12 }}>✅</span>
+          <span style={{ fontSize: '9px', fontWeight: 800, color: c.color, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Branding Media</span>
+        </div>
+        <p style={{ fontSize: '12px', fontWeight: 800, color: '#fff', margin: '0 0 5px', lineHeight: 1.35 }}>{c.ourTitle}</p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.58)', lineHeight: 1.6, margin: 0 }}>{c.ourText}</p>
+      </div>
+      {/* Otros medios */}
+      <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 12 }}>❌</span>
+          <span style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(255,255,255,0.32)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Otros medios</span>
+        </div>
+        <p style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.42)', margin: '0 0 5px', lineHeight: 1.35 }}>{c.theirTitle}</p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)', lineHeight: 1.6, margin: 0 }}>{c.theirText}</p>
+      </div>
+    </div>
+  )
+}
+
+const BG_GRAD = 'radial-gradient(ellipse at 18% 10%, rgba(0,196,173,0.07) 0%, transparent 48%), radial-gradient(ellipse at 82% 90%, rgba(232,17,138,0.05) 0%, transparent 48%)'
+
 export default function Comparison() {
   const outerRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
+  )
 
-  const { scrollYProgress } = useScroll({
-    target: outerRef,
-    offset: ['start end', 'end start'],
-  })
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
-  /* Telón */
+  /* Hooks de scroll — siempre se llaman, solo se usan en desktop */
+  const { scrollYProgress } = useScroll({ target: outerRef, offset: ['start end', 'end start'] })
   const rawTop = useTransform(scrollYProgress, [0.02, 0.13, 0.85, 0.96], [0, -100, -100, 0])
   const rawBot = useTransform(scrollYProgress, [0.02, 0.13, 0.85, 0.96], [0,  100,  100, 0])
   const topSpr = useSpring(rawTop, { stiffness: 44, damping: 13, mass: 0.9 })
   const botSpr = useSpring(rawBot, { stiffness: 44, damping: 13, mass: 0.9 })
-  const topY = useTransform(topSpr, v => `${v}%`)
-  const botY = useTransform(botSpr, v => `${v}%`)
-
-  /* Filas — entran y SE QUEDAN (sin fade-out) */
+  const topY   = useTransform(topSpr, v => `${v}%`)
+  const botY   = useTransform(botSpr, v => `${v}%`)
   const row0op = useTransform(scrollYProgress, [0.16, 0.24], [0, 1])
   const row0y  = useTransform(scrollYProgress, [0.16, 0.26], [22, 0])
   const row1op = useTransform(scrollYProgress, [0.34, 0.44], [0, 1])
   const row1y  = useTransform(scrollYProgress, [0.34, 0.46], [22, 0])
   const row2op = useTransform(scrollYProgress, [0.54, 0.64], [0, 1])
   const row2y  = useTransform(scrollYProgress, [0.54, 0.66], [22, 0])
-
   const rows = [
     { cards: [comparisons[0], comparisons[1]], op: row0op, y: row0y },
     { cards: [comparisons[2], comparisons[3]], op: row1op, y: row1y },
     { cards: [comparisons[4], comparisons[5]], op: row2op, y: row2y },
   ]
 
+  /* ── MOBILE: sección scrolleable normal, sin animación de telón ── */
+  if (isMobile) {
+    return (
+      <section id="comparison-outer" style={{
+        background: '#0D0D10', position: 'relative',
+        paddingTop: 'calc(65px + 2rem)',
+        paddingBottom: '3rem',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: BG_GRAD, pointerEvents: 'none' }} />
+
+        {/* Título */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.5 }}
+          style={{ textAlign: 'center', marginBottom: '1.4rem', position: 'relative' }}
+        >
+          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', display: 'block', marginBottom: 8 }}>
+            Comparativa de medios
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.55rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.2, color: '#fff', margin: 0 }}>
+            ¿Por qué <span style={{ color: '#E8118A' }}>CONVERTIMOS</span> en los espacios de pauta más importantes?
+          </h2>
+        </motion.div>
+
+        {/* 6 cards apiladas */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }}>
+          {comparisons.map((c, i) => (
+            <motion.div key={c.vs}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.07 }}
+            >
+              <MobileCard c={c} />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  /* ── DESKTOP: animación acumulativa con telón ── */
   return (
     <div ref={outerRef} id="comparison-outer" style={{ height: '700vh', position: 'relative' }}>
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
 
-        {/* Fondo */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: '#0D0D10', pointerEvents: 'none' }}>
-          <div style={{ position: 'absolute', inset: 0,
-            background: 'radial-gradient(ellipse at 18% 10%, rgba(0,196,173,0.07) 0%, transparent 48%), radial-gradient(ellipse at 82% 90%, rgba(232,17,138,0.05) 0%, transparent 48%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: BG_GRAD }} />
         </div>
 
-        {/* Contenido principal */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1,
           display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -166,7 +236,6 @@ export default function Comparison() {
         }}>
           <div style={{ maxWidth: '1200px', width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
 
-            {/* Título */}
             <div style={{ textAlign: 'center', marginBottom: 'clamp(10px, 1.6vh, 16px)', flexShrink: 0 }}>
               <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', display: 'block', marginBottom: 7 }}>
                 Comparativa de medios
@@ -176,21 +245,13 @@ export default function Comparison() {
               </h2>
             </div>
 
-            {/* 3 filas en columna — cada fila toma 1/3 del espacio disponible */}
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 'clamp(8px, 1.2vh, 12px)', minHeight: 0 }}>
               {rows.map((row, ri) => (
-                <motion.div
-                  key={ri}
-                  style={{
-                    flex: 1,
-                    minHeight: 0,
-                    opacity: row.op,
-                    y: row.y,
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 'clamp(8px, 1.2vw, 14px)',
-                  }}
-                >
+                <motion.div key={ri} style={{
+                  flex: 1, minHeight: 0, opacity: row.op, y: row.y,
+                  display: 'grid', gridTemplateColumns: '1fr 1fr',
+                  gap: 'clamp(8px, 1.2vw, 14px)',
+                }}>
                   {row.cards.map(c => <ComparisonCard key={c.vs} c={c} />)}
                 </motion.div>
               ))}
@@ -199,22 +260,11 @@ export default function Comparison() {
           </div>
         </div>
 
-        {/* Telón superior */}
-        <motion.div style={{
-          position: 'absolute', inset: 0, background: '#0D0D10',
-          clipPath: 'inset(0 0 50% 0)', zIndex: 10, y: topY, pointerEvents: 'none',
-        }}>
-          <img src={TRAY_URL} alt="" draggable={false} loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
+        <motion.div style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(0 0 50% 0)', zIndex: 10, y: topY, pointerEvents: 'none' }}>
+          <img src={TRAY_URL} alt="" draggable={false} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
         </motion.div>
-
-        {/* Telón inferior */}
-        <motion.div style={{
-          position: 'absolute', inset: 0, background: '#0D0D10',
-          clipPath: 'inset(50% 0 0 0)', zIndex: 10, y: botY, pointerEvents: 'none',
-        }}>
-          <img src={TRAY_URL} alt="" draggable={false} loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
+        <motion.div style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(50% 0 0 0)', zIndex: 10, y: botY, pointerEvents: 'none' }}>
+          <img src={TRAY_URL} alt="" draggable={false} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
         </motion.div>
 
       </div>

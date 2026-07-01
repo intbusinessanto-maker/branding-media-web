@@ -70,33 +70,38 @@ const BUBBLES = [
  * quedaban con left negativo y se veían cortadas), (3) cero solapamientos
  * entre burbujas ni con la zona del título (verificado algorítmicamente).
  */
+/*
+ * Posiciones intercaladas top/bottom para que con cualquier cantidad de marcas
+ * la distribución sea equitativa. Con 17 marcas: índices pares=arriba (9),
+ * índices impares=abajo (8) → 9 arriba / 8 abajo en lugar de 13/4.
+ */
 const MOBILE_BUBBLES = [
-  { left: '6.0%',  top: '9.0%',  size: 80, fromX: -680 },
-  { left: '29.7%', top: '9.7%',  size: 72, fromX:  380 },
-  { left: '53.5%', top: '9.0%',  size: 82, fromX:  700 },
-  { left: '80.0%', top: '9.5%',  size: 66, fromX: -220 },
-  { left: '19.6%', top: '17.3%', size: 70, fromX:  440 },
-  { left: '38.5%', top: '17.7%', size: 74, fromX: -560 },
-  { left: '61.6%', top: '18.8%', size: 64, fromX:  160 },
-  { left: '79.7%', top: '17.8%', size: 78, fromX: -680 },
-  { left: '0.3%',  top: '18.4%', size: 72, fromX: -680 },
-  { left: '26.9%', top: '25.9%', size: 76, fromX: -680 },
-  { left: '47.9%', top: '25.8%', size: 78, fromX:  700 },
-  { left: '8.0%',  top: '26.7%', size: 70, fromX:  700 },
-  { left: '68.9%', top: '26.0%', size: 76, fromX:  700 },
-  { left: '2.5%',  top: '63.4%', size: 78, fromX: -680 },
-  { left: '82.3%', top: '60.0%', size: 68, fromX: -240 },
-  { left: '24.8%', top: '69.1%', size: 72, fromX:  200 },
-  { left: '59.2%', top: '67.9%', size: 70, fromX:  480 },
-  { left: '80.8%', top: '66.9%', size: 74, fromX:  700 },
-  { left: '5.5%',  top: '71.3%', size: 66, fromX: -520 },
-  { left: '40.3%', top: '73.6%', size: 68, fromX:  400 },
-  { left: '72.3%', top: '73.2%', size: 64, fromX: -140 },
-  { left: '14.5%', top: '77.4%', size: 60, fromX:  700 },
-  { left: '49.1%', top: '79.7%', size: 62, fromX: -600 },
-  { left: '66.2%', top: '79.1%', size: 58, fromX:  640 },
-  { left: '30.0%', top: '83.0%', size: 60, fromX: -620 },
-  { left: '82.5%', top: '81.0%', size: 58, fromX:  620 },
+  { left: '6.0%',  top: '9.0%',  size: 80, fromX: -680 }, // [0]  TOP
+  { left: '2.5%',  top: '63.4%', size: 78, fromX: -680 }, // [1]  BOT
+  { left: '29.7%', top: '9.7%',  size: 72, fromX:  380 }, // [2]  TOP
+  { left: '82.3%', top: '60.0%', size: 68, fromX: -240 }, // [3]  BOT
+  { left: '53.5%', top: '9.0%',  size: 82, fromX:  700 }, // [4]  TOP
+  { left: '24.8%', top: '69.1%', size: 72, fromX:  200 }, // [5]  BOT
+  { left: '80.0%', top: '9.5%',  size: 66, fromX: -220 }, // [6]  TOP
+  { left: '59.2%', top: '67.9%', size: 70, fromX:  480 }, // [7]  BOT
+  { left: '19.6%', top: '17.3%', size: 70, fromX:  440 }, // [8]  TOP
+  { left: '80.8%', top: '66.9%', size: 74, fromX:  700 }, // [9]  BOT
+  { left: '38.5%', top: '17.7%', size: 74, fromX: -560 }, // [10] TOP
+  { left: '5.5%',  top: '71.3%', size: 66, fromX: -520 }, // [11] BOT
+  { left: '61.6%', top: '18.8%', size: 64, fromX:  160 }, // [12] TOP
+  { left: '40.3%', top: '73.6%', size: 68, fromX:  400 }, // [13] BOT
+  { left: '79.7%', top: '17.8%', size: 78, fromX: -680 }, // [14] TOP
+  { left: '72.3%', top: '73.2%', size: 64, fromX: -140 }, // [15] BOT
+  { left: '0.3%',  top: '18.4%', size: 72, fromX: -680 }, // [16] TOP
+  { left: '14.5%', top: '77.4%', size: 60, fromX:  700 }, // [17] BOT
+  { left: '26.9%', top: '25.9%', size: 76, fromX: -680 }, // [18] TOP
+  { left: '49.1%', top: '79.7%', size: 62, fromX: -600 }, // [19] BOT
+  { left: '47.9%', top: '25.8%', size: 78, fromX:  700 }, // [20] TOP
+  { left: '66.2%', top: '79.1%', size: 58, fromX:  640 }, // [21] BOT
+  { left: '8.0%',  top: '26.7%', size: 70, fromX:  700 }, // [22] TOP
+  { left: '30.0%', top: '83.0%', size: 60, fromX: -620 }, // [23] BOT
+  { left: '68.9%', top: '26.0%', size: 76, fromX:  700 }, // [24] TOP
+  { left: '82.5%', top: '81.0%', size: 58, fromX:  620 }, // [25] BOT
 ]
 
 /* Popup de caso — modal centrado con carrusel horizontal */
