@@ -1,34 +1,63 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { supabase } from '../lib/supabase'
 
 const LOGO_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo-Branding-Media.png'
 
-const categoryColors = { Estrategia: '#8B3FA8', DOOH: '#00C4AD', Tendencias: '#E8118A' }
+const categoryColors = {
+  Estrategia: '#8B3FA8',
+  DOOH: '#00C4AD',
+  Tendencias: '#F07B00',
+  OOH: '#3B82F6',
+  'Marketing Universitario': '#10B981',
+  'Casos de Éxito': '#F43F5E',
+  'Publicidad OOH/DOOH': '#00C4AD',
+  'Marketing y Publicidad': '#8B3FA8',
+  'Publicidad Exterior': '#3B82F6',
+}
 
-const posts = [
-  {
-    date: '03 Mar 2026', category: 'Estrategia',
-    title: '¿Tu marca es protagonista o solo parte del paisaje?',
-    excerpt: 'Estamos pagando fortunas por ser ignorados. El fin de la publicidad invisible en entornos universitarios.',
-    readTime: '5 min',
-  },
-  {
-    date: 'Próximamente', category: 'DOOH',
-    title: 'Programmatic DOOH en universidades: la próxima frontera',
-    excerpt: 'Cómo la compra programática de espacios digitales en campus está cambiando la planificación de medios.',
-    readTime: '7 min',
-  },
-  {
-    date: 'Próximamente', category: 'Tendencias',
-    title: 'El universitario colombiano: el consumidor más valioso',
-    excerpt: 'Datos, comportamientos y por qué las marcas más inteligentes ya están invirtiendo en este segmento.',
-    readTime: '6 min',
-  },
-]
+function ArticleSchema({ post }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.seo_title || post.title,
+    description: post.seo_description || post.excerpt,
+    image: (post.cover_image_url && !post.cover_image_url.startsWith('data:')) ? post.cover_image_url : '',
+    author: { '@type': 'Organization', name: post.author || 'Bmmedios' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Bmmedios',
+      logo: { '@type': 'ImageObject', url: LOGO_URL },
+    },
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at || post.published_at || post.created_at,
+    keywords: (post.seo_keywords || []).join(', '),
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.bmmedios.com/blog/${post.slug}` },
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+}
 
-export default function BlogPage() {
+function ArticlePage({ post, onBack }) {
+  const col = categoryColors[post.category] || '#00C4AD'
+  const dateStr = post.published_at
+    ? new Date(post.published_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })
+    : ''
+  const hasRealImage = post.cover_image_url && !post.cover_image_url.startsWith('data:')
+
+  useEffect(() => {
+    document.title = (post.seo_title || post.title) + ' | Bmmedios'
+    const meta = document.querySelector('meta[name="description"]')
+    if (meta) meta.setAttribute('content', post.seo_description || post.excerpt || '')
+    window.scrollTo(0, 0)
+    return () => { document.title = 'Bmmedios — Publicidad en Universidades Colombia' }
+  }, [post])
+
+  const paragraphs = (post.content || '').split('\n').filter(l => l.trim())
+
   return (
     <div style={{ minHeight: '100vh', background: '#fff' }}>
-      {/* Header de la página */}
+      <ArticleSchema post={post} />
+
       <header style={{
         position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(20px)',
@@ -36,20 +65,129 @@ export default function BlogPage() {
         padding: '0 2rem', height: '72px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-          <img src={LOGO_URL} alt="Branding Media" style={{ height: '52px', width: 'auto', objectFit: 'contain' }} />
+        <a href="/" style={{ textDecoration: 'none' }}>
+          <img src={LOGO_URL} alt="Branding Media" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+        </a>
+        <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#555', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>← Blog</button>
+          <a href="/#contacto" style={{ background: '#8B3FA8', color: '#fff', padding: '9px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>Contactar</a>
+        </nav>
+      </header>
+
+      <section style={{ padding: '64px 2rem 80px', background: '#fff' }}>
+        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: col, border: `1px solid ${col}30`, padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase', background: `${col}0A` }}>
+            {post.category}
+          </span>
+
+          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.2, marginTop: '16px', marginBottom: '16px' }}>
+            {post.title}
+          </h1>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#AAA', fontSize: '13px', marginBottom: '32px', flexWrap: 'wrap' }}>
+            <span>{post.author || 'Bmmedios'}</span>
+            {dateStr && <><span>·</span><span>{dateStr}</span></>}
+            {post.read_time_minutes && <><span>·</span><span>{post.read_time_minutes} min lectura</span></>}
+          </div>
+
+          {hasRealImage && (
+            <img src={post.cover_image_url} alt={post.cover_image_alt || post.title}
+              style={{ width: '100%', borderRadius: '14px', marginBottom: '40px', maxHeight: '420px', objectFit: 'cover' }} />
+          )}
+
+          {post.excerpt && (
+            <p style={{ fontSize: '18px', color: '#444', lineHeight: 1.7, fontStyle: 'italic', borderLeft: `3px solid ${col}`, paddingLeft: '20px', marginBottom: '32px' }}>
+              {post.excerpt}
+            </p>
+          )}
+
+          <div style={{ fontSize: '16px', color: '#333', lineHeight: 1.8 }}>
+            {paragraphs.map((p, i) => {
+              if (p.startsWith('## ')) return <h2 key={i} style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1A1A1A', marginTop: '36px', marginBottom: '12px', letterSpacing: '-0.02em' }}>{p.replace('## ', '')}</h2>
+              if (p.startsWith('### ')) return <h3 key={i} style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1A1A1A', marginTop: '24px', marginBottom: '8px' }}>{p.replace('### ', '')}</h3>
+              if (p.startsWith('**') && p.endsWith('**')) return <p key={i} style={{ marginBottom: '16px', fontWeight: 700 }}>{p.replace(/\*\*/g, '')}</p>
+              return <p key={i} style={{ marginBottom: '16px' }}>{p}</p>
+            })}
+          </div>
+
+          {post.seo_keywords?.length > 0 && (
+            <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {post.seo_keywords.map((k, i) => (
+                  <span key={i} style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '12px', background: 'rgba(0,0,0,0.05)', color: '#666', border: '1px solid rgba(0,0,0,0.08)' }}>
+                    #{k}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: '48px', padding: '28px', borderRadius: '16px', background: 'linear-gradient(135deg, #F8F0FF, #F0FFFE)', border: '1px solid rgba(139,63,168,0.12)', textAlign: 'center' }}>
+            <p style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', marginBottom: '8px' }}>¿Quieres llegar a 300,000 universitarios en Colombia?</p>
+            <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>Bmmedios es la única agencia especializada en publicidad OOH y DOOH en campus universitarios.</p>
+            <a href="/#contacto" style={{ display: 'inline-block', background: '#8B3FA8', color: '#fff', padding: '12px 28px', borderRadius: '10px', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
+              Hablar con un experto →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer style={{ borderTop: '1px solid rgba(0,0,0,0.07)', padding: '24px 2rem', textAlign: 'center' }}>
+        <a href="/blog" style={{ color: '#8B3FA8', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>← Volver al blog</a>
+        <span style={{ margin: '0 16px', color: '#DDD' }}>|</span>
+        <a href="/" style={{ color: '#555', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Volver al sitio principal</a>
+      </footer>
+    </div>
+  )
+}
+
+export default function BlogPage() {
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null)
+
+  useEffect(() => {
+    supabase
+      .from('blog_posts')
+      .select('id, title, slug, excerpt, category, published_at, cover_image_url, cover_image_alt, read_time_minutes, seo_title, seo_description, seo_keywords, content, author, updated_at, created_at')
+      .eq('status', 'publicado')
+      .order('published_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => { setPosts(data || []); setLoading(false) })
+  }, [])
+
+  if (selected) return <ArticlePage post={selected} onBack={() => setSelected(null)} />
+
+  const skeletons = [1, 2, 3]
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#fff' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Blog',
+        name: 'Blog Bmmedios',
+        description: 'Perspectivas sobre publicidad OOH y DOOH en campus universitarios de Colombia y Latinoamérica',
+        url: 'https://www.bmmedios.com/blog',
+        publisher: { '@type': 'Organization', name: 'Bmmedios' },
+      }) }} />
+
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(0,0,0,0.07)',
+        padding: '0 2rem', height: '72px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <a href="/" style={{ textDecoration: 'none' }}>
+          <img src={LOGO_URL} alt="Branding Media" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
         </a>
         <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <a href="/" style={{ color: '#555', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>Inicio</a>
           <a href="/#mapa" style={{ color: '#555', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>Cobertura</a>
-          <a href="/#contacto" style={{
-            background: '#8B3FA8', color: '#fff', padding: '9px 20px', borderRadius: '8px',
-            fontSize: '14px', fontWeight: 700, textDecoration: 'none',
-          }}>Contactar</a>
+          <a href="/#contacto" style={{ background: '#8B3FA8', color: '#fff', padding: '9px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>Contactar</a>
         </nav>
       </header>
 
-      {/* Hero del blog */}
       <section style={{
         background: 'linear-gradient(135deg, #F8F0FF 0%, #F0FFFE 100%)',
         padding: 'clamp(60px,10vw,100px) 2rem clamp(40px,8vw,80px)',
@@ -67,46 +205,81 @@ export default function BlogPage() {
         </motion.div>
       </section>
 
-      {/* Grid de artículos */}
       <section style={{ padding: 'clamp(40px,6vw,80px) 2rem', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
-          {posts.map((p, i) => {
-            const col = categoryColors[p.category] || '#00C4AD'
-            return (
-              <motion.article
-                key={i}
-                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.5 }}
-                whileHover={{ y: -6, boxShadow: '0 16px 48px rgba(0,0,0,0.10)' }}
-                style={{
-                  padding: '28px', borderRadius: '18px', background: '#FAFAFA',
-                  border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
-                  display: 'flex', flexDirection: 'column', gap: '14px', cursor: 'pointer',
-                  transition: 'box-shadow 0.25s, transform 0.25s',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: col, border: `1px solid ${col}30`, padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase', background: `${col}0A` }}>{p.category}</span>
-                  <span style={{ fontSize: '11px', color: '#AAA' }}>{p.readTime}</span>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h2 style={{ fontSize: '17px', fontWeight: 800, color: '#1A1A1A', lineHeight: 1.4, marginBottom: '8px' }}>{p.title}</h2>
-                  <p style={{ fontSize: '13px', color: '#666', lineHeight: 1.7 }}>{p.excerpt}</p>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                  <span style={{ fontSize: '12px', color: '#AAA' }}>{p.date}</span>
-                  <span style={{ fontSize: '12px', color: col, fontWeight: 700 }}>Leer artículo →</span>
-                </div>
-              </motion.article>
-            )
-          })}
-        </div>
+        {loading && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
+            {skeletons.map(i => (
+              <div key={i} style={{ height: '260px', borderRadius: '18px', background: '#F3F3F3', animation: 'bm-pulse 1.5s ease-in-out infinite' }} />
+            ))}
+          </div>
+        )}
+
+        {!loading && posts.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <p style={{ fontSize: '18px', color: '#999', marginBottom: '8px' }}>Próximamente</p>
+            <p style={{ fontSize: '14px', color: '#BBB' }}>Estamos preparando contenido de valor sobre publicidad universitaria en Colombia.</p>
+          </div>
+        )}
+
+        {!loading && posts.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
+            {posts.map((p, i) => {
+              const col = categoryColors[p.category] || '#00C4AD'
+              const hasRealImage = p.cover_image_url && !p.cover_image_url.startsWith('data:')
+              const dateStr = p.published_at
+                ? new Date(p.published_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+                : ''
+              return (
+                <motion.article
+                  key={p.id}
+                  initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.5 }}
+                  whileHover={{ y: -6, boxShadow: '0 16px 48px rgba(0,0,0,0.10)' }}
+                  onClick={() => setSelected(p)}
+                  style={{
+                    padding: '0', borderRadius: '18px', background: '#FAFAFA',
+                    border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+                    display: 'flex', flexDirection: 'column', cursor: 'pointer',
+                    overflow: 'hidden', transition: 'box-shadow 0.25s, transform 0.25s',
+                  }}
+                >
+                  {hasRealImage ? (
+                    <img src={p.cover_image_url} alt={p.cover_image_alt || p.title}
+                      style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '8px', background: `linear-gradient(90deg, ${col}, ${col}88)` }} />
+                  )}
+                  <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: col, border: `1px solid ${col}30`, padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase', background: `${col}0A` }}>{p.category}</span>
+                      <span style={{ fontSize: '11px', color: '#AAA' }}>{p.read_time_minutes} min</span>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h2 style={{ fontSize: '17px', fontWeight: 800, color: '#1A1A1A', lineHeight: 1.4, marginBottom: '8px' }}>{p.title}</h2>
+                      <p style={{ fontSize: '13px', color: '#666', lineHeight: 1.7 }}>{p.excerpt}</p>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                      <span style={{ fontSize: '12px', color: '#AAA' }}>{dateStr}</span>
+                      <span style={{ fontSize: '12px', color: col, fontWeight: 700 }}>Leer artículo →</span>
+                    </div>
+                  </div>
+                </motion.article>
+              )
+            })}
+          </div>
+        )}
       </section>
 
-      {/* Footer mínimo */}
-      <footer style={{ borderTop: '1px solid rgba(0,0,0,0.07)', padding: '24px 2rem', textAlign: 'center' }}>
+      <footer style={{ borderTop: '1px solid rgba(0,0,0,0.07)', padding: '32px 2rem', textAlign: 'center' }}>
         <a href="/" style={{ color: '#8B3FA8', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>← Volver al sitio principal</a>
       </footer>
+
+      <style>{`
+        @keyframes bm-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
     </div>
   )
 }
