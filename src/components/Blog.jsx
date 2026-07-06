@@ -25,6 +25,46 @@ function ArticleSchema({ post }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
+const normalizeContent = (text) => text
+  .replace(/campus universitarios?/gi, 'universidades')
+  .replace(/\bcampus\b/gi, 'universidades')
+
+const renderInline = (text) => {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
+    if (part.startsWith('*') && part.endsWith('*')) return <em key={i}>{part.slice(1, -1)}</em>
+    return part
+  })
+}
+
+const renderContent = (raw) => {
+  const content = normalizeContent(raw || '')
+  const lines = content.split('\n')
+  const elements = []
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    if (!line.trim()) { i++; continue }
+    if (line.startsWith('#### ')) { elements.push(<h4 key={i} style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1A1A', marginTop: '20px', marginBottom: '6px' }}>{renderInline(line.slice(5))}</h4>); i++; continue }
+    if (line.startsWith('### ')) { elements.push(<h3 key={i} style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1A1A1A', marginTop: '28px', marginBottom: '8px' }}>{renderInline(line.slice(4))}</h3>); i++; continue }
+    if (line.startsWith('## ')) { elements.push(<h2 key={i} style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1A1A1A', marginTop: '40px', marginBottom: '12px', letterSpacing: '-0.02em' }}>{renderInline(line.slice(3))}</h2>); i++; continue }
+    if (line.startsWith('# ')) { elements.push(<h2 key={i} style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1A1A1A', marginTop: '40px', marginBottom: '14px', letterSpacing: '-0.02em' }}>{renderInline(line.slice(2))}</h2>); i++; continue }
+    if (/^\d+\.\s/.test(line)) {
+      const items = []
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) { items.push(<li key={i} style={{ marginBottom: '8px' }}>{renderInline(lines[i].replace(/^\d+\.\s/, ''))}</li>); i++ }
+      elements.push(<ol key={`ol-${i}`} style={{ paddingLeft: '24px', marginBottom: '16px', lineHeight: 1.8 }}>{items}</ol>); continue
+    }
+    if (/^[-*]\s/.test(line)) {
+      const items = []
+      while (i < lines.length && /^[-*]\s/.test(lines[i])) { items.push(<li key={i} style={{ marginBottom: '6px' }}>{renderInline(lines[i].replace(/^[-*]\s/, ''))}</li>); i++ }
+      elements.push(<ul key={`ul-${i}`} style={{ paddingLeft: '24px', marginBottom: '16px', lineHeight: 1.8 }}>{items}</ul>); continue
+    }
+    elements.push(<p key={i} style={{ marginBottom: '16px' }}>{renderInline(line)}</p>); i++
+  }
+  return elements
+}
+
 function ArticlePage({ post, onBack }) {
   const col = categoryColors[post.category] || '#00C4AD'
   const dateStr = post.published_at
@@ -38,8 +78,6 @@ function ArticlePage({ post, onBack }) {
     window.scrollTo(0, 0)
     return () => { document.title = 'Bmmedios — Publicidad en Universidades Colombia' }
   }, [post])
-
-  const paragraphs = (post.content || '').split('\n').filter(l => l.trim())
 
   return (
     <section style={{ padding: '80px 2rem', background: '#fff' }}>
@@ -79,11 +117,7 @@ function ArticlePage({ post, onBack }) {
         )}
 
         <div style={{ fontSize: '16px', color: '#333', lineHeight: 1.8 }}>
-          {paragraphs.map((p, i) => {
-            if (p.startsWith('## ')) return <h2 key={i} style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1A1A1A', marginTop: '36px', marginBottom: '12px', letterSpacing: '-0.02em' }}>{p.replace('## ', '')}</h2>
-            if (p.startsWith('### ')) return <h3 key={i} style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1A1A1A', marginTop: '24px', marginBottom: '8px' }}>{p.replace('### ', '')}</h3>
-            return <p key={i} style={{ marginBottom: '16px' }}>{p}</p>
-          })}
+          {renderContent(post.content)}
         </div>
 
         {post.seo_keywords?.length > 0 && (
