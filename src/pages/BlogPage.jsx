@@ -52,12 +52,6 @@ function ArticlePage({ post, onBack }) {
     return () => { document.title = 'Bmmedios — Publicidad en Universidades Colombia' }
   }, [post])
 
-  // Normaliza el contenido: reemplaza "campus universitario/campus" por "universidades"
-  // y renderiza markdown correctamente
-  const normalizeContent = (text) => text
-    .replace(/campus universitarios?/gi, 'universidades')
-    .replace(/\bcampus\b/gi, 'universidades')
-
   const renderInline = (text) => {
     // Convierte **negrita** a <strong> y *cursiva* a <em>
     const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
@@ -71,7 +65,7 @@ function ArticlePage({ post, onBack }) {
   }
 
   const renderContent = (raw) => {
-    const content = normalizeContent(raw || '')
+    const content = raw || ''
     const lines = content.split('\n')
     const elements = []
     let i = 0

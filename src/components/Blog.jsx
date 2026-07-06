@@ -25,10 +25,6 @@ function ArticleSchema({ post }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
-const normalizeContent = (text) => text
-  .replace(/campus universitarios?/gi, 'universidades')
-  .replace(/\bcampus\b/gi, 'universidades')
-
 const renderInline = (text) => {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
   return parts.map((part, i) => {
@@ -39,7 +35,7 @@ const renderInline = (text) => {
 }
 
 const renderContent = (raw) => {
-  const content = normalizeContent(raw || '')
+  const content = raw || ''
   const lines = content.split('\n')
   const elements = []
   let i = 0
