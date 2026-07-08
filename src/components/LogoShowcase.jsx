@@ -123,7 +123,7 @@ export default function LogoShowcase() {
           0%,100% { transform:translateY(0px); }
           50%      { transform:translateY(-16px); }
         }
-        /* ── Móvil: redes ARRIBA y ABAJO del eslogan, bien pegadas ── */
+        /* ── Móvil: redes ARRIBA y ABAJO del eslogan, pegadas al centro ── */
         @media (max-width: 767px) {
           .logo-showcase-section {
             background-image: url(${FONDO_URL}) !important;
@@ -133,27 +133,27 @@ export default function LogoShowcase() {
           }
           .social-bubble { animation-duration: 5s !important; }
 
-          /* === FILA SUPERIOR — muy cerca del eslogan === */
-          /* LinkedIn — arriba izquierda, más cerca del eslogan */
-          .social-linkedin { top: 30% !important; left: 3% !important; right: auto !important; }
-          .social-linkedin > div { width: 64px !important; height: 64px !important; }
+          /* === FILA SUPERIOR — pegada al eslogan === */
+          /* LinkedIn — arriba izquierda, cerca del centro */
+          .social-linkedin { top: 16% !important; left: 4% !important; right: auto !important; }
+          .social-linkedin > div { width: 96px !important; height: 96px !important; }
 
-          /* Instagram — arriba derecha, más cerca del eslogan */
-          .social-instagram { top: 31% !important; left: auto !important; right: 3% !important; }
-          .social-instagram > div { width: 56px !important; height: 56px !important; }
+          /* Instagram — arriba derecha, cerca del centro */
+          .social-instagram { top: 17% !important; left: auto !important; right: 4% !important; }
+          .social-instagram > div { width: 82px !important; height: 82px !important; }
 
-          /* === FILA INFERIOR — debajo del eslogan === */
+          /* === FILA INFERIOR — pegada al eslogan === */
           /* Facebook — abajo izquierda */
-          .social-facebook { top: 62% !important; left: 6% !important; right: auto !important; }
-          .social-facebook > div { width: 52px !important; height: 52px !important; }
+          .social-facebook { top: 67% !important; left: 4% !important; right: auto !important; }
+          .social-facebook > div { width: 70px !important; height: 70px !important; }
 
           /* WhatsApp — abajo centro */
-          .social-whatsapp { top: 65% !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; }
-          .social-whatsapp > div { width: 50px !important; height: 50px !important; }
+          .social-whatsapp { top: 69% !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; }
+          .social-whatsapp > div { width: 76px !important; height: 76px !important; }
 
           /* TikTok — abajo derecha */
-          .social-tiktok { top: 62% !important; left: auto !important; right: 6% !important; }
-          .social-tiktok > div { width: 50px !important; height: 50px !important; }
+          .social-tiktok { top: 67% !important; left: auto !important; right: 4% !important; }
+          .social-tiktok > div { width: 68px !important; height: 68px !important; }
         }
       `}</style>
 

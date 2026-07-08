@@ -5,19 +5,19 @@
 html { scroll-behavior: smooth; }
 
 body {
-  /* Fondo gris con patrón de puntos — igual al de los posts de redes */
   background-color: #E9E9E9;
   color: #1A1A1A;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   overscroll-behavior-x: none;
-  cursor: none;
 }
 
-/* Restaurar cursor en elementos interactivos para que el punto negro sea visible */
-a, button, input, textarea, select, [role="button"] {
-  cursor: none;
+/* Ocultar cursor nativo solo en desktop — el CustomCursor lo reemplaza */
+@media (min-width: 768px) {
+  *, *::before, *::after {
+    cursor: none !important;
+  }
 }
 
 ::-webkit-scrollbar { width: 4px; }

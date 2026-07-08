@@ -44,7 +44,7 @@ export default function BrandCarousel() {
 
   const sectionBg = isMobile
     ? { backgroundImage: `url(${FONDO_URL})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }
-    : { background: '#fff' }
+    : { background: 'transparent' }
 
   /* No retornar null — causa layout shift de 0→800px cuando carga Supabase,
      desplazando CinematicText y rompiendo su scroll tracking. */

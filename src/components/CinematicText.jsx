@@ -58,12 +58,12 @@ export default function CinematicText() {
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
-  const op0 = useTransform(scrollYProgress, [0.00, 0.06, 0.27, 0.33], [0, 1, 1, 0])
-  const y0  = useTransform(scrollYProgress, [0.00, 0.10], [32, 0])
-  const op1 = useTransform(scrollYProgress, [0.33, 0.39, 0.60, 0.66], [0, 1, 1, 0])
-  const y1  = useTransform(scrollYProgress, [0.33, 0.43], [32, 0])
-  const op2 = useTransform(scrollYProgress, [0.66, 0.73, 0.94, 1.00], [0, 1, 1, 0])
-  const y2  = useTransform(scrollYProgress, [0.66, 0.77], [32, 0])
+  const op0 = useTransform(scrollYProgress, [0.00, 0.08, 0.28, 0.38], [0, 1, 1, 0])
+  const y0  = useTransform(scrollYProgress, [0.00, 0.12], [32, 0])
+  const op1 = useTransform(scrollYProgress, [0.38, 0.46, 0.62, 0.70], [0, 1, 1, 0])
+  const y1  = useTransform(scrollYProgress, [0.38, 0.50], [32, 0])
+  const op2 = useTransform(scrollYProgress, [0.70, 0.78, 0.94, 1.00], [0, 1, 1, 0])
+  const y2  = useTransform(scrollYProgress, [0.70, 0.82], [32, 0])
 
   const layers = [
     { ...PHRASES[0], op: op0, yMotion: y0 },
@@ -72,7 +72,7 @@ export default function CinematicText() {
   ]
 
   return (
-    <div ref={ref} id="cinematic-outer" style={{ height: '300vh', position: 'relative' }}>
+    <div ref={ref} id="cinematic-outer" style={{ height: '150vh', position: 'relative' }}>
       <div style={{
         position: 'sticky', top: 0, height: '100vh',
         background: '#0D0D0D', overflow: 'hidden',
@@ -86,19 +86,17 @@ export default function CinematicText() {
             onError={e => { e.target.style.display = 'none' }} />
         </div>
 
-        {/* Viñeta */}
+        {/* Viñeta — oscurece bordes para legibilidad, sin brightspot en el centro */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
-          background: 'radial-gradient(circle 44vmin at 50% 50%, rgba(13,13,13,0.18) 0%, rgba(13,13,13,0.42) 40%, rgba(13,13,13,0.78) 65%, rgba(13,13,13,0.97) 90%)',
+          background: 'radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(13,13,13,0.55) 60%, rgba(13,13,13,0.92) 100%)',
         }} />
 
-        {/* Puntos */}
+        {/* Puntos — sin máscara, uniformes en toda la sección */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
-          maskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
-          WebkitMaskImage: 'radial-gradient(circle 40vmin at 50% 50%, transparent 0%, transparent 26%, black 60%)',
         }} />
 
         {/* Figura caminando */}

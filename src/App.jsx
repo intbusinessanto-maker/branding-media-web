@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useIsMobile } from './hooks/useIsMobile'
 import Navbar        from './components/Navbar'
 import VideoIntro    from './components/VideoIntro'
 import Hero          from './components/Hero'
@@ -21,10 +22,6 @@ const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/
  * matchMedia es más fiable que innerWidth — usa exactamente la misma lógica
  * que las CSS media queries, incluyendo zoom del sistema y DPR correctos.
  */
-const IS_MOBILE_INIT = typeof window !== 'undefined'
-  ? window.matchMedia('(max-width: 767px)').matches
-  : false
-
 /* Solo desktop: cursor personalizado con RAF loop */
 function CustomCursor() {
   const dotRef = useRef(null)
@@ -62,11 +59,15 @@ function CustomCursor() {
       ref={dotRef}
       style={{
         position: 'fixed', top: 0, left: 0,
-        width: '14px', height: '14px',
-        marginLeft: '-7px', marginTop: '-7px',
-        borderRadius: '50%', backgroundColor: '#fff',
-        mixBlendMode: 'difference', pointerEvents: 'none',
+        width: '18px', height: '18px',
+        marginLeft: '-9px', marginTop: '-9px',
+        borderRadius: '50%',
+        backgroundColor: '#8B3FA8',
+        border: '2.5px solid #fff',
+        boxShadow: '0 0 0 1.5px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.3)',
+        pointerEvents: 'none',
         zIndex: 99999, willChange: 'transform',
+        cursor: 'none',
       }}
     />
   )
@@ -160,19 +161,7 @@ function App() {
     return () => clearTimeout(id)
   }, [])
 
-  /*
-   * matchMedia: mismo mecanismo que CSS. Se suscribe a cambios (orientación, zoom)
-   * para mantener el valor correcto sin polling. useLayoutEffect corre antes del
-   * primer paint → nunca se renderiza InteractiveBackground en móvil.
-   */
-  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
-  useLayoutEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)')
-    setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
+  const isMobile = useIsMobile()
 
   return (
     <>

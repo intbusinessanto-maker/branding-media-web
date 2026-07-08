@@ -1,6 +1,7 @@
-import { useRef, useState, useEffect, useLayoutEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const STATUE_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/estatua%20megafono.png'
 const FONDO_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
@@ -116,20 +117,9 @@ export default function Formats() {
   const [activeFormat, setActiveFormat] = useState(null)
   const [visibleCount, setVisibleCount] = useState(0)
   const [activeCard, setActiveCard]     = useState(0)
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
-  )
+  const isMobile = useIsMobile()
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
-
-  /* matchMedia — misma lógica que CSS, corrige antes del primer paint */
-  useLayoutEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)')
-    setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
 
   /*
    * maxProgress solo aumenta — resuelve el bug de desktop donde los bloques
@@ -144,18 +134,18 @@ export default function Formats() {
     })
   }, [scrollYProgress, maxProgress])
 
-  const op0 = useTransform(maxProgress, [0.00, 0.10], [0, 1])
-  const x0  = useTransform(maxProgress, [0.00, 0.16], [-280, 0])
-  const op1 = useTransform(maxProgress, [0.20, 0.30], [0, 1])
-  const x1  = useTransform(maxProgress, [0.20, 0.36], [-380, 0])
-  const op2 = useTransform(maxProgress, [0.40, 0.50], [0, 1])
-  const x2  = useTransform(maxProgress, [0.40, 0.56], [-480, 0])
+  const op0 = useTransform(maxProgress, [0.00, 0.12], [0, 1])
+  const x0  = useTransform(maxProgress, [0.00, 0.18], [-280, 0])
+  const op1 = useTransform(maxProgress, [0.30, 0.42], [0, 1])
+  const x1  = useTransform(maxProgress, [0.30, 0.48], [-380, 0])
+  const op2 = useTransform(maxProgress, [0.58, 0.70], [0, 1])
+  const x2  = useTransform(maxProgress, [0.58, 0.76], [-480, 0])
 
   useEffect(() => {
     return maxProgress.on('change', v => {
-      if (v >= 0.52) setVisibleCount(3)
-      else if (v >= 0.26) setVisibleCount(2)
-      else if (v >= 0.04) setVisibleCount(1)
+      if (v >= 0.62) setVisibleCount(3)
+      else if (v >= 0.34) setVisibleCount(2)
+      else if (v >= 0.06) setVisibleCount(1)
     })
   }, [maxProgress])
 
@@ -183,7 +173,7 @@ export default function Formats() {
           DESKTOP: sticky scroll 500vh con maxProgress
           ══════════════════════════════════════════════ */}
       {!isMobile && (
-        <div ref={ref} style={{ height: '500vh', position: 'relative' }}>
+        <div ref={ref} style={{ height: '200vh', position: 'relative' }}>
           <section id="formatos" style={{
             position: 'sticky', top: 0, height: '100svh',
             overflow: 'hidden', background: 'transparent',
@@ -294,7 +284,7 @@ export default function Formats() {
             {/* Estatua fija — misma altura que el carrusel (top:0 bottom:0) */}
             <div style={{
               position: 'absolute', left: 0, top: 0, bottom: 0,
-              width: '50vw', pointerEvents: 'none', zIndex: 5,
+              width: '36vw', pointerEvents: 'none', zIndex: 5,
             }}>
               <img src={STATUE_URL} alt="" loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
@@ -324,7 +314,7 @@ export default function Formats() {
                   flexShrink: 0,
                   width: '100vw',
                   scrollSnapAlign: 'start',
-                  paddingLeft: '42vw',
+                  paddingLeft: '34vw',
                   paddingRight: '12px',
                   boxSizing: 'border-box',
                 }}>

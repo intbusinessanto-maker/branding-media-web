@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect, useLayoutEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useMotionValue } from 'framer-motion'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const MOBILE_IMG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/vista%20celuar.png'
 
@@ -24,16 +25,16 @@ function MobileAudience() {
     })
   }, [scrollYProgress, maxProgress])
 
-  // Pilar 01 aparece inmediatamente con y grande (efecto "desde el centro de pantalla")
-  const op0 = useTransform(maxProgress, [0.00, 0.10], [0, 1])
-  const y0  = useTransform(maxProgress, [0.00, 0.15], [180, 0])
-  // Pilares 02-04: aparecen escalonados con y pequeño
-  const op1 = useTransform(maxProgress, [0.25, 0.36], [0, 1])
-  const y1  = useTransform(maxProgress, [0.25, 0.38], [40, 0])
-  const op2 = useTransform(maxProgress, [0.48, 0.58], [0, 1])
-  const y2  = useTransform(maxProgress, [0.48, 0.60], [40, 0])
-  const op3 = useTransform(maxProgress, [0.70, 0.80], [0, 1])
-  const y3  = useTransform(maxProgress, [0.70, 0.82], [40, 0])
+  // Pilar 01 aparece inmediatamente
+  const op0 = useTransform(maxProgress, [0.00, 0.12], [0, 1])
+  const y0  = useTransform(maxProgress, [0.00, 0.18], [120, 0])
+  // Pilares 02-04: escalonados
+  const op1 = useTransform(maxProgress, [0.30, 0.42], [0, 1])
+  const y1  = useTransform(maxProgress, [0.30, 0.44], [40, 0])
+  const op2 = useTransform(maxProgress, [0.54, 0.64], [0, 1])
+  const y2  = useTransform(maxProgress, [0.54, 0.66], [40, 0])
+  const op3 = useTransform(maxProgress, [0.76, 0.86], [0, 1])
+  const y3  = useTransform(maxProgress, [0.76, 0.88], [40, 0])
 
   const pillarMotions = [
     { op: op0, y: y0 },
@@ -43,7 +44,7 @@ function MobileAudience() {
   ]
 
   return (
-    <div ref={ref} style={{ height: '450vh', position: 'relative' }}>
+    <div ref={ref} style={{ height: '250vh', position: 'relative' }}>
       <section
         id="audiencia"
         style={{
@@ -55,8 +56,8 @@ function MobileAudience() {
       >
         {/* Fondo */}
         <img src={MOBILE_IMG_URL} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
-        {/* Degradado */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.10) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.96) 100%)' }} />
+        {/* Degradado — más oscuro para mejor contraste de textos */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.72) 55%, rgba(0,0,0,0.97) 100%)' }} />
 
         {/* Encabezado — siempre visible desde que entra la sección */}
         <div style={{
@@ -67,7 +68,7 @@ function MobileAudience() {
             La audiencia
           </span>
           <h2 style={{ fontSize: 'clamp(1.45rem, 5.5vw, 2rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: '10px' }}>
-            ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
+            ¿Por qué llegar a la{' '}<span style={{ color: '#8B3FA8' }}>universidad?</span>
           </h2>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '7px 13px', borderRadius: '10px', background: 'rgba(232,17,138,0.14)', border: '1px solid rgba(232,17,138,0.22)' }}>
             <span style={{ fontSize: '26px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1 }}>3–6h</span>
@@ -116,22 +117,10 @@ function MobileAudience() {
   )
 }
 
-const IS_MOBILE_INIT = typeof window !== 'undefined'
-  ? window.matchMedia('(max-width: 767px)').matches
-  : false
-
 /* ── DESKTOP ── */
 export default function NewspaperAudience() {
-  const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
+  const isMobile = useIsMobile()
   const [showVideo, setShowVideo] = useState(false)
-
-  useLayoutEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)')
-    setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
 
   const ref = useRef(null)
 
@@ -153,17 +142,17 @@ export default function NewspaperAudience() {
     offset: ['start end', 'end start'],
   })
 
-  const headerOp = useTransform(scrollYProgress, [0.05, 0.20], [0, 1])
-  const headerY  = useTransform(scrollYProgress, [0.05, 0.20], [16, 0])
+  const headerOp = useTransform(scrollYProgress, [0.04, 0.16], [0, 1])
+  const headerY  = useTransform(scrollYProgress, [0.04, 0.16], [16, 0])
 
-  const p0op = useTransform(scrollYProgress, [0.23, 0.27], [0, 1])
-  const p0y  = useTransform(scrollYProgress, [0.23, 0.27], [22, 0])
-  const p1op = useTransform(scrollYProgress, [0.35, 0.39], [0, 1])
-  const p1y  = useTransform(scrollYProgress, [0.35, 0.39], [22, 0])
-  const p2op = useTransform(scrollYProgress, [0.47, 0.51], [0, 1])
-  const p2y  = useTransform(scrollYProgress, [0.47, 0.51], [22, 0])
-  const p3op = useTransform(scrollYProgress, [0.59, 0.63], [0, 1])
-  const p3y  = useTransform(scrollYProgress, [0.59, 0.63], [22, 0])
+  const p0op = useTransform(scrollYProgress, [0.18, 0.26], [0, 1])
+  const p0y  = useTransform(scrollYProgress, [0.18, 0.26], [22, 0])
+  const p1op = useTransform(scrollYProgress, [0.36, 0.44], [0, 1])
+  const p1y  = useTransform(scrollYProgress, [0.36, 0.44], [22, 0])
+  const p2op = useTransform(scrollYProgress, [0.54, 0.62], [0, 1])
+  const p2y  = useTransform(scrollYProgress, [0.54, 0.62], [22, 0])
+  const p3op = useTransform(scrollYProgress, [0.72, 0.80], [0, 1])
+  const p3y  = useTransform(scrollYProgress, [0.72, 0.80], [22, 0])
 
   const pillarMotions = [
     { op: p0op, y: p0y },
@@ -175,7 +164,7 @@ export default function NewspaperAudience() {
   if (isMobile) return <MobileAudience />
 
   return (
-    <section ref={ref} id="audiencia" style={{ height: '350vh', position: 'relative' }}>
+    <section ref={ref} id="audiencia" style={{ height: '200vh', position: 'relative' }}>
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', willChange: 'transform', background: '#0D0D0D' }}>
 
         {/*
@@ -232,7 +221,7 @@ export default function NewspaperAudience() {
                 La audiencia
               </span>
               <h2 style={{ fontSize: 'clamp(2rem, 3.4vw, 3.6rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.06, textShadow: '0 2px 16px rgba(0,0,0,0.9)' }}>
-                ¿Por qué llegar al{' '}<span style={{ color: '#8B3FA8' }}>campus?</span>
+                ¿Por qué llegar a la{' '}<span style={{ color: '#8B3FA8' }}>universidad?</span>
               </h2>
             </div>
             <div style={{

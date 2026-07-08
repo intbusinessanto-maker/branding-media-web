@@ -94,24 +94,14 @@ export default function Contact() {
               </h2>
               <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '32px' }}>En menos de 24 horas te presentamos una propuesta de medios personalizada.</p>
 
-              {/* Items de contacto — en móvil: fila con figura a la derecha */}
+              {/* Items de contacto — en móvil: figura a la IZQUIERDA, items a la derecha */}
               <div style={{ display: 'flex', alignItems: 'stretch', gap: '16px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
-                  {INFO_ITEMS.map(item => (
-                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
-                      <span style={{ fontSize: '14px', color: '#555' }}>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-
                 {/*
-                 * Figura móvil — alineada desde el ícono de ubicación hasta el correo.
-                 * position:relative + figure como imagen que llena toda la altura disponible.
+                 * Figura móvil — izquierda.
                  */}
                 <div className="contact-figura-mobile" style={{
                   flexShrink: 0,
-                  width: 'clamp(140px, 44vw, 200px)',
+                  width: 'clamp(120px, 38vw, 180px)',
                   position: 'relative',
                 }}>
                   <img src={FIGURA_URL} alt="" loading="lazy"
@@ -124,6 +114,15 @@ export default function Contact() {
                       transform: 'translateY(13.5%)',
                       pointerEvents: 'none',
                     }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                  {INFO_ITEMS.map(item => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${item.color}12`, border: `1px solid ${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
+                      <span style={{ fontSize: '14px', color: '#555' }}>{item.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </motion.div>

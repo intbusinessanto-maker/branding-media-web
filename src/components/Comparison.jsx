@@ -1,5 +1,6 @@
-import { useRef, useState, useLayoutEffect } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const TRAY_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/bandeja.png'
 
@@ -141,106 +142,159 @@ const BG_GRAD = 'radial-gradient(ellipse at 18% 10%, rgba(0,196,173,0.07) 0%, tr
 
 export default function Comparison() {
   const outerRef = useRef(null)
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
-  )
+  const carouselRef = useRef(null)
+  const [activeCard, setActiveCard] = useState(0)
+  const isMobile = useIsMobile()
 
-  useLayoutEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)')
-    setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
+  /*
+   * Scroll sincronizado: offset ['start start','end end'] = progreso dentro
+   * de la sección sticky (0 cuando entra, 1 cuando sale).
+   * 0.00–0.12 → bandeja cerrada (telón en posición inicial)
+   * 0.12–0.28 → bandeja se abre
+   * 0.28–0.42 → fila 1 aparece
+   * 0.42–0.56 → fila 2 aparece
+   * 0.56–0.70 → fila 3 aparece
+   * 0.82–0.96 → bandeja se cierra al salir
+   */
+  const { scrollYProgress } = useScroll({ target: outerRef, offset: ['start start', 'end end'] })
 
-  /* Hooks de scroll — siempre se llaman, solo se usan en desktop */
-  const { scrollYProgress } = useScroll({ target: outerRef, offset: ['start end', 'end start'] })
-  const rawTop = useTransform(scrollYProgress, [0.02, 0.13, 0.85, 0.96], [0, -100, -100, 0])
-  const rawBot = useTransform(scrollYProgress, [0.02, 0.13, 0.85, 0.96], [0,  100,  100, 0])
-  const topSpr = useSpring(rawTop, { stiffness: 44, damping: 13, mass: 0.9 })
-  const botSpr = useSpring(rawBot, { stiffness: 44, damping: 13, mass: 0.9 })
+  /* Telón — mitad superior sube, mitad inferior baja */
+  const rawTop = useTransform(scrollYProgress, [0.04, 0.26, 0.80, 0.96], [0, -100, -100, 0])
+  const rawBot = useTransform(scrollYProgress, [0.04, 0.26, 0.80, 0.96], [0,  100,  100, 0])
+  const topSpr = useSpring(rawTop, { stiffness: 60, damping: 18, mass: 0.7 })
+  const botSpr = useSpring(rawBot, { stiffness: 60, damping: 18, mass: 0.7 })
   const topY   = useTransform(topSpr, v => `${v}%`)
   const botY   = useTransform(botSpr, v => `${v}%`)
-  const row0op = useTransform(scrollYProgress, [0.16, 0.24], [0, 1])
-  const row0y  = useTransform(scrollYProgress, [0.16, 0.26], [22, 0])
-  const row1op = useTransform(scrollYProgress, [0.34, 0.44], [0, 1])
-  const row1y  = useTransform(scrollYProgress, [0.34, 0.46], [22, 0])
-  const row2op = useTransform(scrollYProgress, [0.54, 0.64], [0, 1])
-  const row2y  = useTransform(scrollYProgress, [0.54, 0.66], [22, 0])
+
+  /* Contenido — aparece escalonado DENTRO de la bandeja abierta */
+  const titleOp = useTransform(scrollYProgress, [0.26, 0.34], [0, 1])
+  const titleY  = useTransform(scrollYProgress, [0.26, 0.34], [16, 0])
+  const row0op  = useTransform(scrollYProgress, [0.34, 0.44], [0, 1])
+  const row0y   = useTransform(scrollYProgress, [0.34, 0.44], [20, 0])
+  const row1op  = useTransform(scrollYProgress, [0.48, 0.58], [0, 1])
+  const row1y   = useTransform(scrollYProgress, [0.48, 0.58], [20, 0])
+  const row2op  = useTransform(scrollYProgress, [0.60, 0.70], [0, 1])
+  const row2y   = useTransform(scrollYProgress, [0.60, 0.70], [20, 0])
   const rows = [
     { cards: [comparisons[0], comparisons[1]], op: row0op, y: row0y },
     { cards: [comparisons[2], comparisons[3]], op: row1op, y: row1y },
     { cards: [comparisons[4], comparisons[5]], op: row2op, y: row2y },
   ]
 
-  /* ── MOBILE: sección scrolleable normal, CON efecto de telón de entrada ── */
+  /* ── MOBILE: mismo patrón sticky que desktop — bandeja sincronizada con scroll ── */
   if (isMobile) {
+    const scrollTo = (idx) => {
+      if (!carouselRef.current) return
+      carouselRef.current.scrollTo({ left: idx * carouselRef.current.clientWidth, behavior: 'smooth' })
+      setActiveCard(idx)
+    }
+
     return (
-      <section id="comparison-outer" style={{
-        background: '#0D0D10', position: 'relative',
-        paddingTop: 'calc(65px + 2rem)',
-        paddingBottom: '3rem',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
-      }}>
-        <div style={{ position: 'absolute', inset: 0, background: BG_GRAD, pointerEvents: 'none' }} />
+      <div ref={outerRef} id="comparison-outer" style={{ height: '250vh', position: 'relative' }}>
+        <div style={{ position: 'sticky', top: 0, height: '100dvh', overflow: 'hidden' }}>
 
-        {/* ── Telón de apertura — cubre el primer viewport de la sección ── */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100dvh', overflow: 'hidden', pointerEvents: 'none', zIndex: 10 }}>
-          <motion.div
-            initial={{ y: '0%' }} whileInView={{ y: '-100%' }}
-            viewport={{ once: true, amount: 0 }}
-            transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
-            style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(0 0 50% 0)' }}
-          >
-            <img src={TRAY_URL} alt="" draggable={false} loading="lazy"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
-          </motion.div>
-          <motion.div
-            initial={{ y: '0%' }} whileInView={{ y: '100%' }}
-            viewport={{ once: true, amount: 0 }}
-            transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
-            style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(50% 0 0 0)' }}
-          >
-            <img src={TRAY_URL} alt="" draggable={false} loading="lazy"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
-          </motion.div>
-        </div>
+          {/* Fondo */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: '#0D0D10', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', inset: 0, background: BG_GRAD }} />
+          </div>
 
-        {/* Título */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }}
-          style={{ textAlign: 'center', marginBottom: '1.4rem', position: 'relative', zIndex: 1 }}
-        >
-          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', display: 'block', marginBottom: 8 }}>
-            Comparativa de medios
-          </span>
-          <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.55rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.2, color: '#fff', margin: 0 }}>
-            ¿Por qué <span style={{ color: '#E8118A' }}>CONVERTIMOS</span> en los espacios de pauta más importantes?
-          </h2>
-        </motion.div>
-
-        {/* 6 cards apiladas */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative', zIndex: 1 }}>
-          {comparisons.map((c, i) => (
-            <motion.div key={c.vs}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.55 + i * 0.07 }}
-            >
-              <MobileCard c={c} />
+          {/* Contenido: título + carrusel */}
+          <motion.div style={{
+            position: 'absolute', inset: 0, zIndex: 1,
+            display: 'flex', flexDirection: 'column',
+            paddingTop: 'calc(65px + 1rem)',
+            paddingBottom: '1.5rem',
+            opacity: titleOp,
+          }}>
+            {/* Título */}
+            <motion.div style={{ y: titleY, textAlign: 'center', marginBottom: '1rem', padding: '0 1rem', flexShrink: 0 }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', display: 'block', marginBottom: 8 }}>
+                Comparativa de medios
+              </span>
+              <h2 style={{ fontSize: 'clamp(1.1rem, 4.5vw, 1.4rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.2, color: '#fff', margin: 0 }}>
+                ¿Por qué <span style={{ color: '#E8118A' }}>CONVERTIMOS</span> en los espacios de pauta más importantes?
+              </h2>
             </motion.div>
-          ))}
+
+            {/* Carrusel */}
+            <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+              <style>{`.cmp-carousel::-webkit-scrollbar{display:none}`}</style>
+              <div
+                ref={carouselRef}
+                className="cmp-carousel"
+                onScroll={e => {
+                  const w = e.target.clientWidth
+                  if (w) setActiveCard(Math.round(e.target.scrollLeft / w))
+                }}
+                style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', overflowX: 'scroll',
+                  scrollSnapType: 'x mandatory', scrollbarWidth: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {comparisons.map((c) => (
+                  <div key={c.vs} style={{
+                    flexShrink: 0, width: '100vw', scrollSnapAlign: 'start',
+                    padding: '0 1rem', boxSizing: 'border-box',
+                    display: 'flex', alignItems: 'center',
+                  }}>
+                    <MobileCard c={c} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Flechas */}
+              {activeCard > 0 && (
+                <button onClick={() => scrollTo(activeCard - 1)} style={{
+                  all: 'unset', position: 'absolute',
+                  left: 6, top: '50%', transform: 'translateY(-50%)',
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, color: '#fff', zIndex: 5,
+                }}>‹</button>
+              )}
+              {activeCard < comparisons.length - 1 && (
+                <button onClick={() => scrollTo(activeCard + 1)} style={{
+                  all: 'unset', position: 'absolute',
+                  right: 6, top: '50%', transform: 'translateY(-50%)',
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, color: '#fff', zIndex: 5,
+                }}>›</button>
+              )}
+            </div>
+
+            {/* Dots */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 6, paddingTop: 12, flexShrink: 0 }}>
+              {comparisons.map((c, i) => (
+                <button key={c.vs} onClick={() => scrollTo(i)} style={{
+                  all: 'unset', height: 5, borderRadius: 3, transition: 'all 0.25s',
+                  width: activeCard === i ? 20 : 5,
+                  background: activeCard === i ? c.color : 'rgba(255,255,255,0.2)',
+                }} />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Telón — misma lógica scroll que desktop */}
+          <motion.div style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(0 0 50% 0)', zIndex: 10, y: topY, pointerEvents: 'none' }}>
+            <img src={TRAY_URL} alt="" draggable={false} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
+          </motion.div>
+          <motion.div style={{ position: 'absolute', inset: 0, background: '#0D0D10', clipPath: 'inset(50% 0 0 0)', zIndex: 10, y: botY, pointerEvents: 'none' }}>
+            <img src={TRAY_URL} alt="" draggable={false} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block', userSelect: 'none' }} />
+          </motion.div>
+
         </div>
-      </section>
+      </div>
     )
   }
 
   /* ── DESKTOP: animación acumulativa con telón ── */
   return (
-    <div ref={outerRef} id="comparison-outer" style={{ height: '700vh', position: 'relative' }}>
+    <div ref={outerRef} id="comparison-outer" style={{ height: '300vh', position: 'relative' }}>
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
 
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: '#0D0D10', pointerEvents: 'none' }}>
@@ -258,14 +312,14 @@ export default function Comparison() {
         }}>
           <div style={{ maxWidth: '1200px', width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
 
-            <div style={{ textAlign: 'center', marginBottom: 'clamp(10px, 1.6vh, 16px)', flexShrink: 0 }}>
+            <motion.div style={{ opacity: titleOp, y: titleY, textAlign: 'center', marginBottom: 'clamp(10px, 1.6vh, 16px)', flexShrink: 0 }}>
               <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', display: 'block', marginBottom: 7 }}>
                 Comparativa de medios
               </span>
               <h2 style={{ fontSize: 'clamp(1.15rem, 2.4vw, 1.9rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.18, color: '#fff', margin: 0 }}>
                 ¿Por qué <span style={{ color: '#E8118A' }}>CONVERTIMOS</span> en los espacios de pauta más importantes?
               </h2>
-            </div>
+            </motion.div>
 
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 'clamp(8px, 1.2vh, 12px)', minHeight: 0 }}>
               {rows.map((row, ri) => (
