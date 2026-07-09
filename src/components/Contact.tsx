@@ -1,8 +1,11 @@
 ﻿import { motion } from 'framer-motion'
 import { useState } from 'react'
+import type React from 'react'
 import { supabase } from '../lib/supabase'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const FIGURA_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/figura%201.png'
+const FONDO_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
 const INFO_ITEMS = [
   { icon: '📍', label: 'Bogotá, Colombia',    color: '#E8118A' },
@@ -11,14 +14,15 @@ const INFO_ITEMS = [
 ]
 
 export default function Contact() {
+  const isMobile = useIsMobile()
   const [form, setForm]       = useState({ nombre: '', empresa: '', email: '', mensaje: '' })
   const [sent, setSent]       = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError]     = useState('')
 
-  const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+  const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
-  const submit = async (e) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSending(true)
@@ -40,7 +44,11 @@ export default function Contact() {
   }
 
   return (
-    <section id="contacto" style={{ padding: 'clamp(60px,8vw,100px) 1.5rem', background: 'transparent', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+    <section id="contacto" style={{
+      padding: 'clamp(60px,8vw,100px) 1.5rem',
+      borderTop: '1px solid rgba(0,0,0,0.06)',
+      background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent',
+    }}>
       <style>{`
         /*
          * Desktop: 2 columnas — [grupo izq: figura | info] | formulario.

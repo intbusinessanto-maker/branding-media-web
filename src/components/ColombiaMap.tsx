@@ -46,7 +46,8 @@ const STEP_MS = 1200
 /* Aspecto del PNG 3D Colombia: 425 / 587 ≈ 0.724, height/width = 1.381 */
 const IMG_ASPECT = 425 / 587
 
-function CityCard({ c, isActive, onToggle, index }) {
+interface City { city: string; xPct: number; yPct: number; count: number; institutions: string[]; color: string; labelSide: string }
+function CityCard({ c, isActive, onToggle, index }: { c: City; isActive: boolean; onToggle: () => void; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 28 }}
@@ -103,7 +104,7 @@ function CityCard({ c, isActive, onToggle, index }) {
             style={{ overflow: 'hidden' }}
           >
             <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              {c.institutions.map((inst, j) => (
+              {c.institutions.map((inst: string, j: number) => (
                 <motion.li
                   key={inst}
                   initial={{ opacity: 0, x: -8 }}
@@ -124,9 +125,9 @@ function CityCard({ c, isActive, onToggle, index }) {
 }
 
 export default function ColombiaMap() {
-  const ref     = useRef(null)
+  const ref     = useRef<HTMLDivElement | null>(null)
   const started = useRef(false)
-  const relRef  = useRef(null)
+  const relRef  = useRef<(() => void) | null>(null)
   const inView  = useInView(ref, { once: true, amount: 0.15 })
 
   const [seqIdx,  setSeqIdx]  = useState(-1)
@@ -135,9 +136,9 @@ export default function ColombiaMap() {
 
   const totalInstitutions = CITIES.reduce((s, c) => s + c.count, 0)
 
-  const isActive = (city, idx) => seqDone ? manual.has(city) : seqIdx === idx
+  const isActive = (city: string, idx: number) => seqDone ? manual.has(city) : seqIdx === idx
 
-  const toggleManual = (city) => {
+  const toggleManual = (city: string) => {
     if (!seqDone) return
     setManual(prev => {
       const next = new Set(prev)
@@ -153,7 +154,7 @@ export default function ColombiaMap() {
     started.current = true
     const release = () => { relRef.current = null }
     relRef.current = release
-    let timers = [], tDone
+    let timers: ReturnType<typeof setTimeout>[] = [], tDone: ReturnType<typeof setTimeout>
     const t0 = setTimeout(() => {
       timers = CITIES.map((_, i) => setTimeout(() => setSeqIdx(i), i * STEP_MS))
       tDone  = setTimeout(() => { setSeqIdx(-1); setSeqDone(true); release() }, CITIES.length * STEP_MS)
@@ -177,7 +178,7 @@ export default function ColombiaMap() {
         @media (max-width: 900px) { .map-grid { grid-template-columns: 1.3fr 1fr; gap: 10px; } }
         @media (max-width: 600px) {
           .colombia-section { height: auto !important; min-height: 100svh !important; overflow: visible !important; }
-          .map-wrapper { padding: 16px 10px 20px !important; }
+          .map-wrapper { padding: clamp(60px,8vh,100px) 1.2rem clamp(48px,6vh,80px) !important; }
           .map-grid { grid-template-columns: 1fr !important; gap: 10px !important; flex: none !important; }
           .map-cards-col { overflow-y: visible !important; max-height: none !important; }
           .map-3d-svg { max-width: 340px !important; margin: 0 auto; }
@@ -186,7 +187,7 @@ export default function ColombiaMap() {
 
       <div className="map-wrapper" style={{
         maxWidth: '1200px', width: '100%', margin: '0 auto',
-        padding: '16px 20px 14px',
+        padding: 'clamp(48px,6vh,80px) clamp(1.5rem,4vw,3rem) clamp(32px,4vh,60px)',
         display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0,
       }}>
         <motion.div

@@ -1,7 +1,10 @@
 ﻿import { motion, useInView } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
-function Counter({ to, suffix = '' }) {
+const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
+
+function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   const [count, setCount] = useState(0)
   const ref = useRef(null)
   const inView = useInView(ref, { once: true })
@@ -26,9 +29,22 @@ const stats = [
 ]
 
 export default function Stats() {
+  const isMobile = useIsMobile()
+
   return (
-    <section id="nosotros" style={{ padding: '80px 2rem', background: 'transparent' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+    <section
+      id="nosotros"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '80px 2rem',
+        background: isMobile
+          ? `url(${PAGE_BG_URL}) center/cover no-repeat`
+          : 'transparent',
+      }}
+    >
+      <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '16px',

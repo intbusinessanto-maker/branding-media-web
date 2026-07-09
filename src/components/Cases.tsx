@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react'
+import type React from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
@@ -29,34 +30,34 @@ const FALLBACK = ['#8B3FA8', '#00C4AD', '#E8118A']
 const BUBBLES = [
   { left: '6%',  top: '9%',  size: 180, fromX: -1600 },
   { left: '5%',  top: '40%', size: 150, fromX: -1600 },
-  { left: '5%',  top: '74%', size: 172, fromX: -1600 },
+  { left: '5%',  top: '70%', size: 172, fromX: -1600 },
   { left: '21%', top: '11%', size: 135, fromX: -1100 },
   { left: '21%', top: '48%', size: 163, fromX: -1100 },
-  { left: '18%', top: '84%', size: 132, fromX: -1100 },
+  { left: '18%', top: '76%', size: 132, fromX: -1100 },
   { left: '30%', top: '10%', size: 142, fromX:  -750 },
-  { left: '28%', top: '88%', size: 126, fromX:  -750 },
-  { left: '40%', top: '82%', size: 122, fromX:  -600 },
+  { left: '28%', top: '80%', size: 126, fromX:  -750 },
+  { left: '40%', top: '74%', size: 122, fromX:  -600 },
   { left: '54%', top: '10%', size: 155, fromX:   750 },
-  { left: '51%', top: '76%', size: 138, fromX:   750 },
+  { left: '51%', top: '72%', size: 138, fromX:   750 },
   { left: '61%', top: '28%', size: 148, fromX:  1100 },
   { left: '67%', top: '45%', size: 135, fromX:  1100 },
-  { left: '66%', top: '81%', size: 168, fromX:  1100 },
+  { left: '66%', top: '74%', size: 168, fromX:  1100 },
   { left: '76%', top: '10%', size: 178, fromX:  1600 },
   { left: '77%', top: '36%', size: 146, fromX:  1600 },
-  { left: '78%', top: '68%', size: 184, fromX:  1600 },
+  { left: '78%', top: '62%', size: 184, fromX:  1600 },
   { left: '25%', top: '30%', size: 138, fromX:  -950 },
-  { left: '23%', top: '69%', size: 126, fromX:  -950 },
+  { left: '23%', top: '65%', size: 126, fromX:  -950 },
   { left: '36%', top: '13%', size: 130, fromX:  -680 },
-  { left: '33%', top: '68%', size: 132, fromX:  -680 },
+  { left: '33%', top: '64%', size: 132, fromX:  -680 },
   { left: '44%', top: '3%',  size: 124, fromX:  -520 },
-  { left: '48%', top: '92%', size: 118, fromX:  -520 },
+  { left: '48%', top: '84%', size: 118, fromX:  -520 },
   { left: '60%', top: '11%', size: 128, fromX:   520 },
-  { left: '57%', top: '92%', size: 122, fromX:   520 },
+  { left: '57%', top: '84%', size: 122, fromX:   520 },
   { left: '72%', top: '19%', size: 148, fromX:   950 },
-  { left: '67%', top: '63%', size: 140, fromX:   950 },
+  { left: '67%', top: '58%', size: 140, fromX:   950 },
   { left: '86%', top: '15%', size: 160, fromX:  1550 },
   { left: '85%', top: '50%', size: 148, fromX:  1550 },
-  { left: '87%', top: '87%', size: 155, fromX:  1550 },
+  { left: '87%', top: '79%', size: 155, fromX:  1550 },
   { left: '13%', top: '26%', size: 142, fromX: -1300 },
   { left: '11%', top: '58%', size: 136, fromX: -1300 },
 ]
@@ -75,44 +76,53 @@ const BUBBLES = [
  * Índices pares = TOP (0-30%), índices impares = BOTTOM (62-90%).
  * Ninguna burbuja queda a la misma altura que sus vecinas horizontales.
  */
+/*
+ * MOBILE_BUBBLES — top reorganizado para que las burbujas queden visibles:
+ * TOP: entre 18%–38% (justo encima del título, por debajo del header de la app)
+ * BOT: entre 62%–88% (justo debajo del título)
+ */
+/*
+ * MOBILE_BUBBLES — TOP: 8%–32%, BOT: 62%–91%
+ * Adidas [0] left:1% top:8% size:70  →  Mazda [2] left:25% top:14% size:64 — sin solape
+ */
 const MOBILE_BUBBLES = [
-  // ── TOP scatter, cada burbuja a distinto top ──
-  { left: '1%',  top: '8%',  size: 70, fromX: -600 }, // [0]
-  // ── BOT scatter, cada burbuja a distinto top ──
-  { left: '4%',  top: '63%', size: 74, fromX: -600 }, // [1]
-  { left: '22%', top: '3%',  size: 64, fromX: -400 }, // [2]
-  { left: '72%', top: '62%', size: 70, fromX:  600 }, // [3]
-  { left: '44%', top: '10%', size: 72, fromX:  500 }, // [4]
-  { left: '36%', top: '70%', size: 72, fromX:  300 }, // [5]
-  { left: '63%', top: '5%',  size: 62, fromX:  400 }, // [6]
-  { left: '14%', top: '74%', size: 68, fromX: -500 }, // [7]
-  { left: '83%', top: '6%',  size: 66, fromX:  600 }, // [8]
-  { left: '58%', top: '75%', size: 74, fromX:  500 }, // [9]
-  { left: '5%',  top: '21%', size: 68, fromX: -500 }, // [10]
-  { left: '80%', top: '80%', size: 66, fromX:  600 }, // [11]
-  { left: '26%', top: '17%', size: 66, fromX: -400 }, // [12]
-  { left: '2%',  top: '85%', size: 70, fromX: -600 }, // [13]
-  { left: '47%', top: '23%', size: 70, fromX:  500 }, // [14]
-  { left: '30%', top: '82%', size: 68, fromX: -300 }, // [15]
-  { left: '68%', top: '18%', size: 58, fromX:  400 }, // [16]
-  { left: '62%', top: '87%', size: 64, fromX:  500 }, // [17]
-  { left: '84%', top: '27%', size: 62, fromX:  600 }, // [18]
-  // overflow para >19 marcas
+  { left: '1%',  top: '13%', size: 70, fromX: -600 }, // [0]  Adidas  TOP
+  { left: '4%',  top: '63%', size: 74, fromX: -600 }, // [1]  BOT
+  { left: '4%',  top: '24%', size: 64, fromX: -400 }, // [2]  Mazda   TOP  fila 2 izq
+  { left: '72%', top: '62%', size: 70, fromX:  600 }, // [3]  BOT
+  { left: '38%', top: '13%', size: 72, fromX:  500 }, // [4]  Electrolit TOP fila 1
+  { left: '36%', top: '70%', size: 72, fromX:  300 }, // [5]  BOT
+  { left: '65%', top: '11%', size: 62, fromX:  400 }, // [6]  Hatsu  TOP fila 1
+  { left: '14%', top: '74%', size: 68, fromX: -500 }, // [7]  BOT
+  { left: '83%', top: '13%', size: 66, fromX:  600 }, // [8]  Kumpet TOP fila 1
+  { left: '58%', top: '75%', size: 74, fromX:  500 }, // [9]  BOT
+  { left: '21%', top: '18%', size: 68, fromX: -500 }, // [10] Samsung TOP fila 2
+  { left: '80%', top: '80%', size: 66, fromX:  600 }, // [11] BOT
+  { left: '52%', top: '24%', size: 66, fromX:  400 }, // [12] Yango  TOP fila 2
+  { left: '2%',  top: '85%', size: 70, fromX: -600 }, // [13] BOT
+  { left: '25%', top: '32%', size: 70, fromX: -400 }, // [14] TOP fila 3 izq
+  { left: '30%', top: '82%', size: 68, fromX: -300 }, // [15] BOT
+  { left: '68%', top: '22%', size: 58, fromX:  400 }, // [16] CasaToro TOP fila 2 der
+  { left: '62%', top: '87%', size: 64, fromX:  500 }, // [17] BOT
+  { left: '47%', top: '33%', size: 62, fromX:  500 }, // [18] TOP fila 3 centro
   { left: '20%', top: '90%', size: 60, fromX: -400 }, // [19] BOT
-  { left: '8%',  top: '32%', size: 64, fromX: -500 }, // [20] TOP
-  { left: '60%', top: '92%', size: 58, fromX:  400 }, // [21] BOT
-  { left: '44%', top: '29%', size: 66, fromX:  400 }, // [22] TOP
-  { left: '83%', top: '89%', size: 56, fromX:  600 }, // [23] BOT
-  { left: '74%', top: '31%', size: 62, fromX:  600 }, // [24] TOP
-  { left: '38%', top: '94%', size: 54, fromX: -300 }, // [25] BOT
+  { left: '84%', top: '30%', size: 64, fromX:  600 }, // [20] TOP fila 3 der
+  { left: '60%', top: '88%', size: 58, fromX:  400 }, // [21] BOT
+  { left: '8%',  top: '38%', size: 66, fromX: -500 }, // [22] TOP fila 4 izq
+  { left: '83%', top: '85%', size: 56, fromX:  600 }, // [23] BOT
+  { left: '74%', top: '38%', size: 62, fromX:  600 }, // [24] TOP fila 4 der
+  { left: '38%', top: '91%', size: 54, fromX: -300 }, // [25] BOT
 ]
 
+interface Brand { id: string; name: string; logo_url?: string; image_url?: string }
+interface CaseImage { id: string; image_url: string; title?: string }
+
 /* Popup de caso — modal centrado con carrusel horizontal */
-function CasePopup({ brand, isOpen, onToggle }) {
-  const [images, setImages]   = useState([])
+function CasePopup({ brand, isOpen, onToggle }: { brand: Brand | null; isOpen: boolean; onToggle: () => void }) {
+  const [images, setImages]   = useState<CaseImage[]>([])
   const [loading, setLoading] = useState(false)
   const [idx, setIdx]         = useState(0)
-  const trackRef              = useRef(null)
+  const trackRef              = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!isOpen || !brand?.id) return
@@ -130,13 +140,13 @@ function CasePopup({ brand, isOpen, onToggle }) {
   const canPrev  = idx > 0
   const canNext  = items ? idx < items.length - 1 : false
 
-  const scrollTo = (newIdx) => {
+  const scrollTo = (newIdx: number) => {
     if (!trackRef.current) return
     trackRef.current.scrollTo({ left: newIdx * trackRef.current.clientWidth, behavior: 'smooth' })
     setIdx(newIdx)
   }
 
-  const arrowBtn = (dir) => ({
+  const arrowBtn = (dir: number): React.CSSProperties => ({
     all: 'unset', cursor: 'pointer', position: 'absolute', top: '50%',
     transform: 'translateY(-50%)',
     ...(dir === -1 ? { left: 10 } : { right: 10 }),
@@ -210,8 +220,8 @@ function CasePopup({ brand, isOpen, onToggle }) {
                 ref={trackRef}
                 className="cases-carousel"
                 onScroll={e => {
-                  const w = e.target.clientWidth
-                  if (w) setIdx(Math.round(e.target.scrollLeft / w))
+                  const t = e.target as HTMLDivElement
+                  if (t.clientWidth) setIdx(Math.round(t.scrollLeft / t.clientWidth))
                 }}
                 style={{ display: 'flex', overflowX: 'scroll', scrollSnapType: 'x mandatory',
                   scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
@@ -230,7 +240,7 @@ function CasePopup({ brand, isOpen, onToggle }) {
                         objectFit: 'contain',
                         display: 'block',
                       }}
-                      onError={e => { e.target.style.display = 'none' }} />
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   </div>
                 )) : [0,1,2].map(n => (
                   <div key={n} style={{ flexShrink: 0, width: '100%', scrollSnapAlign: 'start',
@@ -277,7 +287,12 @@ function CasePopup({ brand, isOpen, onToggle }) {
 }
 
 /* Burbuja individual — NO renderiza el popup (el transform del motion.div rompe position:fixed) */
-function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOpen, onToggle }) {
+function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOpen, onToggle }: {
+  progress: ReturnType<typeof useScroll>['scrollYProgress']
+  left: string; top: string; size: number; fromX: number
+  brand: Brand | undefined; fallback: string; index: number
+  isOpen: boolean; onToggle: () => void
+}) {
   const rawX    = useTransform(progress, [0, 0.20], [fromX, 0])
   const x       = useSpring(rawX, { stiffness: 80, damping: 22, mass: 0.6 })
   /* Fade-in al entrar, fade-out suave al salir — evita que las burbujas de arriba "desaparezcan" abruptamente */
@@ -287,7 +302,7 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
   return (
     <motion.div
       style={{ position: 'absolute', left, top, width: size, height: size, x, opacity, scale,
-        zIndex: isOpen ? 20 : index % 3, cursor: 'pointer', willChange: 'transform, opacity' }}
+        zIndex: isOpen ? 20 : 1, cursor: 'pointer', willChange: 'transform, opacity' }}
       onClick={e => { e.stopPropagation(); onToggle() }}
     >
       <motion.div whileHover={{ scale: 1.07 }} transition={{ duration: 0.2 }}
@@ -296,7 +311,7 @@ function Bubble({ progress, left, top, size, fromX, brand, fallback, index, isOp
           boxShadow: isOpen ? '0 0 0 4px rgba(139,63,168,0.18), 0 16px 48px rgba(0,0,0,0.18)' : '0 8px 32px rgba(0,0,0,0.12)',
           background: '#fff', transition: 'border-color 0.2s, box-shadow 0.2s' }}>
         <img src={brand?.logo_url} alt={brand?.name || ''} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8%' }}
-          onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = fallback }} />
+          onError={e => { const t = e.target as HTMLImageElement; t.style.display = 'none'; if (t.parentElement) t.parentElement.style.background = fallback }} />
       </motion.div>
     </motion.div>
   )
@@ -318,15 +333,15 @@ function SectionHeader() {
 }
 
 export default function Cases() {
-  const ref = useRef(null)
-  const [activeBrand, setActiveBrand] = useState(null)
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [activeBrand, setActiveBrand] = useState<Brand | null>(null)
   const [isMobile, setIsMobile]       = useState(IS_MOBILE_INIT)
-  const [brands, setBrands]           = useState(FALLBACK_IMAGES)
+  const [brands, setBrands]           = useState<Brand[]>(FALLBACK_IMAGES)
 
   useLayoutEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
     setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
@@ -350,7 +365,7 @@ export default function Cases() {
   }, [])
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const handleToggle = (brand) => setActiveBrand(prev => prev?.id === brand?.id ? null : brand)
+  const handleToggle = (brand: Brand) => setActiveBrand(prev => prev?.id === brand?.id ? null : brand)
   const handleClose  = () => setActiveBrand(null)
 
   const pool   = isMobile ? MOBILE_BUBBLES : BUBBLES
@@ -358,15 +373,10 @@ export default function Cases() {
 
   /* ── SHARED SECTION STRUCTURE ── */
   return (
-    <section ref={ref} id="casos" style={{ height: '200vh', position: 'relative' }}>
-      <div
-        style={{
-          position: 'sticky', top: 0, height: '100vh',
-          overflow: 'hidden',
-          background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent',
-        }}
-        onClick={handleClose}
-      >
+    <section ref={ref} id="casos" style={{ height: '100vh', position: 'relative', overflow: 'hidden',
+      background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent' }}
+      onClick={handleClose}
+    >
         {/* Burbujas */}
         {subset.map((brand, i) => {
           const b = pool[i]
@@ -404,7 +414,6 @@ export default function Cases() {
             </motion.p>
           </div>
         </div>
-      </div>
 
       {/*
        * El popup se renderiza AQUÍ — fuera del motion.div de las burbujas.

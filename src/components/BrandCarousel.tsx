@@ -10,23 +10,25 @@ const IS_MOBILE_INIT = typeof window !== 'undefined'
   ? window.matchMedia('(max-width: 767px)').matches
   : false
 
-function isImage(name) {
+interface BrandImage { name: string; url: string }
+
+function isImage(name: string) {
   return IMAGE_EXTS.some(ext => name.toLowerCase().endsWith(`.${ext}`))
 }
 
-function publicUrl(name) {
+function publicUrl(name: string) {
   return `https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/${encodeURIComponent(BUCKET)}/${encodeURIComponent(name)}`
 }
 
 export default function BrandCarousel() {
-  const [images, setImages] = useState([])
-  const [hovered, setHovered] = useState(null)
+  const [images, setImages] = useState<BrandImage[]>([])
+  const [hovered, setHovered] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
 
   useLayoutEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
     setIsMobile(mq.matches)
-    const handler = (e) => setIsMobile(e.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
@@ -134,7 +136,7 @@ export default function BrandCarousel() {
                   filter: hovered === i ? 'grayscale(0)' : 'grayscale(1) opacity(0.55)',
                   transition: 'filter 0.3s',
                 }}
-                onError={e => { e.target.parentElement.style.display = 'none' }}
+                onError={e => { const p = (e.target as HTMLImageElement).parentElement; if (p) p.style.display = 'none' }}
               />
 
               {/* Nombre aparece al hover */}

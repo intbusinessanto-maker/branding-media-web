@@ -1,10 +1,34 @@
 import { useState, useEffect } from 'react'
+import type React from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
-const categoryColors = { Estrategia: '#8B3FA8', DOOH: '#00C4AD', Tendencias: '#F07B00', OOH: '#3B82F6', 'Marketing Universitario': '#10B981', 'Casos de Éxito': '#F43F5E' }
+interface Post {
+  id: string
+  title: string
+  slug: string
+  excerpt?: string
+  category: string
+  published_at?: string
+  cover_image_url?: string
+  cover_image_alt?: string
+  read_time_minutes?: number
+  seo_title?: string
+  seo_description?: string
+  seo_keywords?: string[]
+  author?: string
+  content?: string
+  created_at?: string
+  updated_at?: string
+}
 
-function ArticleSchema({ post }) {
+interface SkeletonItem { id: string; skeleton: true }
+interface PlaceholderItem { id: string; placeholder: true; category: string; title: string; excerpt: string; read_time_minutes: number }
+type DisplayItem = Post | SkeletonItem | PlaceholderItem
+
+const categoryColors: Record<string, string> = { Estrategia: '#8B3FA8', DOOH: '#00C4AD', Tendencias: '#F07B00', OOH: '#3B82F6', 'Marketing Universitario': '#10B981', 'Casos de Éxito': '#F43F5E' }
+
+function ArticleSchema({ post }: { post: Post }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -25,19 +49,19 @@ function ArticleSchema({ post }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
-const renderInline = (text) => {
+const renderInline = (text: string) => {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
-  return parts.map((part, i) => {
+  return parts.map((part: string, i: number) => {
     if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
     if (part.startsWith('*') && part.endsWith('*')) return <em key={i}>{part.slice(1, -1)}</em>
     return part
   })
 }
 
-const renderContent = (raw) => {
+const renderContent = (raw: string) => {
   const content = raw || ''
   const lines = content.split('\n')
-  const elements = []
+  const elements: React.ReactNode[] = []
   let i = 0
   while (i < lines.length) {
     const line = lines[i]
@@ -61,7 +85,7 @@ const renderContent = (raw) => {
   return elements
 }
 
-function ArticlePage({ post, onBack }) {
+function ArticlePage({ post, onBack }: { post: Post; onBack: () => void }) {
   const col = categoryColors[post.category] || '#00C4AD'
   const dateStr = post.published_at
     ? new Date(post.published_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -113,13 +137,13 @@ function ArticlePage({ post, onBack }) {
         )}
 
         <div style={{ fontSize: '16px', color: '#333', lineHeight: 1.8 }}>
-          {renderContent(post.content)}
+          {renderContent(post.content ?? '')}
         </div>
 
-        {post.seo_keywords?.length > 0 && (
+        {(post.seo_keywords?.length ?? 0) > 0 && (
           <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {post.seo_keywords.map((k, i) => (
+              {post.seo_keywords!.map((k: string, i: number) => (
                 <span key={i} style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '12px', background: 'rgba(0,0,0,0.05)', color: '#666', border: '1px solid rgba(0,0,0,0.08)' }}>
                   #{k}
                 </span>
@@ -133,9 +157,9 @@ function ArticlePage({ post, onBack }) {
 }
 
 export default function Blog() {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState<Post | null>(null)
 
   useEffect(() => {
     supabase
@@ -144,12 +168,12 @@ export default function Blog() {
       .eq('status', 'publicado')
       .order('published_at', { ascending: false })
       .limit(6)
-      .then(({ data }) => { setPosts(data || []); setLoading(false) })
+      .then(({ data }) => { setPosts((data as Post[]) || []); setLoading(false) })
   }, [])
 
   if (selected) return <ArticlePage post={selected} onBack={() => setSelected(null)} />
 
-  const displayPosts = loading
+  const displayPosts: DisplayItem[] = loading
     ? [
         { id: 'sk1', skeleton: true },
         { id: 'sk2', skeleton: true },
@@ -193,43 +217,48 @@ export default function Blog() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
           {displayPosts.map((p, i) => {
-            if (p.skeleton) return (
+            if ('skeleton' in p) return (
               <div key={p.id} style={{ padding: '28px', borderRadius: '14px', background: '#FAFAFA', border: '1px solid rgba(0,0,0,0.06)', minHeight: '200px', animation: 'pulse 1.5s infinite' }} />
             )
-            const col = categoryColors[p.category] || '#00C4AD'
-            const dateStr = p.published_at
-              ? new Date(p.published_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
+            const isPlaceholder = 'placeholder' in p
+            const post = p as Post | PlaceholderItem
+            const col = categoryColors[post.category] || '#00C4AD'
+            const published_at = 'published_at' in post ? post.published_at : undefined
+            const cover_image_url = 'cover_image_url' in post ? post.cover_image_url : undefined
+            const cover_image_alt = 'cover_image_alt' in post ? post.cover_image_alt : undefined
+            const dateStr = published_at
+              ? new Date(published_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
               : 'Próximamente'
             return (
               <motion.article key={p.id}
                 initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.12, duration: 0.7 }}
                 whileHover={{ y: -4, boxShadow: '0 12px 28px rgba(0,0,0,0.09)', transition: { duration: 0.2 } }}
-                onClick={() => !p.placeholder && setSelected(p)}
+                onClick={() => !isPlaceholder && setSelected(p as Post)}
                 style={{
                   padding: '28px', borderRadius: '14px', background: '#FAFAFA',
                   border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
                   display: 'flex', flexDirection: 'column', gap: '14px',
-                  cursor: p.placeholder ? 'default' : 'pointer',
+                  cursor: isPlaceholder ? 'default' : 'pointer',
                 }}>
-                {p.cover_image_url && (
-                  <img src={p.cover_image_url} alt={p.cover_image_alt || p.title}
+                {cover_image_url && (
+                  <img src={cover_image_url} alt={cover_image_alt || post.title}
                     style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px' }} />
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '11px', fontWeight: 700, color: col, border: `1px solid ${col}30`, padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.08em', textTransform: 'uppercase', background: `${col}0A` }}>
-                    {p.category}
+                    {post.category}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#AAA' }}>{p.read_time_minutes} min</span>
+                  <span style={{ fontSize: '11px', color: '#AAA' }}>{post.read_time_minutes} min</span>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.4, marginBottom: '8px' }}>{p.title}</h3>
-                  <p style={{ fontSize: '13px', color: '#666', lineHeight: 1.7 }}>{p.excerpt}</p>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', lineHeight: 1.4, marginBottom: '8px' }}>{post.title}</h3>
+                  <p style={{ fontSize: '13px', color: '#666', lineHeight: 1.7 }}>{post.excerpt}</p>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                   <span style={{ fontSize: '12px', color: '#AAA' }}>{dateStr}</span>
-                  {!p.placeholder && <span style={{ fontSize: '12px', color: col, fontWeight: 600 }}>Leer →</span>}
-                  {p.placeholder && <span style={{ fontSize: '12px', color: '#CCC' }}>Próximamente</span>}
+                  {!isPlaceholder && <span style={{ fontSize: '12px', color: col, fontWeight: 600 }}>Leer →</span>}
+                  {isPlaceholder && <span style={{ fontSize: '12px', color: '#CCC' }}>Próximamente</span>}
                 </div>
               </motion.article>
             )

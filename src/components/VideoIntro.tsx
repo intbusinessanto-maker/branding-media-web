@@ -13,7 +13,7 @@ const IS_MOBILE_INIT = typeof window !== 'undefined'
   ? window.matchMedia('(max-width: 767px)').matches
   : false
 
-export default function VideoIntro({ onDismiss }) {
+export default function VideoIntro({ onDismiss }: { onDismiss: () => void }) {
   const [visible, setVisible]   = useState(true)
   const [isMobile, setIsMobile] = useState(IS_MOBILE_INIT)
   const isMobileRef             = useRef(IS_MOBILE_INIT)

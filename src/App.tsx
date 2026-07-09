@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useIsMobile } from './hooks/useIsMobile'
 import Navbar        from './components/Navbar'
-import VideoIntro    from './components/VideoIntro'
+import Preloader     from './components/Preloader'
 import Hero          from './components/Hero'
 import Stats         from './components/Stats'
 import BrandCarousel from './components/BrandCarousel'
@@ -24,14 +24,14 @@ const PAGE_BG_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/
  */
 /* Solo desktop: cursor personalizado con RAF loop */
 function CustomCursor() {
-  const dotRef = useRef(null)
+  const dotRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     let x = -100, y = -100
     let cx = -100, cy = -100
-    let rafId
+    let rafId: number
 
-    const onMove = (e) => { x = e.clientX; y = e.clientY }
+    const onMove = (e: MouseEvent) => { x = e.clientX; y = e.clientY }
     const onLeave = () => { x = -100; y = -100 }
 
     const tick = () => {
@@ -80,14 +80,14 @@ function CustomCursor() {
  * que el fondo de periódico (Fondo 2.png) se viera en el Hero en lugar del video.
  */
 function InteractiveBackground() {
-  const bgRef = useRef(null)
+  const bgRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     let px = 0.5, py = 0.5
     let cpx = 0.5, cpy = 0.5
-    let rafId
+    let rafId: number
 
-    const onMove = (e) => {
+    const onMove = (e: MouseEvent) => {
       px = e.clientX / window.innerWidth
       py = e.clientY / window.innerHeight
     }
@@ -138,9 +138,7 @@ export default function Root() {
 }
 
 function App() {
-  const [introVisible, setIntroVisible] = useState(
-    () => !sessionStorage.getItem('bm_intro_seen')
-  )
+  const [preloaderVisible, setPreloaderVisible] = useState(true)
   /*
    * Solo el Hero renderiza en t=0 (una sección, sin hooks de Framer Motion).
    * Todo lo demás monta cuando el browser está idle o tras 700ms máximo.
@@ -152,6 +150,7 @@ function App() {
    */
   const [deferred, setDeferred] = useState(false)
   useEffect(() => {
+    if (preloaderVisible) return
     const mount = () => setDeferred(true)
     if (typeof requestIdleCallback !== 'undefined') {
       const id = requestIdleCallback(mount, { timeout: 700 })
@@ -159,16 +158,15 @@ function App() {
     }
     const id = setTimeout(mount, 600)
     return () => clearTimeout(id)
-  }, [])
+  }, [preloaderVisible])
 
   const isMobile = useIsMobile()
 
   return (
     <>
-      {introVisible && (
-        <VideoIntro onDismiss={() => {
-          sessionStorage.setItem('bm_intro_seen', '1')
-          setIntroVisible(false)
+      {preloaderVisible && (
+        <Preloader onDone={() => {
+          setPreloaderVisible(false)
         }} />
       )}
 
@@ -179,7 +177,7 @@ function App() {
         <div style={{ position: 'relative', zIndex: 2 }}>
           <Navbar />
           <main>
-            <Hero videoActive={!introVisible} />
+            <Hero videoActive={true} />
             {deferred && (
               <>
                 <Stats />

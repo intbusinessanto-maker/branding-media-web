@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from 'framer-motion'
+import { useRef, useState } from 'react'
+import type React from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useIsMobile } from '../hooks/useIsMobile'
 
@@ -27,23 +28,26 @@ const formats = [
   },
 ]
 
+interface FormatItem { tag: string; title: string; subtitle: string; description: string; features: string[]; color: string; bg: string; border: string }
+interface FormatExample { id: string; image_url: string; brand_name?: string; logo_url?: string }
+
 /* ── Popup ── */
-function FormatPopup({ format, onClose }) {
-  const [examples, setExamples] = useState([])
+function FormatPopup({ format, onClose }: { format: FormatItem; onClose: () => void }) {
+  const [examples, setExamples] = useState<FormatExample[]>([])
   const [loading, setLoading]   = useState(true)
-  const [lightbox, setLightbox] = useState(null)
+  const [lightbox, setLightbox] = useState<FormatExample | null>(null)
 
   useEffect(() => {
     supabase.from('format_examples')
       .select('*').eq('format_type', format.title).order('sort_order').order('created_at')
-      .then(({ data }) => { setExamples(data || []); setLoading(false) })
+      .then(({ data }) => { setExamples((data as FormatExample[]) || []); setLoading(false) })
   }, [format.title])
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="format-popup-overlay"
       style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'flex-end',
-        justifyContent: 'center', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}
+        justifyContent: 'center', background: 'rgba(0,0,0,0.655)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}>
       <style>{`
         .format-popup-overlay { padding: 0 0 clamp(40px,8vh,60px); }
@@ -80,13 +84,13 @@ function FormatPopup({ format, onClose }) {
                 <div style={{ aspectRatio: '16/9', overflow: 'hidden', background: '#EEE' }}>
                   <img src={ex.image_url} alt={ex.brand_name || ''} loading="lazy"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s' }}
-                    onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
-                    onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-                    onError={e => e.target.style.display = 'none'} />
+                    onMouseEnter={e => (e.target as HTMLImageElement).style.transform = 'scale(1.05)'}
+                    onMouseLeave={e => (e.target as HTMLImageElement).style.transform = 'scale(1)'}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                 </div>
                 {ex.brand_name && (
                   <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {ex.logo_url && <img src={ex.logo_url} alt={ex.brand_name} loading="lazy" style={{ width: 22, height: 22, objectFit: 'contain', background: '#fff', borderRadius: '50%', padding: 2, border: '1px solid #EEE', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />}
+                    {ex.logo_url && <img src={ex.logo_url} alt={ex.brand_name} loading="lazy" style={{ width: 22, height: 22, objectFit: 'contain', background: '#fff', borderRadius: '50%', padding: 2, border: '1px solid #EEE', flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />}
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>{ex.brand_name}</span>
                   </div>
                 )}
@@ -112,50 +116,12 @@ function FormatPopup({ format, onClose }) {
 
 /* ── Sección principal ── */
 export default function Formats() {
-  const ref        = useRef(null)
-  const carouselRef = useRef(null)
-  const [activeFormat, setActiveFormat] = useState(null)
-  const [visibleCount, setVisibleCount] = useState(0)
+  const carouselRef = useRef<HTMLDivElement | null>(null)
+  const [activeFormat, setActiveFormat] = useState<FormatItem | null>(null)
   const [activeCard, setActiveCard]     = useState(0)
   const isMobile = useIsMobile()
 
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
-
-  /*
-   * maxProgress solo aumenta — resuelve el bug de desktop donde los bloques
-   * desaparecían al subir. Los transforms de opacidad/x solo avanzan, nunca
-   * revierten al hacer scroll hacia arriba dentro de la sección.
-   */
-  const maxProgress = useMotionValue(0)
-
-  useEffect(() => {
-    return scrollYProgress.on('change', v => {
-      if (v > maxProgress.get()) maxProgress.set(v)
-    })
-  }, [scrollYProgress, maxProgress])
-
-  const op0 = useTransform(maxProgress, [0.00, 0.12], [0, 1])
-  const x0  = useTransform(maxProgress, [0.00, 0.18], [-280, 0])
-  const op1 = useTransform(maxProgress, [0.30, 0.42], [0, 1])
-  const x1  = useTransform(maxProgress, [0.30, 0.48], [-380, 0])
-  const op2 = useTransform(maxProgress, [0.58, 0.70], [0, 1])
-  const x2  = useTransform(maxProgress, [0.58, 0.76], [-480, 0])
-
-  useEffect(() => {
-    return maxProgress.on('change', v => {
-      if (v >= 0.62) setVisibleCount(3)
-      else if (v >= 0.34) setVisibleCount(2)
-      else if (v >= 0.06) setVisibleCount(1)
-    })
-  }, [maxProgress])
-
-  const desktopLayers = [
-    { f: formats[0], op: op0, x: x0 },
-    { f: formats[1], op: op1, x: x1 },
-    { f: formats[2], op: op2, x: x2 },
-  ]
-
-  const desktopCardStyle = (f) => ({
+  const desktopCardStyle = (f: FormatItem): React.CSSProperties => ({
     padding: 'clamp(18px,2.2vw,28px)',
     borderRadius: '14px',
     background: '#fff',
@@ -170,30 +136,41 @@ export default function Formats() {
   return (
     <>
       {/* ══════════════════════════════════════════════
-          DESKTOP: sticky scroll 500vh con maxProgress
+          DESKTOP: sección normal, scroll libre, cards
+          aparecen de a una con whileInView escalonado
           ══════════════════════════════════════════════ */}
       {!isMobile && (
-        <div ref={ref} style={{ height: '200vh', position: 'relative' }}>
-          <section id="formatos" style={{
-            position: 'sticky', top: 0, height: '100svh',
-            overflow: 'hidden', background: 'transparent',
+        <section id="formatos" style={{
+          position: 'relative',
+          minHeight: '100vh',
+          overflow: 'hidden',
+          background: 'transparent',
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          {/* Estatua — ocupa toda la altura de la sección */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0,
+            width: 'clamp(260px, 32vw, 480px)',
+            height: '100%',
+            pointerEvents: 'none', zIndex: 1,
           }}>
-            {/* Estatua */}
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0,
-              width: 'clamp(220px, 30vw, 440px)', height: '92%',
-              pointerEvents: 'none', zIndex: 1,
-            }}>
-              <img src={STATUE_URL} alt="" loading="lazy"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
-            </div>
+            <img src={STATUE_URL} alt="" loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
+          </div>
 
+          {/* Contenido: header + cards */}
+          <div style={{
+            position: 'relative', zIndex: 2,
+            width: '100%',
+            paddingLeft: 'clamp(240px, 30vw, 460px)',
+            paddingRight: 'clamp(1.5rem, 3vw, 3rem)',
+            paddingTop: 'clamp(80px, 10vh, 120px)',
+            paddingBottom: 'clamp(120px, 18vh, 200px)',
+            boxSizing: 'border-box',
+          }}>
             {/* Header */}
-            <div style={{
-              position: 'absolute', top: 'clamp(80px,11vh,100px)',
-              left: 0, right: 0, textAlign: 'center',
-              pointerEvents: 'none', zIndex: 6, padding: '0 1rem',
-            }}>
+            <div style={{ textAlign: 'center', marginBottom: 'clamp(32px, 5vh, 56px)' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 10 }}>
                 Formatos
               </span>
@@ -202,16 +179,23 @@ export default function Formats() {
               </h2>
             </div>
 
-            {/* Cards en fila */}
+            {/* Cards — aparecen de izquierda a derecha, scroll libre */}
             <div style={{
-              position: 'absolute',
-              left: 'clamp(200px, 28vw, 400px)', right: '2rem',
-              top: '50%', transform: 'translateY(-50%)',
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 'clamp(10px, 1.4vw, 18px)', zIndex: 2,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 'clamp(10px, 1.4vw, 18px)',
+              alignItems: 'stretch',
             }}>
-              {desktopLayers.map(({ f, op, x }) => (
-                <motion.div key={f.title} style={{ opacity: op, x }} onClick={() => setActiveFormat(f)}>
+              {formats.map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, x: -48 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ duration: 0.655, delay: i * 0.14, ease: [0.22, 1, 0.36, 1] }}
+                  onClick={() => setActiveFormat(f)}
+                  style={{ height: '100%' }}
+                >
                   <div style={desktopCardStyle(f)}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
                       <span style={{ fontSize: '10px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
@@ -234,18 +218,8 @@ export default function Formats() {
                 </motion.div>
               ))}
             </div>
-
-            {/* Dots de progreso */}
-            <div style={{ position: 'absolute', bottom: 'clamp(20px,3.5vh,36px)', left: 0, right: 0,
-              display: 'flex', justifyContent: 'center', gap: 8, zIndex: 4, pointerEvents: 'none' }}>
-              {formats.map((f, i) => (
-                <div key={f.title} style={{ height: 5, borderRadius: 3, transition: 'all 0.3s',
-                  width: visibleCount > i ? 22 : 5,
-                  background: visibleCount > i ? f.color : 'rgba(0,0,0,0.12)' }} />
-              ))}
-            </div>
-          </section>
-        </div>
+          </div>
+        </section>
       )}
 
       {/* ══════════════════════════════════════════════
@@ -255,49 +229,67 @@ export default function Formats() {
           ══════════════════════════════════════════════ */}
       {isMobile && (
         <section id="formatos" style={{
-          padding: '32px 0 44px',
           backgroundImage: `url(${FONDO_URL})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
+          minHeight: '100svh',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          paddingTop: 'clamp(60px,8vh,100px)',
+          paddingBottom: 'clamp(48px,6vh,80px)',
+          overflow: 'hidden',
+          position: 'relative',
         }}>
 
+          {/* Estatua — sube desde abajo, cabeza sobreponida en esquina inferior izquierda de la card */}
+          <img src={STATUE_URL} alt="" loading="lazy" style={{
+            position: 'absolute',
+            bottom: '0%',   /* ligeramente fuera del fondo para que suba más */
+            left: '-2%',
+            width: '62%',
+            height: '80%',   /* altura fija: ocupa 80% de la sección, así la cabeza llega a ~20% desde arriba */
+            objectFit: 'contain',
+            objectPosition: 'bottom left',
+            display: 'block',
+            zIndex: 3,
+            pointerEvents: 'none',
+          }} />
+
           {/* Header */}
-          <div style={{ textAlign: 'center', padding: '0 8px 20px', position: 'relative', zIndex: 2 }}>
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 6 }}>
+          <div style={{ textAlign: 'center', padding: '0 16px', marginBottom: '3vh', flexShrink: 0, position: 'relative', zIndex: 2 }}>
+            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 4 }}>
               Formatos
             </span>
-            <h2 style={{ fontSize: 'clamp(1.1rem, 4.5vw, 1.4rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
+            <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.5rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
               Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
             </h2>
           </div>
 
           {/*
-           * Estatua + carrusel en contenedor relativo.
-           * La estatua está absolutamente posicionada (no scrollea con las cards).
-           * Cada slide = 100vw con paddingLeft:42vw → cards arrancan donde termina la estatua.
-           * El solapamiento 8vw hace que la estatua tape el borde izquierdo de cada card,
-           * apuntando el megáfono hacia el bloque visible.
-           */}
-          <div style={{ position: 'relative' }}>
+            Zona cards + dots: ocupa el ancho derecho (desde el 38% del ancho).
+            La estatua queda a la izquierda (absolute), las cards encima de ella.
+            El carrusel muestra UNA sola card a la vez, cada slide = ancho de esta columna.
+          */}
+          <div style={{
+            position: 'absolute',
+            top: 'calc(clamp(60px,8vh,100px) + 80px)',   /* paddingTop + header */
+            right: 0,
+            width: '62%',
+            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
 
-            {/* Estatua fija — misma altura que el carrusel (top:0 bottom:0) */}
-            <div style={{
-              position: 'absolute', left: 0, top: 0, bottom: 0,
-              width: '36vw', pointerEvents: 'none', zIndex: 5,
-            }}>
-              <img src={STATUE_URL} alt="" loading="lazy"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
-            </div>
-
-            {/* Carrusel horizontal con scroll-snap */}
             <style>{`.fm-carousel::-webkit-scrollbar{display:none}`}</style>
             <div
               ref={carouselRef}
               className="fm-carousel"
               onScroll={() => {
                 if (!carouselRef.current) return
-                const idx = Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth)
+                const slideW = carouselRef.current.offsetWidth
+                const idx = Math.round(carouselRef.current.scrollLeft / slideW)
                 setActiveCard(idx)
               }}
               style={{
@@ -309,74 +301,72 @@ export default function Formats() {
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              {formats.map((f, i) => (
+              {formats.map((f) => (
                 <div key={f.title} style={{
                   flexShrink: 0,
-                  width: '100vw',
+                  width: '100%',           /* cada slide = ancho del contenedor (62vw) */
                   scrollSnapAlign: 'start',
-                  paddingLeft: '34vw',
-                  paddingRight: '12px',
                   boxSizing: 'border-box',
+                  paddingLeft: '6px',
+                  paddingRight: '14px',
                 }}>
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: '-10px' }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  <div
                     onClick={() => setActiveFormat(f)}
-                  >
-                    <div style={{
-                      padding: '18px 16px',
-                      borderRadius: '16px',
+                    style={{
+                      padding: '12px',
+                      borderRadius: '14px',
                       background: '#fff',
                       border: `1px solid ${f.border}`,
                       borderTop: `4px solid ${f.color}`,
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
                       cursor: 'pointer',
-                      display: 'flex', flexDirection: 'column', gap: '10px',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{
-                          fontSize: '9px', fontWeight: 800, color: f.color, background: f.bg,
-                          border: `1px solid ${f.border}`, padding: '4px 12px', borderRadius: '100px',
-                          letterSpacing: '0.1em', textTransform: 'uppercase',
-                        }}>{f.tag}</span>
-                        <span style={{ fontSize: '11px', color: f.color, fontWeight: 700 }}>Ver ejemplos →</span>
-                      </div>
-                      <div>
-                        <h3 style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 4px' }}>{f.title}</h3>
-                        <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, margin: '0 0 6px' }}>{f.subtitle}</p>
-                        <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.55, margin: 0 }}>{f.description}</p>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                        {f.features.map(feat => (
-                          <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
-                            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
-                            {feat}
-                          </div>
-                        ))}
-                      </div>
+                      display: 'flex', flexDirection: 'column', gap: '6px',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{
+                        fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg,
+                        border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px',
+                        letterSpacing: '0.1em', textTransform: 'uppercase',
+                      }}>{f.tag}</span>
+                      <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver →</span>
                     </div>
-                  </motion.div>
+                    <h3 style={{ fontSize: 'clamp(1.1rem, 4.5vw, 1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
+                    <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: 0 }}>{f.subtitle}</p>
+                    <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      {f.features.map(feat => (
+                        <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
+                          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
+                          {feat}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Dots de navegación táctil */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, padding: '14px 0 0' }}>
+            {/* Dots — pegados debajo del carrusel, margen vertical del 5% respecto al muñeco */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '8px', flexShrink: 0 }}>
               {formats.map((f, i) => (
                 <button
                   key={f.title}
                   onClick={() => {
                     if (!carouselRef.current) return
-                    carouselRef.current.scrollTo({ left: i * carouselRef.current.clientWidth, behavior: 'smooth' })
+                    carouselRef.current.scrollTo({
+                      left: i * carouselRef.current.offsetWidth,
+                      behavior: 'smooth',
+                    })
                     setActiveCard(i)
                   }}
                   style={{
                     all: 'unset', cursor: 'pointer', height: 5, borderRadius: 3,
                     transition: 'all 0.3s ease',
                     width: activeCard === i ? 22 : 5,
-                    background: activeCard === i ? f.color : 'rgba(0,0,0,0.12)',
+                    background: activeCard === i ? f.color : 'rgba(0,0,0,0.18)',
+                    display: 'block',
                   }}
                 />
               ))}

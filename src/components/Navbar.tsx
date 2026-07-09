@@ -102,8 +102,8 @@ export default function Navbar() {
                 color: linkColor, textDecoration: 'none', fontSize: '14px', fontWeight: 600,
                 transition: 'color 0.5s',
               }}
-                onMouseEnter={e => e.target.style.color = hoverColor}
-                onMouseLeave={e => e.target.style.color = linkColor}
+                onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = hoverColor}
+                onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = linkColor}
               >{link.label}</a>
             )
           })}

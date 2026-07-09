@@ -1,10 +1,66 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type React from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 
+const FONDO_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
+const WA_URL    = 'https://wa.me/573016978741?text=Hola%2C%20quiero%20información%20sobre%20publicidad%20en%20universidades'
+
+/* Cursor personalizado — mismo que en home */
+function CustomCursor() {
+  const dotRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    let x = -100, y = -100, cx = -100, cy = -100, rafId: number
+    const onMove = (e: MouseEvent) => { x = e.clientX; y = e.clientY }
+    const onLeave = () => { x = -100; y = -100 }
+    const tick = () => {
+      cx += (x - cx) * 0.85
+      cy += (y - cy) * 0.85
+      if (dotRef.current) dotRef.current.style.transform = `translate(${cx}px, ${cy}px)`
+      rafId = requestAnimationFrame(tick)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseleave', onLeave)
+    rafId = requestAnimationFrame(tick)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseleave', onLeave)
+      cancelAnimationFrame(rafId)
+    }
+  }, [])
+  return (
+    <div ref={dotRef} style={{
+      position: 'fixed', top: 0, left: 0, width: '18px', height: '18px',
+      marginLeft: '-9px', marginTop: '-9px', borderRadius: '50%',
+      backgroundColor: '#8B3FA8', border: '2.5px solid #fff',
+      boxShadow: '0 0 0 1.5px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.3)',
+      pointerEvents: 'none', zIndex: 99999, willChange: 'transform', cursor: 'none',
+    }} />
+  )
+}
+
+interface Post {
+  id: string
+  title: string
+  slug: string
+  excerpt?: string
+  category: string
+  published_at?: string
+  created_at?: string
+  updated_at?: string
+  cover_image_url?: string
+  cover_image_alt?: string
+  read_time_minutes?: number
+  seo_title?: string
+  seo_description?: string
+  seo_keywords?: string[]
+  content?: string
+  author?: string
+}
+
 const LOGO_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Logo-Branding-Media.png'
 
-const categoryColors = {
+const categoryColors: Record<string, string> = {
   Estrategia: '#8B3FA8',
   DOOH: '#00C4AD',
   Tendencias: '#F07B00',
@@ -16,7 +72,7 @@ const categoryColors = {
   'Publicidad Exterior': '#3B82F6',
 }
 
-function ArticleSchema({ post }) {
+function ArticleSchema({ post }: { post: Post }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -37,7 +93,7 @@ function ArticleSchema({ post }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 }
 
-function ArticlePage({ post, onBack }) {
+function ArticlePage({ post, onBack }: { post: Post; onBack: () => void }) {
   const col = categoryColors[post.category] || '#00C4AD'
   const dateStr = post.published_at
     ? new Date(post.published_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -52,10 +108,9 @@ function ArticlePage({ post, onBack }) {
     return () => { document.title = 'Bmmedios — Publicidad en Universidades Colombia' }
   }, [post])
 
-  const renderInline = (text) => {
-    // Convierte **negrita** a <strong> y *cursiva* a <em>
+  const renderInline = (text: string) => {
     const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
-    return parts.map((part, i) => {
+    return parts.map((part: string, i: number) => {
       if (part.startsWith('**') && part.endsWith('**'))
         return <strong key={i}>{part.slice(2, -2)}</strong>
       if (part.startsWith('*') && part.endsWith('*'))
@@ -64,10 +119,10 @@ function ArticlePage({ post, onBack }) {
     })
   }
 
-  const renderContent = (raw) => {
+  const renderContent = (raw: string) => {
     const content = raw || ''
     const lines = content.split('\n')
-    const elements = []
+    const elements: React.ReactNode[] = []
     let i = 0
 
     while (i < lines.length) {
@@ -170,13 +225,13 @@ function ArticlePage({ post, onBack }) {
           )}
 
           <div style={{ fontSize: '16px', color: '#333', lineHeight: 1.8 }}>
-            {renderContent(post.content)}
+            {renderContent(post.content ?? '')}
           </div>
 
-          {post.seo_keywords?.length > 0 && (
+          {(post.seo_keywords?.length ?? 0) > 0 && (
             <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {post.seo_keywords.map((k, i) => (
+                {post.seo_keywords!.map((k: string, i: number) => (
                   <span key={i} style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '12px', background: 'rgba(0,0,0,0.05)', color: '#666', border: '1px solid rgba(0,0,0,0.08)' }}>
                     #{k}
                   </span>
@@ -188,7 +243,7 @@ function ArticlePage({ post, onBack }) {
           <div style={{ marginTop: '48px', padding: '28px', borderRadius: '16px', background: 'linear-gradient(135deg, #F8F0FF, #F0FFFE)', border: '1px solid rgba(139,63,168,0.12)', textAlign: 'center' }}>
             <p style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', marginBottom: '8px' }}>¿Quieres llegar a 9.000.000 universitarios en Colombia?</p>
             <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>Bmmedios es la única agencia especializada en publicidad OOH y DOOH en universidades.</p>
-            <a href="/#contacto" style={{ display: 'inline-block', background: '#8B3FA8', color: '#fff', padding: '12px 28px', borderRadius: '10px', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
+            <a href={WA_URL} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#25D366', color: '#fff', padding: '12px 28px', borderRadius: '10px', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
               Hablar con un experto →
             </a>
           </div>
@@ -205,9 +260,9 @@ function ArticlePage({ post, onBack }) {
 }
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState<Post | null>(null)
 
   useEffect(() => {
     supabase
@@ -216,7 +271,7 @@ export default function BlogPage() {
       .eq('status', 'publicado')
       .order('published_at', { ascending: false })
       .limit(20)
-      .then(({ data }) => { setPosts(data || []); setLoading(false) })
+      .then(({ data }) => { setPosts((data as Post[]) || []); setLoading(false) })
   }, [])
 
   if (selected) return <ArticlePage post={selected} onBack={() => setSelected(null)} />
@@ -224,7 +279,11 @@ export default function BlogPage() {
   const skeletons = [1, 2, 3]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: `#fff url(${FONDO_URL}) center/cover fixed`,
+    }}>
+      <CustomCursor />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Blog',
@@ -246,13 +305,12 @@ export default function BlogPage() {
         </a>
         <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <a href="/" style={{ color: '#555', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>Inicio</a>
-          <a href="/#mapa" style={{ color: '#555', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>Cobertura</a>
           <a href="/#contacto" style={{ background: '#8B3FA8', color: '#fff', padding: '9px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>Contactar</a>
         </nav>
       </header>
 
       <section style={{
-        background: 'linear-gradient(135deg, #F8F0FF 0%, #F0FFFE 100%)',
+        background: 'linear-gradient(135deg, rgba(248,240,255,0.88) 0%, rgba(240,255,254,0.88) 100%)',
         padding: 'clamp(60px,10vw,100px) 2rem clamp(40px,8vw,80px)',
         textAlign: 'center',
       }}>
@@ -268,7 +326,7 @@ export default function BlogPage() {
         </motion.div>
       </section>
 
-      <section style={{ padding: 'clamp(40px,6vw,80px) 2rem', maxWidth: '1100px', margin: '0 auto' }}>
+      <section style={{ padding: 'clamp(40px,6vw,80px) 2rem clamp(60px,8vw,100px)', maxWidth: '1100px', margin: '0 auto' }}>
         {loading && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
             {skeletons.map(i => (

@@ -161,8 +161,8 @@ export default function Footer() {
             Copyright ©2026 – All rights reserved. Powered by{' '}
             <a href="https://dangerdigitalagency.com/" target="_blank" rel="noopener noreferrer"
               style={{ color: '#E8118A', textDecoration: 'none', fontWeight: 700 }}
-              onMouseEnter={e => e.target.style.textDecoration = 'underline'}
-              onMouseLeave={e => e.target.style.textDecoration = 'none'}>
+              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline'}
+              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none'}>
               Danger
             </a>
           </p>

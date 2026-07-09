@@ -32,7 +32,7 @@ const SOCIALS = [
   },
   {
     id: 'tiktok', label: 'TikTok',
-    href: null,
+    href: undefined,
     bg: '#010101',
     size: 'clamp(68px, 7.5vw, 92px)',
     pos: { top: '66%', right: '22%' }, floatDur: 6.8, floatDelay: '1.8s',
@@ -48,7 +48,9 @@ const SOCIALS = [
   },
 ]
 
-function SocialBubble({ s, i }) {
+interface Social { id: string; label: string; href?: string; bg: string; size: string; pos: Record<string, string | undefined>; floatDur: number; floatDelay: string; icon: React.ReactNode }
+import type React from 'react'
+function SocialBubble({ s, i }: { s: Social; i: number }) {
   const circle = (
     <motion.div
       initial={{ opacity: 0, scale: 0.4 }}
@@ -70,9 +72,9 @@ function SocialBubble({ s, i }) {
     </motion.div>
   )
 
-  const wrapStyle = {
+  const wrapStyle: React.CSSProperties = {
     position: 'absolute', zIndex: 3,
-    ...s.pos,
+    ...(s.pos as React.CSSProperties),
     animation: `bfloat ${s.floatDur}s ease-in-out infinite`,
     animationDelay: s.floatDelay,
   }
@@ -97,8 +99,9 @@ export default function LogoShowcase() {
   const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-10, 10]), { stiffness: 70, damping: 22 })
 
   useEffect(() => {
-    const el = ref.current
-    const onMove = (e) => {
+    const el = ref.current as HTMLElement | null
+    if (!el) return
+    const onMove = (e: MouseEvent) => {
       const r = el.getBoundingClientRect()
       mx.set((e.clientX - r.left)  / r.width  - 0.5)
       my.set((e.clientY - r.top)   / r.height - 0.5)
@@ -123,7 +126,7 @@ export default function LogoShowcase() {
           0%,100% { transform:translateY(0px); }
           50%      { transform:translateY(-16px); }
         }
-        /* ── Móvil: redes ARRIBA y ABAJO del eslogan, pegadas al centro ── */
+        /* ── Móvil: redes ARRIBA y ABAJO del eslogan ── */
         @media (max-width: 767px) {
           .logo-showcase-section {
             background-image: url(${FONDO_URL}) !important;
@@ -133,27 +136,27 @@ export default function LogoShowcase() {
           }
           .social-bubble { animation-duration: 5s !important; }
 
-          /* === FILA SUPERIOR — pegada al eslogan === */
-          /* LinkedIn — arriba izquierda, cerca del centro */
-          .social-linkedin { top: 16% !important; left: 4% !important; right: auto !important; }
-          .social-linkedin > div { width: 96px !important; height: 96px !important; }
+          /* === FILA SUPERIOR === */
+          /* LinkedIn — arriba izquierda, el más grande y prominente */
+          .social-linkedin { top: 28% !important; left: 2% !important; right: auto !important; }
+          .social-linkedin > div { width: 108px !important; height: 108px !important; }
 
-          /* Instagram — arriba derecha, cerca del centro */
-          .social-instagram { top: 17% !important; left: auto !important; right: 4% !important; }
-          .social-instagram > div { width: 82px !important; height: 82px !important; }
+          /* Instagram — arriba derecha, un poco más arriba que LinkedIn y más pequeño */
+          .social-instagram { top: 22% !important; left: auto !important; right: 2% !important; }
+          .social-instagram > div { width: 88px !important; height: 88px !important; }
 
-          /* === FILA INFERIOR — pegada al eslogan === */
+          /* === FILA INFERIOR — justo debajo del logo === */
           /* Facebook — abajo izquierda */
-          .social-facebook { top: 67% !important; left: 4% !important; right: auto !important; }
-          .social-facebook > div { width: 70px !important; height: 70px !important; }
+          .social-facebook { top: 62% !important; left: 4% !important; right: auto !important; }
+          .social-facebook > div { width: 80px !important; height: 80px !important; }
 
-          /* WhatsApp — abajo centro */
-          .social-whatsapp { top: 69% !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; }
-          .social-whatsapp > div { width: 76px !important; height: 76px !important; }
+          /* WhatsApp — abajo centro, pegado al logo */
+          .social-whatsapp { top: 60% !important; left: 50% !important; right: auto !important; transform: translateX(-50%) !important; }
+          .social-whatsapp > div { width: 104px !important; height: 104px !important; }
 
-          /* TikTok — abajo derecha */
-          .social-tiktok { top: 67% !important; left: auto !important; right: 4% !important; }
-          .social-tiktok > div { width: 68px !important; height: 68px !important; }
+          /* TikTok — abajo derecha, el más pequeño */
+          .social-tiktok { top: 63% !important; left: auto !important; right: 4% !important; }
+          .social-tiktok > div { width: 64px !important; height: 64px !important; }
         }
       `}</style>
 
@@ -181,7 +184,7 @@ export default function LogoShowcase() {
             filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.13)) drop-shadow(0 6px 14px rgba(0,0,0,0.07))',
             userSelect: 'none',
           }}
-          onError={e => { e.target.style.display = 'none' }}
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
         />
       </motion.div>
     </section>
