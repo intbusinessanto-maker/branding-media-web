@@ -19,33 +19,19 @@ const PHRASES = [
   },
 ]
 
-const BG_IMG      = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
-const WALKING_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/caminando.png'
+const BG_IMG = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
-// Duración visible de cada frase en ms
 const HOLD_MS = 2800
-// Duración de la transición entrada/salida
-const ANIM_DURATION = 0.6
+const ANIM_DURATION = 0.5
 
-const rollerVariants = {
-  enter: {
-    opacity: 0,
-    y: 60,
-    rotateX: 35,
-    scale: 0.96,
-  },
+const carouselVariants = {
+  enter: { opacity: 0, x: 120 },
   visible: {
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    scale: 1,
+    opacity: 1, x: 0,
     transition: { duration: ANIM_DURATION, ease: [0.22, 1, 0.36, 1] },
   },
   exit: {
-    opacity: 0,
-    y: -60,
-    rotateX: -35,
-    scale: 0.96,
+    opacity: 0, x: -120,
     transition: { duration: ANIM_DURATION, ease: [0.55, 0, 0.78, 0] },
   },
 }
@@ -100,25 +86,7 @@ export default function CinematicText() {
         backgroundSize: '24px 24px',
       }} />
 
-      {/* Figura caminando */}
-      <img
-        src={WALKING_URL}
-        alt=""
-        loading="eager"
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          right: 'clamp(0px, 3vw, 40px)',
-          width: 'clamp(120px, 20vw, 320px)',
-          height: 'auto',
-          zIndex: 2,
-          pointerEvents: 'none',
-          userSelect: 'none',
-          opacity: 0.85,
-        }}
-      />
-
-      {/* Rodillo de frases — aparecen de a una, rotan como cilindro */}
+      {/* Carrusel horizontal de frases */}
       <div style={{
         position: 'relative',
         zIndex: 3,
@@ -128,12 +96,12 @@ export default function CinematicText() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        perspective: '1000px',
+        overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
-            variants={rollerVariants}
+            variants={carouselVariants}
             initial="enter"
             animate="visible"
             exit="exit"
@@ -141,7 +109,6 @@ export default function CinematicText() {
               position: 'absolute',
               width: '100%',
               textAlign: 'center',
-              transformOrigin: 'center center',
             }}
           >
             {phrase.display ? (
