@@ -10,7 +10,7 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  overscroll-behavior-x: none;
+  overscroll-behavior: none;
 }
 
 /* Ocultar cursor nativo solo en desktop — el CustomCursor lo reemplaza */

@@ -178,6 +178,38 @@ export default function Hero({ videoActive: _va = true }) {
         animation: 'hero-blob 6s ease-in-out infinite',
       }} />
 
+      {/* ── Figuras decorativas flotantes ── */}
+      {/* Zigzag — arriba izquierda */}
+      <svg viewBox="0 0 48 28" width="54" height="32" style={{ position:'absolute', top:'-8%', left:'-12%', zIndex:2, pointerEvents:'none', animation:'deco-float-a 5s ease-in-out infinite' }}>
+        <polyline points="0,24 12,4 24,24 36,4 48,24" fill="none" stroke="#E8118A" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+
+      {/* Checkmark curvo — arriba derecha */}
+      <svg viewBox="0 0 40 32" width="46" height="36" style={{ position:'absolute', top:'2%', right:'-14%', zIndex:2, pointerEvents:'none', animation:'deco-float-b 6s ease-in-out infinite' }}>
+        <polyline points="4,16 16,26 36,4" fill="none" stroke="#00C4AD" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+
+      {/* Cruz / estrella — derecha media */}
+      <svg viewBox="0 0 28 28" width="34" height="34" style={{ position:'absolute', top:'42%', right:'-16%', zIndex:2, pointerEvents:'none', animation:'deco-float-a 7s ease-in-out infinite 0.8s' }}>
+        <line x1="14" y1="2" x2="14" y2="26" stroke="#8B3FA8" strokeWidth="6" strokeLinecap="round"/>
+        <line x1="2" y1="14" x2="26" y2="14" stroke="#8B3FA8" strokeWidth="6" strokeLinecap="round"/>
+      </svg>
+
+      {/* Línea ondulada / curva — abajo derecha */}
+      <svg viewBox="0 0 56 28" width="62" height="32" style={{ position:'absolute', bottom:'4%', right:'-10%', zIndex:2, pointerEvents:'none', animation:'deco-float-b 5.5s ease-in-out infinite 0.4s' }}>
+        <path d="M4,14 C14,2 22,26 32,14 C42,2 50,20 54,14" fill="none" stroke="#E8118A" strokeWidth="5.5" strokeLinecap="round"/>
+      </svg>
+
+      {/* Zigzag pequeño — abajo izquierda */}
+      <svg viewBox="0 0 40 22" width="44" height="26" style={{ position:'absolute', bottom:'8%', left:'-14%', zIndex:2, pointerEvents:'none', animation:'deco-float-a 6.5s ease-in-out infinite 1.2s' }}>
+        <polyline points="0,18 10,4 20,18 30,4 40,18" fill="none" stroke="#00C4AD" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+
+      {/* Punto decorativo — izquierda media */}
+      <svg viewBox="0 0 22 22" width="22" height="22" style={{ position:'absolute', top:'55%', left:'-10%', zIndex:2, pointerEvents:'none', animation:'deco-float-b 4.5s ease-in-out infinite 0.6s' }}>
+        <circle cx="11" cy="11" r="9" fill="#8B3FA8" opacity="0.9"/>
+      </svg>
+
       {/* Imagen con flotación continua */}
       <motion.img
         src={IMG_SRC}
@@ -298,6 +330,8 @@ export default function Hero({ videoActive: _va = true }) {
         @keyframes hpulse      { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.55;transform:scale(.8)} }
         @keyframes hpulse-ring { 0%,100%{opacity:.35;transform:scale(1)} 50%{opacity:0;transform:scale(2)} }
         @keyframes hscroll     { 0%,100%{opacity:.8;transform:scaleY(1)} 50%{opacity:.25;transform:scaleY(.35)} }
+        @keyframes deco-float-a { 0%,100%{transform:translateY(-8px) rotate(-4deg)} 50%{transform:translateY(8px) rotate(4deg)} }
+        @keyframes deco-float-b { 0%,100%{transform:translateY(6px) rotate(3deg)} 50%{transform:translateY(-10px) rotate(-3deg)} }
       `}</style>
     </section>
   )

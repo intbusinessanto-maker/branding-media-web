@@ -91,11 +91,11 @@ function MobileAudience() {
         <h2 style={{ fontSize: 'clamp(1.45rem, 5.5vw, 2rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: '10px' }}>
           ¿Por qué llegar a la{' '}<span style={{ color: '#8B3FA8' }}>universidad?</span>
         </h2>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '7px 13px', borderRadius: '10px', background: 'rgba(232,17,138,0.14)', border: '1px solid rgba(232,17,138,0.22)' }}>
-          <span style={{ fontSize: '26px', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1 }}>3–6h</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '7px 13px', borderRadius: '10px', background: '#2A0A18', border: '1px solid rgba(232,17,138,0.35)' }}>
+          <span style={{ fontSize: '26px', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>3–6h</span>
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Tiempo en campus</div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Promedio diario del estudiante</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Tiempo en universidades</div>
+            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>Promedio diario del estudiante</div>
           </div>
         </div>
       </div>
@@ -183,16 +183,15 @@ export default function NewspaperAudience() {
           <div style={{
             display: 'flex', alignItems: 'center', gap: '20px',
             padding: '18px 32px',
-            background: 'rgba(232,17,138,0.16)', backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(232,17,138,0.25)',
+            background: '#2A0A18',
+            border: '1px solid rgba(232,17,138,0.35)',
             borderTop: 'none', borderBottom: 'none',
           }}>
-            <span style={{ fontSize: 'clamp(40px, 5.5vw, 62px)', fontWeight: 900, color: '#E8118A', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0, textShadow: '0 0 24px rgba(232,17,138,0.5)' }}>
+            <span style={{ fontSize: 'clamp(40px, 5.5vw, 62px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0 }}>
               3–6h
             </span>
             <div>
-              <div style={{ fontSize: '17px', fontWeight: 700, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>Tiempo promedio en campus</div>
+              <div style={{ fontSize: '17px', fontWeight: 700, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>Tiempo promedio en universidades</div>
               <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>Más que en cualquier otro entorno</div>
             </div>
           </div>

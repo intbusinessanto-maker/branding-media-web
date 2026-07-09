@@ -233,7 +233,6 @@ export default function Formats() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          minHeight: '100svh',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -243,22 +242,8 @@ export default function Formats() {
           position: 'relative',
         }}>
 
-          {/* Estatua — sube desde abajo, cabeza sobreponida en esquina inferior izquierda de la card */}
-          <img src={STATUE_URL} alt="" loading="lazy" style={{
-            position: 'absolute',
-            bottom: '0%',   /* ligeramente fuera del fondo para que suba más */
-            left: '-2%',
-            width: '62%',
-            height: '80%',   /* altura fija: ocupa 80% de la sección, así la cabeza llega a ~20% desde arriba */
-            objectFit: 'contain',
-            objectPosition: 'bottom left',
-            display: 'block',
-            zIndex: 3,
-            pointerEvents: 'none',
-          }} />
-
           {/* Header */}
-          <div style={{ textAlign: 'center', padding: '0 16px', marginBottom: '3vh', flexShrink: 0, position: 'relative', zIndex: 2 }}>
+          <div style={{ textAlign: 'center', padding: '0 16px', marginBottom: '3vh', flexShrink: 0 }}>
             <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 4 }}>
               Formatos
             </span>
@@ -267,111 +252,114 @@ export default function Formats() {
             </h2>
           </div>
 
-          {/*
-            Zona cards + dots: ocupa el ancho derecho (desde el 38% del ancho).
-            La estatua queda a la izquierda (absolute), las cards encima de ella.
-            El carrusel muestra UNA sola card a la vez, cada slide = ancho de esta columna.
-          */}
-          <div style={{
-            position: 'absolute',
-            top: 'calc(clamp(60px,8vh,100px) + 80px)',   /* paddingTop + header */
-            right: 0,
-            width: '62%',
-            zIndex: 2,
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
+          {/* Cuerpo: cards a la derecha + estatua a la izquierda, alineados al fondo */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, flex: 1 }}>
 
-            <style>{`.fm-carousel::-webkit-scrollbar{display:none}`}</style>
-            <div
-              ref={carouselRef}
-              className="fm-carousel"
-              onScroll={() => {
-                if (!carouselRef.current) return
-                const slideW = carouselRef.current.offsetWidth
-                const idx = Math.round(carouselRef.current.scrollLeft / slideW)
-                setActiveCard(idx)
-              }}
-              style={{
-                display: 'flex',
-                overflowX: 'scroll',
-                scrollSnapType: 'x mandatory',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
-              {formats.map((f) => (
-                <div key={f.title} style={{
-                  flexShrink: 0,
-                  width: '100%',           /* cada slide = ancho del contenedor (62vw) */
-                  scrollSnapAlign: 'start',
-                  boxSizing: 'border-box',
-                  paddingLeft: '6px',
-                  paddingRight: '14px',
-                }}>
-                  <div
-                    onClick={() => setActiveFormat(f)}
-                    style={{
-                      padding: '12px',
-                      borderRadius: '14px',
-                      background: '#fff',
-                      border: `1px solid ${f.border}`,
-                      borderTop: `4px solid ${f.color}`,
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
-                      cursor: 'pointer',
-                      display: 'flex', flexDirection: 'column', gap: '6px',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{
-                        fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg,
-                        border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px',
-                        letterSpacing: '0.1em', textTransform: 'uppercase',
-                      }}>{f.tag}</span>
-                      <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver →</span>
-                    </div>
-                    <h3 style={{ fontSize: 'clamp(1.1rem, 4.5vw, 1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
-                    <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: 0 }}>{f.subtitle}</p>
-                    <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      {f.features.map(feat => (
-                        <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
-                          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
-                          {feat}
-                        </div>
-                      ))}
+            {/* Estatua — columna izquierda, pegada al borde inferior */}
+            <div style={{ flexShrink: 0, width: '38%', alignSelf: 'flex-end', marginBottom: 'calc(-1 * clamp(48px,6vh,80px))' }}>
+              <img src={STATUE_URL} alt="" loading="lazy" style={{
+                width: '100%',
+                height: 'auto',
+                maxHeight: '52vw',
+                objectFit: 'contain',
+                objectPosition: 'bottom left',
+                display: 'block',
+              }} />
+            </div>
+
+            {/* Cards + dots — columna derecha */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingRight: '12px', paddingTop: '16px', paddingBottom: '16px' }}>
+
+              <style>{`.fm-carousel::-webkit-scrollbar{display:none}`}</style>
+              <div
+                ref={carouselRef}
+                className="fm-carousel"
+                onScroll={() => {
+                  if (!carouselRef.current) return
+                  const slideW = carouselRef.current.offsetWidth
+                  const idx = Math.round(carouselRef.current.scrollLeft / slideW)
+                  setActiveCard(idx)
+                }}
+                style={{
+                  display: 'flex',
+                  overflowX: 'scroll',
+                  scrollSnapType: 'x mandatory',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {formats.map((f) => (
+                  <div key={f.title} style={{
+                    flexShrink: 0,
+                    width: '100%',
+                    scrollSnapAlign: 'start',
+                    boxSizing: 'border-box',
+                    paddingLeft: '4px',
+                  }}>
+                    <div
+                      onClick={() => setActiveFormat(f)}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '14px',
+                        background: '#fff',
+                        border: `1px solid ${f.border}`,
+                        borderTop: `4px solid ${f.color}`,
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                        cursor: 'pointer',
+                        display: 'flex', flexDirection: 'column', gap: '6px',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{
+                          fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg,
+                          border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px',
+                          letterSpacing: '0.1em', textTransform: 'uppercase',
+                        }}>{f.tag}</span>
+                        <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver →</span>
+                      </div>
+                      <h3 style={{ fontSize: 'clamp(1.1rem, 4.5vw, 1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
+                      <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: 0 }}>{f.subtitle}</p>
+                      <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        {f.features.map(feat => (
+                          <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
+                            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
+                            {feat}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Dots — pegados debajo del carrusel, margen vertical del 5% respecto al muñeco */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '8px', flexShrink: 0 }}>
-              {formats.map((f, i) => (
-                <button
-                  key={f.title}
-                  onClick={() => {
-                    if (!carouselRef.current) return
-                    carouselRef.current.scrollTo({
-                      left: i * carouselRef.current.offsetWidth,
-                      behavior: 'smooth',
-                    })
-                    setActiveCard(i)
-                  }}
-                  style={{
-                    all: 'unset', cursor: 'pointer', height: 5, borderRadius: 3,
-                    transition: 'all 0.3s ease',
-                    width: activeCard === i ? 22 : 5,
-                    background: activeCard === i ? f.color : 'rgba(0,0,0,0.18)',
-                    display: 'block',
-                  }}
-                />
-              ))}
-            </div>
+              {/* Dots */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '10px', flexShrink: 0 }}>
+                {formats.map((f, i) => (
+                  <button
+                    key={f.title}
+                    onClick={() => {
+                      if (!carouselRef.current) return
+                      carouselRef.current.scrollTo({
+                        left: i * carouselRef.current.offsetWidth,
+                        behavior: 'smooth',
+                      })
+                      setActiveCard(i)
+                    }}
+                    style={{
+                      all: 'unset', cursor: 'pointer', height: 5, borderRadius: 3,
+                      transition: 'all 0.3s ease',
+                      width: activeCard === i ? 22 : 5,
+                      background: activeCard === i ? f.color : 'rgba(0,0,0,0.18)',
+                      display: 'block',
+                    }}
+                  />
+                ))}
+              </div>
 
+            </div>
           </div>
 
         </section>
