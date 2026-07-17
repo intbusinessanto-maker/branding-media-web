@@ -35,10 +35,10 @@ export default function Stats() {
     <section
       id="nosotros"
       style={{
-        minHeight: '50vh',
         display: 'flex',
         alignItems: 'center',
-        padding: '48px 2rem',
+        height: isMobile ? undefined : '50vh',
+        padding: isMobile ? '48px 2rem' : '0 2rem',
         background: isMobile
           ? `url(${PAGE_BG_URL}) center/cover no-repeat`
           : 'transparent',

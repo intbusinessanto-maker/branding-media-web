@@ -237,13 +237,13 @@ export default function Hero({ videoActive: _va = true }) {
       id="inicio"
       ref={containerRef}
       style={{
-        minHeight: '100vh',
+        height: '100vh',
         background: '#0D0D0D',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative', overflow: 'hidden',
         padding: isMobile
-          ? 'clamp(88px,13vh,120px) 1.4rem clamp(60px,9vh,90px)'
-          : 'clamp(100px,12vh,140px) clamp(2rem,6vw,6rem) clamp(60px,8vh,100px)',
+          ? 'clamp(88px,13vh,120px) 1.4rem clamp(24px,4vh,40px)'
+          : 'clamp(100px,12vh,140px) clamp(2rem,6vw,6rem) clamp(24px,4vh,40px)',
       }}
     >
       {/* Textura Fondo 2 — misma que CinematicText, visible en mobile y desktop */}

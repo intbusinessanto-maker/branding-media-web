@@ -161,7 +161,7 @@ function FormatCard({ f, visibleCount, idx, isMobile, onClick }: {
   )
 }
 
-const MOBILE_STEP_PX = 260
+const MOBILE_STEP_PX = 300
 
 /* ── Sección principal ── */
 export default function Formats() {
@@ -172,11 +172,8 @@ export default function Formats() {
   const [sectionH, setSectionH] = useState(0)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // Callback ref: mide la sección en el momento en que el DOM la inserta
   const sectionCallbackRef = (el: HTMLElement | null) => {
-    if (el && el.offsetHeight !== sectionH) {
-      setSectionH(el.offsetHeight)
-    }
+    if (el && el.offsetHeight !== sectionH) setSectionH(el.offsetHeight)
   }
 
   useEffect(() => {
@@ -185,9 +182,16 @@ export default function Formats() {
     const onScroll = () => {
       const rect = wrapper.getBoundingClientRect()
       const scrolled = -rect.top
-      const stepH = isMobile ? MOBILE_STEP_PX : window.innerHeight
-      const count = Math.min(formats.length, Math.floor(scrolled / stepH) + 1)
-      setVisibleCount(Math.max(0, count))
+      if (scrolled <= 0) { setVisibleCount(0); return }
+      if (isMobile) {
+        // cada MOBILE_STEP_PX de scroll revela una card más
+        const idx = Math.floor(scrolled / MOBILE_STEP_PX)
+        setVisibleCount(Math.min(idx + 1, formats.length))
+      } else {
+        const stepH = window.innerHeight
+        const count = Math.min(formats.length, Math.floor(scrolled / stepH) + 1)
+        setVisibleCount(Math.max(0, count))
+      }
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -233,7 +237,7 @@ export default function Formats() {
 
   // MOBILE — carrusel igual que antes, pero controlado por scroll en vez de swipe.
   // visibleCount-1 es el índice de la card activa (0, 1, 2).
-  const mobileActiveIdx = Math.max(0, Math.min(visibleCount - 1, formats.length - 1))
+  const mobileActiveIdx = visibleCount === 0 ? 0 : Math.min(visibleCount - 1, formats.length - 1)
 
   const MobileSection = (
     <section ref={sectionCallbackRef} id="formatos" style={{
@@ -337,7 +341,7 @@ export default function Formats() {
     <>
       <style>{`@keyframes fm-scroll { 0%,100%{opacity:.8;transform:scaleY(1)} 50%{opacity:.2;transform:scaleY(.35)} }`}</style>
       {isMobile ? (
-        <div ref={wrapperRef} style={{ height: sectionH ? sectionH + formats.length * MOBILE_STEP_PX : 'auto', position: 'relative', marginBottom: sectionH ? -sectionH : 0 }}>
+        <div ref={wrapperRef} style={{ height: sectionH ? sectionH + formats.length * MOBILE_STEP_PX : 'auto', position: 'relative', marginBottom: -(formats.length * MOBILE_STEP_PX) }}>
           <div style={{ position: 'sticky', top: 0 }}>
             {MobileSection}
           </div>
