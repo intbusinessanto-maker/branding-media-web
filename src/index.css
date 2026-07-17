@@ -5,7 +5,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #E9E9E9;
+  background-color: #eff2f1;
   color: #1A1A1A;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -26,3 +26,6 @@ body {
   background: #8B3FA8;
   border-radius: 2px;
 }
+
+/* Compensar header fijo (88px) en todos los anchors de sección */
+[id] { scroll-margin-top: 96px; }

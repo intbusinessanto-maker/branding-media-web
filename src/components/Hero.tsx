@@ -107,6 +107,7 @@ export default function Hero({ videoActive: _va = true }) {
                 key={ci}
                 initial={{ opacity: 0, y: 38, rotateX: -55 }}
                 animate={ready ? { opacity: 1, y: 0, rotateX: 0 } : {}}
+                whileHover={{ y: -10, transition: { type: 'spring', stiffness: 600, damping: 14 } }}
                 transition={{
                   duration: 0.62,
                   ease: [0.22, 1, 0.36, 1],
@@ -116,6 +117,7 @@ export default function Hero({ videoActive: _va = true }) {
                   display: 'inline-block',
                   transformOrigin: 'bottom center',
                   color: isAccent ? '#E8118A' : 'inherit',
+                  cursor: 'default',
                 }}
               >
                 {ch}
@@ -164,7 +166,7 @@ export default function Hero({ videoActive: _va = true }) {
      * la imagen nunca sale del viewport.
      */
     <motion.div
-      style={{ x: cursorX, y: cursorY, width: '100%', position: 'relative' }}
+      style={{ x: cursorX, y: cursorY, width: '100%', height: '100%', position: 'relative', display: 'flex', alignItems: 'flex-end' }}
     >
       {/* Blob de luz detrás — flota al mismo ritmo */}
       <div style={{
@@ -220,7 +222,8 @@ export default function Hero({ videoActive: _va = true }) {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
         style={{
           position: 'relative', zIndex: 1,
-          width: '100%', height: 'auto', display: 'block',
+          width: '100%', height: isMobile ? 'auto' : '100%', display: 'block',
+          objectFit: 'contain', objectPosition: 'center bottom',
           filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.55))',
           userSelect: 'none',
           animation: 'hero-float 6s ease-in-out infinite',
@@ -265,19 +268,18 @@ export default function Hero({ videoActive: _va = true }) {
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: 'clamp(32px, 5vw, 72px)',
-          alignItems: 'center',
+          alignItems: 'stretch',
         }}>
           {/* Texto izquierda: título arriba, chip abajo */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '26px', justifyContent: 'center' }}>
             {Title}
             {BottomTag}
           </div>
           {/* Imagen derecha */}
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '20px 0',
+            display: 'flex', alignItems: 'stretch', justifyContent: 'center',
           }}>
-            <div style={{ width: 'min(100%, 460px)' }}>{Image3D}</div>
+            <div style={{ width: '100%' }}>{Image3D}</div>
           </div>
         </div>
       )}

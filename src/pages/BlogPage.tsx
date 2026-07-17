@@ -179,6 +179,7 @@ function ArticlePage({ post, onBack }: { post: Post; onBack: () => void }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff' }}>
+      <CustomCursor />
       <ArticleSchema post={post} />
 
       <header style={{

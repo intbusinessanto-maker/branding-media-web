@@ -1,5 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
+import type React from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useIsMobile } from '../hooks/useIsMobile'
+
+// En desktop: sticky 2 scrolls. En mobile: pass-through (la sección crece libremente).
+function StickyMapWrapper({ children, mobile }: { children: React.ReactNode; mobile: boolean }) {
+  if (mobile) return <>{children}</>
+  return (
+    <div style={{ height: '300vh', position: 'relative' }}>
+      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
 
 const MAP_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/mapa%20de%20colombia.png'
 const PIN_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/pin%20ubi.png'
@@ -58,7 +72,7 @@ function CityCard({ c, isActive, onToggle, index }: { c: City; isActive: boolean
       whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(232,17,138,0.18)' }}
       style={{
         padding: '14px 16px', borderRadius: '12px', cursor: 'pointer',
-        background: isActive ? 'rgba(232,17,138,0.08)' : '#fff',
+        background: isActive ? 'rgba(232,17,138,0.08)' : '#eff2f1',
         border: `1.5px solid ${isActive ? '#E8118A' : 'rgba(0,0,0,0.07)'}`,
         boxShadow: isActive ? '0 4px 20px rgba(232,17,138,0.15)' : '0 2px 8px rgba(0,0,0,0.04)',
         transition: 'border-color 0.25s, background 0.25s, box-shadow 0.25s',
@@ -125,6 +139,7 @@ function CityCard({ c, isActive, onToggle, index }: { c: City; isActive: boolean
 }
 
 export default function ColombiaMap() {
+  const isMobile = useIsMobile()
   const ref     = useRef<HTMLDivElement | null>(null)
   const started = useRef(false)
   const relRef  = useRef<(() => void) | null>(null)
@@ -163,8 +178,9 @@ export default function ColombiaMap() {
   }, [inView])
 
   return (
+    <StickyMapWrapper mobile={isMobile}>
     <section ref={ref} id="mapa" className="colombia-section" style={{
-      height: '100vh', minHeight: '600px', overflow: 'hidden',
+      height: isMobile ? 'auto' : '100vh', minHeight: '600px', overflow: isMobile ? 'visible' : 'hidden',
       background: 'transparent',
       display: 'flex', flexDirection: 'column', position: 'relative',
     }}>
@@ -177,8 +193,8 @@ export default function ColombiaMap() {
         }
         @media (max-width: 900px) { .map-grid { grid-template-columns: 1.3fr 1fr; gap: 10px; } }
         @media (max-width: 600px) {
-          .colombia-section { height: auto !important; min-height: 100svh !important; overflow: visible !important; }
-          .map-wrapper { padding: clamp(60px,8vh,100px) 1.2rem clamp(48px,6vh,80px) !important; }
+          .colombia-section { height: auto !important; min-height: unset !important; overflow: visible !important; padding-bottom: clamp(40px,6vh,64px) !important; }
+          .map-wrapper { padding: 96px 1.2rem clamp(32px,4vh,48px) !important; }
           .map-grid { grid-template-columns: 1fr !important; gap: 10px !important; flex: none !important; }
           .map-cards-col { overflow-y: visible !important; max-height: none !important; }
           .map-3d-svg { max-width: 340px !important; margin: 0 auto; }
@@ -187,7 +203,7 @@ export default function ColombiaMap() {
 
       <div className="map-wrapper" style={{
         maxWidth: '1200px', width: '100%', margin: '0 auto',
-        padding: 'clamp(48px,6vh,80px) clamp(1.5rem,4vw,3rem) clamp(32px,4vh,60px)',
+        padding: '96px clamp(1.5rem,4vw,3rem) clamp(32px,4vh,60px)',
         display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0,
       }}>
         <motion.div
@@ -373,5 +389,6 @@ export default function ColombiaMap() {
         )}
       </AnimatePresence>
     </section>
+    </StickyMapWrapper>
   )
 }

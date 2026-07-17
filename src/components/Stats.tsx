@@ -35,10 +35,10 @@ export default function Stats() {
     <section
       id="nosotros"
       style={{
-        minHeight: '100vh',
+        minHeight: '50vh',
         display: 'flex',
         alignItems: 'center',
-        padding: '80px 2rem',
+        padding: '48px 2rem',
         background: isMobile
           ? `url(${PAGE_BG_URL}) center/cover no-repeat`
           : 'transparent',
@@ -58,7 +58,7 @@ export default function Stats() {
               whileHover={{ y: -5, boxShadow: `0 12px 32px rgba(0,0,0,0.10)`, transition: { duration: 0.2 } }}
               style={{
                 padding: '32px 28px', borderRadius: '16px',
-                background: '#fff', border: '1px solid rgba(0,0,0,0.06)',
+                background: '#eff2f1', border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
                 borderTop: `4px solid ${s.color}`,
                 cursor: 'default',

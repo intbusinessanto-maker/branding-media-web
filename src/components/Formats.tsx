@@ -114,212 +114,182 @@ function FormatPopup({ format, onClose }: { format: FormatItem; onClose: () => v
   )
 }
 
+/* ── Card de formato (compartida desktop + mobile) ── */
+function FormatCard({ f, visibleCount, idx, isMobile, onClick }: {
+  f: FormatItem; visibleCount: number; idx: number; isMobile: boolean; onClick: () => void
+}) {
+  const visible = idx < visibleCount
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 48 }}
+      animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 48 }}
+      transition={{ duration: 0.55, delay: visible ? idx * 0.08 : 0, ease: [0.22, 1, 0.36, 1] }}
+      onClick={onClick}
+      style={{ height: isMobile ? 'auto' : '100%', cursor: 'pointer' }}
+    >
+      <div style={{
+        padding: isMobile ? '12px' : 'clamp(18px,2.2vw,28px)',
+        borderRadius: '14px',
+        background: '#eff2f1',
+        border: `1px solid ${f.border}`,
+        borderLeft: isMobile ? undefined : `4px solid ${f.color}`,
+        borderTop: isMobile ? `4px solid ${f.color}` : undefined,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '10px',
+        height: isMobile ? undefined : '100%',
+        boxSizing: 'border-box',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+          <span style={{ fontSize: isMobile ? '8px' : '10px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
+          <span style={{ fontSize: isMobile ? '10px' : '11px', color: f.color, fontWeight: 600 }}>Ver →</span>
+        </div>
+        <div>
+          <h3 style={{ fontSize: isMobile ? 'clamp(1.1rem,4.5vw,1.4rem)' : 'clamp(1.6rem,3vw,2.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', marginBottom: '3px', lineHeight: 1 }}>{f.title}</h3>
+          <p style={{ fontSize: isMobile ? '10px' : '11px', color: '#888', fontWeight: 600, marginBottom: '6px', margin: isMobile ? '0' : undefined }}>{f.subtitle}</p>
+          <p style={{ fontSize: isMobile ? '11px' : '12px', color: '#555', lineHeight: 1.6, margin: 0 }}>{f.description}</p>
+        </div>
+        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: isMobile ? '3px' : '5px', marginTop: isMobile ? undefined : 'auto' }}>
+          {f.features.map(feat => (
+            <li key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? '5px' : '7px', fontSize: isMobile ? '10px' : '11px', color: '#666' }}>
+              <span style={{ width: isMobile ? '4px' : '5px', height: isMobile ? '4px' : '5px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: isMobile ? '3px' : '4px' }} />
+              {feat}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  )
+}
+
+const MOBILE_STEP_PX = 260
+
 /* ── Sección principal ── */
 export default function Formats() {
-  const carouselRef = useRef<HTMLDivElement | null>(null)
   const [activeFormat, setActiveFormat] = useState<FormatItem | null>(null)
-  const [activeCard, setActiveCard]     = useState(0)
   const isMobile = useIsMobile()
 
-  const desktopCardStyle = (f: FormatItem): React.CSSProperties => ({
-    padding: 'clamp(18px,2.2vw,28px)',
-    borderRadius: '14px',
-    background: '#fff',
-    border: `1px solid ${f.border}`,
-    borderLeft: `4px solid ${f.color}`,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-    cursor: 'pointer',
-    display: 'flex', flexDirection: 'column', gap: '10px',
-    height: '100%',
-  })
+  const [visibleCount, setVisibleCount] = useState(0)
+  const [sectionH, setSectionH] = useState(0)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
-  return (
-    <>
-      {/* ══════════════════════════════════════════════
-          DESKTOP: sección normal, scroll libre, cards
-          aparecen de a una con whileInView escalonado
-          ══════════════════════════════════════════════ */}
-      {!isMobile && (
-        <section id="formatos" style={{
-          position: 'relative',
-          minHeight: '100vh',
-          overflow: 'hidden',
-          background: 'transparent',
-          display: 'flex',
-          alignItems: 'center',
-        }}>
-          {/* Estatua — ocupa toda la altura de la sección */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0,
-            width: 'clamp(260px, 32vw, 480px)',
-            height: '100%',
-            pointerEvents: 'none', zIndex: 1,
-          }}>
-            <img src={STATUE_URL} alt="" loading="lazy"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
-          </div>
+  // Callback ref: mide la sección en el momento en que el DOM la inserta
+  const sectionCallbackRef = (el: HTMLElement | null) => {
+    if (el && el.offsetHeight !== sectionH) {
+      setSectionH(el.offsetHeight)
+    }
+  }
 
-          {/* Contenido: header + cards */}
-          <div style={{
-            position: 'relative', zIndex: 2,
-            width: '100%',
-            paddingLeft: 'clamp(240px, 30vw, 460px)',
-            paddingRight: 'clamp(1.5rem, 3vw, 3rem)',
-            paddingTop: 'clamp(80px, 10vh, 120px)',
-            paddingBottom: 'clamp(120px, 18vh, 200px)',
-            boxSizing: 'border-box',
-          }}>
-            {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: 'clamp(32px, 5vh, 56px)' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 10 }}>
-                Formatos
-              </span>
-              <h2 style={{ fontSize: 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
-                Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
-              </h2>
-            </div>
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+    const onScroll = () => {
+      const rect = wrapper.getBoundingClientRect()
+      const scrolled = -rect.top
+      const stepH = isMobile ? MOBILE_STEP_PX : window.innerHeight
+      const count = Math.min(formats.length, Math.floor(scrolled / stepH) + 1)
+      setVisibleCount(Math.max(0, count))
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [isMobile, sectionH])
 
-            {/* Cards — aparecen de izquierda a derecha, scroll libre */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 'clamp(10px, 1.4vw, 18px)',
-              alignItems: 'stretch',
-            }}>
-              {formats.map((f, i) => (
-                <motion.div
-                  key={f.title}
-                  initial={{ opacity: 0, x: -48 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.655, delay: i * 0.14, ease: [0.22, 1, 0.36, 1] }}
-                  onClick={() => setActiveFormat(f)}
-                  style={{ height: '100%' }}
-                >
-                  <div style={desktopCardStyle(f)}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
-                      <span style={{ fontSize: '10px', fontWeight: 700, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
-                      <span style={{ fontSize: '11px', color: f.color, fontWeight: 600 }}>Ver →</span>
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', marginBottom: '3px', lineHeight: 1 }}>{f.title}</h3>
-                      <p style={{ fontSize: '11px', color: '#888', fontWeight: 600, marginBottom: '6px' }}>{f.subtitle}</p>
-                      <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.6 }}>{f.description}</p>
-                    </div>
-                    <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '5px', marginTop: 'auto' }}>
-                      {f.features.map(feat => (
-                        <li key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', fontSize: '11px', color: '#666' }}>
-                          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '4px' }} />
-                          {feat}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+  // DESKTOP
+  const DesktopSection = (
+    <section id="formatos" style={{
+      position: 'relative', height: '100vh', overflow: 'hidden',
+      background: 'transparent', display: 'flex', alignItems: 'center',
+    }}>
+      {/* Estatua */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, width: 'clamp(260px,32vw,480px)', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
+        <img src={STATUE_URL} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
+      </div>
+      {/* Contenido */}
+      <div style={{ position: 'relative', zIndex: 2, width: '100%', paddingLeft: 'clamp(240px,30vw,460px)', paddingRight: 'clamp(1.5rem,3vw,3rem)', paddingTop: 'clamp(80px,10vh,120px)', paddingBottom: 'clamp(120px,18vh,200px)', boxSizing: 'border-box' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'clamp(32px,5vh,56px)' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 10 }}>Formatos</span>
+          <h2 style={{ fontSize: 'clamp(1.6rem,3.2vw,2.6rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
+            Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
+          </h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'clamp(10px,1.4vw,18px)', alignItems: 'stretch' }}>
+          {formats.map((f, i) => (
+            <FormatCard key={f.title} f={f} visibleCount={visibleCount} idx={i} isMobile={false} onClick={() => setActiveFormat(f)} />
+          ))}
+        </div>
+      </div>
+      {/* Hint scroll si no hay cards aún */}
+      <AnimatePresence>
+        {visibleCount === 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, pointerEvents: 'none', zIndex: 10 }}>
+            <span style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.3)', fontWeight: 600 }}>scroll</span>
+            <div style={{ width: 1, height: 32, background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)', animation: 'fm-scroll 2s ease-in-out infinite' }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  )
 
-      {/* ══════════════════════════════════════════════
-          MÓVIL: carrusel horizontal — DOOH → OOH → Activaciones.
-          Estatua fija en izquierda (no scroll), sobresale 8vw sobre
-          cada card. Dots táctiles para navegar entre slides.
-          ══════════════════════════════════════════════ */}
-      {isMobile && (
-        <section id="formatos" style={{
-          backgroundImage: `url(${FONDO_URL})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
-          paddingTop: 'clamp(60px,8vh,100px)',
-          paddingBottom: 'clamp(48px,6vh,80px)',
-          overflow: 'hidden',
-          position: 'relative',
-        }}>
+  // MOBILE — carrusel igual que antes, pero controlado por scroll en vez de swipe.
+  // visibleCount-1 es el índice de la card activa (0, 1, 2).
+  const mobileActiveIdx = Math.max(0, Math.min(visibleCount - 1, formats.length - 1))
 
-          {/* Header */}
-          <div style={{ textAlign: 'center', padding: '0 16px', marginBottom: '3vh', flexShrink: 0 }}>
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 4 }}>
-              Formatos
-            </span>
-            <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.5rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
-              Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
-            </h2>
-          </div>
+  const MobileSection = (
+    <section ref={sectionCallbackRef} id="formatos" style={{
+      backgroundImage: `url(${FONDO_URL})`, backgroundSize: 'cover', backgroundPosition: 'center',
+      boxSizing: 'border-box', display: 'flex', flexDirection: 'column',
+      paddingTop: '96px', paddingBottom: '16px',
+      overflow: 'hidden', position: 'relative',
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', padding: '8px 16px 8px', flexShrink: 0 }}>
+        <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 4 }}>Formatos</span>
+        <h2 style={{ fontSize: 'clamp(1.2rem,5vw,1.5rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#1A1A1A', lineHeight: 1.1, margin: 0 }}>
+          Medios que <span style={{ color: '#00C4AD' }}>capturan atención</span>
+        </h2>
+      </div>
 
-          {/* Cuerpo: cards a la derecha + estatua a la izquierda, alineados al fondo */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, flex: 1 }}>
+      {/* Cuerpo: estatua izquierda + card activa derecha */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0 }}>
 
-            {/* Estatua — columna izquierda, pegada al borde inferior */}
-            <div style={{ flexShrink: 0, width: '38%', alignSelf: 'flex-end', marginBottom: 'calc(-1 * clamp(48px,6vh,80px))' }}>
-              <img src={STATUE_URL} alt="" loading="lazy" style={{
-                width: '100%',
-                height: 'auto',
-                maxHeight: '52vw',
-                objectFit: 'contain',
-                objectPosition: 'bottom left',
-                display: 'block',
-              }} />
-            </div>
+        {/* Estatua — igual que antes, pegada al borde inferior */}
+        <div style={{ flexShrink: 0, width: '38%', alignSelf: 'flex-end', marginBottom: 0 }}>
+          <img src={STATUE_URL} alt="" loading="lazy" style={{
+            width: '100%', height: 'auto', maxHeight: '52vw',
+            objectFit: 'contain', objectPosition: 'bottom left', display: 'block',
+          }} />
+        </div>
 
-            {/* Cards + dots — columna derecha */}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingRight: '12px', paddingTop: '16px', paddingBottom: '16px' }}>
+        {/* Columna derecha: card activa + dots */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingRight: '12px', paddingTop: '8px', paddingBottom: '12px' }}>
 
-              <style>{`.fm-carousel::-webkit-scrollbar{display:none}`}</style>
-              <div
-                ref={carouselRef}
-                className="fm-carousel"
-                onScroll={() => {
-                  if (!carouselRef.current) return
-                  const slideW = carouselRef.current.offsetWidth
-                  const idx = Math.round(carouselRef.current.scrollLeft / slideW)
-                  setActiveCard(idx)
-                }}
-                style={{
-                  display: 'flex',
-                  overflowX: 'scroll',
-                  scrollSnapType: 'x mandatory',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                  WebkitOverflowScrolling: 'touch',
-                }}
+          {/* Card activa con transición entre slides */}
+          <div style={{ position: 'relative', flex: 1 }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mobileActiveIdx}
+                initial={{ opacity: 0, x: 48 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -48 }}
+                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                onClick={() => setActiveFormat(formats[mobileActiveIdx])}
+                style={{ cursor: 'pointer', paddingLeft: '4px', boxSizing: 'border-box' }}
               >
-                {formats.map((f) => (
-                  <div key={f.title} style={{
-                    flexShrink: 0,
-                    width: '100%',
-                    scrollSnapAlign: 'start',
-                    boxSizing: 'border-box',
-                    paddingLeft: '4px',
-                  }}>
-                    <div
-                      onClick={() => setActiveFormat(f)}
-                      style={{
-                        padding: '12px',
-                        borderRadius: '14px',
-                        background: '#fff',
-                        border: `1px solid ${f.border}`,
-                        borderTop: `4px solid ${f.color}`,
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
-                        cursor: 'pointer',
-                        display: 'flex', flexDirection: 'column', gap: '6px',
-                        boxSizing: 'border-box',
-                      }}
-                    >
+                {(() => {
+                  const f = formats[mobileActiveIdx]
+                  return (
+                    <div style={{
+                      padding: '12px', borderRadius: '14px', background: '#eff2f1',
+                      border: `1px solid ${f.border}`, borderTop: `4px solid ${f.color}`,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                      display: 'flex', flexDirection: 'column', gap: '6px', boxSizing: 'border-box',
+                    }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{
-                          fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg,
-                          border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px',
-                          letterSpacing: '0.1em', textTransform: 'uppercase',
-                        }}>{f.tag}</span>
+                        <span style={{ fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
                         <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver →</span>
                       </div>
-                      <h3 style={{ fontSize: 'clamp(1.1rem, 4.5vw, 1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
+                      <h3 style={{ fontSize: 'clamp(1.1rem,4.5vw,1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
                       <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: 0 }}>{f.subtitle}</p>
                       <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -331,41 +301,56 @@ export default function Formats() {
                         ))}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Dots */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '10px', flexShrink: 0 }}>
-                {formats.map((f, i) => (
-                  <button
-                    key={f.title}
-                    onClick={() => {
-                      if (!carouselRef.current) return
-                      carouselRef.current.scrollTo({
-                        left: i * carouselRef.current.offsetWidth,
-                        behavior: 'smooth',
-                      })
-                      setActiveCard(i)
-                    }}
-                    style={{
-                      all: 'unset', cursor: 'pointer', height: 5, borderRadius: 3,
-                      transition: 'all 0.3s ease',
-                      width: activeCard === i ? 22 : 5,
-                      background: activeCard === i ? f.color : 'rgba(0,0,0,0.18)',
-                      display: 'block',
-                    }}
-                  />
-                ))}
-              </div>
-
-            </div>
+                  )
+                })()}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-        </section>
+          {/* Dots */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '10px', flexShrink: 0 }}>
+            {formats.map((f, i) => (
+              <div key={f.title} style={{
+                height: 5, borderRadius: 3, transition: 'all 0.3s ease',
+                width: i === mobileActiveIdx ? 22 : 5,
+                background: i === mobileActiveIdx ? f.color : 'rgba(0,0,0,0.18)',
+              }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Hint scroll */}
+      <AnimatePresence>
+        {visibleCount <= formats.length && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, pointerEvents: 'none', zIndex: 10 }}>
+            <span style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.3)', fontWeight: 600 }}>scroll</span>
+            <div style={{ width: 1, height: 24, background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)', animation: 'fm-scroll 2s ease-in-out infinite' }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  )
+
+  return (
+    <>
+      <style>{`@keyframes fm-scroll { 0%,100%{opacity:.8;transform:scaleY(1)} 50%{opacity:.2;transform:scaleY(.35)} }`}</style>
+      {isMobile ? (
+        <div ref={wrapperRef} style={{ height: sectionH ? sectionH + formats.length * MOBILE_STEP_PX : 'auto', position: 'relative', marginBottom: sectionH ? -sectionH : 0 }}>
+          <div style={{ position: 'sticky', top: 0 }}>
+            {MobileSection}
+          </div>
+        </div>
+      ) : (
+        <div ref={wrapperRef} style={{ height: `${(formats.length + 1) * 100}vh`, position: 'relative' }}>
+          <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
+            {DesktopSection}
+          </div>
+        </div>
       )}
 
-      {/* Popup: ambas plataformas */}
+      {/* Popup */}
       <AnimatePresence>
         {activeFormat && <FormatPopup format={activeFormat} onClose={() => setActiveFormat(null)} />}
       </AnimatePresence>

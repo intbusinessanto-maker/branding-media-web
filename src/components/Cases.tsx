@@ -10,6 +10,14 @@ const IS_MOBILE_INIT = typeof window !== 'undefined'
   ? window.matchMedia('(max-width: 767px)').matches
   : false
 
+// Factor de escala para pantallas intermedias (768–1280px)
+function getBubbleScale(w: number) {
+  if (w >= 1280) return 1
+  if (w <= 767)  return 1 // mobile usa MOBILE_BUBBLES
+  // Interpolación lineal: 768px→0.55, 1280px→1
+  return 0.55 + ((w - 768) / (1280 - 768)) * 0.45
+}
+
 /* Fallback estático mientras carga o si Supabase no responde */
 const FALLBACK_IMAGES = [
   'adidas-2.png', 'alkosto.png', 'davivienda.png', 'doggy-home.png',
@@ -337,13 +345,22 @@ export default function Cases() {
   const [activeBrand, setActiveBrand] = useState<Brand | null>(null)
   const [isMobile, setIsMobile]       = useState(IS_MOBILE_INIT)
   const [brands, setBrands]           = useState<Brand[]>(FALLBACK_IMAGES)
+  const [bubbleScale, setBubbleScale] = useState(() =>
+    typeof window !== 'undefined' ? getBubbleScale(window.innerWidth) : 1
+  )
 
   useLayoutEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
     setIsMobile(mq.matches)
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
     mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
+
+    const onResize = () => setBubbleScale(getBubbleScale(window.innerWidth))
+    window.addEventListener('resize', onResize)
+    return () => {
+      mq.removeEventListener('change', handler)
+      window.removeEventListener('resize', onResize)
+    }
   }, [])
 
   /* Fetch diferido: solo cuando la sección está a ~1000px del viewport.
@@ -380,9 +397,10 @@ export default function Cases() {
         {/* Burbujas */}
         {subset.map((brand, i) => {
           const b = pool[i]
+          const scale = isMobile ? 1 : bubbleScale
           return (
             <Bubble key={brand.id || i} index={i} progress={scrollYProgress}
-              left={b.left} top={b.top} size={b.size} fromX={b.fromX}
+              left={b.left} top={b.top} size={Math.round(b.size * scale)} fromX={b.fromX}
               brand={brand} fallback={FALLBACK[i % 3]}
               isOpen={activeBrand?.id === brand.id}
               onToggle={() => handleToggle(brand)} />
