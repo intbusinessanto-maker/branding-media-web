@@ -39,9 +39,7 @@ export default function Stats() {
         alignItems: 'center',
         height: isMobile ? undefined : '50vh',
         padding: isMobile ? '48px 2rem' : '0 2rem',
-        background: isMobile
-          ? `url(${PAGE_BG_URL}) center/cover no-repeat`
-          : 'transparent',
+        background: '#eff2f1',
       }}
     >
       <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
@@ -58,7 +56,7 @@ export default function Stats() {
               whileHover={{ y: -5, boxShadow: `0 12px 32px rgba(0,0,0,0.10)`, transition: { duration: 0.2 } }}
               style={{
                 padding: '32px 28px', borderRadius: '16px',
-                background: '#eff2f1', border: '1px solid rgba(0,0,0,0.06)',
+                background: '#fff', border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
                 borderTop: `4px solid ${s.color}`,
                 cursor: 'default',

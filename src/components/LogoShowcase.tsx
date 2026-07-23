@@ -132,10 +132,7 @@ export default function LogoShowcase() {
           .logo-showcase-section {
             height: 60vh !important;
             min-height: 380px !important;
-            background-image: url(${FONDO_URL}) !important;
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
+            background: #eff2f1 !important;
           }
           .social-bubble { animation-duration: 5s !important; }
 

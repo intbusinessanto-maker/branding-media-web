@@ -24,8 +24,26 @@ const cardVariants = {
 
 /* ── Capa de fondo compartida: video Vimeo + imagen fallback ── */
 function VideoBg({ mobile }: { mobile?: boolean }) {
+  const [videoFailed, setVideoFailed] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (iframeRef.current) {
+        try {
+          const doc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document
+          if (!doc || doc.title === '') setVideoFailed(true)
+        } catch {
+          // cross-origin: el iframe cargó normalmente (política de mismo origen bloquea el acceso)
+        }
+      }
+    }, 6000)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', background: '#000' }}>
+      {/* Imagen de fallback — siempre presente detrás */}
       <img
         src={MOBILE_IMG_URL}
         alt=""
@@ -35,8 +53,30 @@ function VideoBg({ mobile }: { mobile?: boolean }) {
           width: '100%', height: '100%',
           objectFit: 'cover',
           objectPosition: mobile ? 'center top' : 'center center',
+          zIndex: 0,
         }}
       />
+      {/* Video Vimeo — encima de la imagen; si falla queda la imagen visible */}
+      {!videoFailed && (
+        <iframe
+          ref={iframeRef}
+          src={`https://player.vimeo.com/video/${VIMEO_ID}?h=${VIMEO_HASH}&autoplay=1&loop=1&muted=1&background=1&autopause=0`}
+          allow="autoplay; fullscreen; picture-in-picture"
+          style={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%,-50%)',
+            width: mobile ? '100%' : '177.78vh',
+            minWidth: mobile ? '177.78vh' : '100%',
+            height: mobile ? '56.25vw' : '100%',
+            minHeight: mobile ? '100%' : '56.25vw',
+            border: 'none',
+            zIndex: 1,
+            pointerEvents: 'none',
+          }}
+          onError={() => setVideoFailed(true)}
+        />
+      )}
     </div>
   )
 }

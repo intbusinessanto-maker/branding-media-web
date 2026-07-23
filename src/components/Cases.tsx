@@ -391,7 +391,7 @@ export default function Cases() {
   /* ── SHARED SECTION STRUCTURE ── */
   return (
     <section ref={ref} id="casos" style={{ height: '100vh', position: 'relative', overflow: 'hidden',
-      background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent' }}
+      background: '#eff2f1' }}
       onClick={handleClose}
     >
         {/* Burbujas */}

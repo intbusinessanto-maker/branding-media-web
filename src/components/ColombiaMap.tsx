@@ -72,7 +72,7 @@ function CityCard({ c, isActive, onToggle, index }: { c: City; isActive: boolean
       whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(232,17,138,0.18)' }}
       style={{
         padding: '14px 16px', borderRadius: '12px', cursor: 'pointer',
-        background: isActive ? 'rgba(232,17,138,0.08)' : '#eff2f1',
+        background: isActive ? 'rgba(232,17,138,0.08)' : '#fff',
         border: `1.5px solid ${isActive ? '#E8118A' : 'rgba(0,0,0,0.07)'}`,
         boxShadow: isActive ? '0 4px 20px rgba(232,17,138,0.15)' : '0 2px 8px rgba(0,0,0,0.04)',
         transition: 'border-color 0.25s, background 0.25s, box-shadow 0.25s',

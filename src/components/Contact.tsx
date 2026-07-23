@@ -10,7 +10,7 @@ const FONDO_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/p
 const INFO_ITEMS = [
   { icon: '📍', label: 'Bogotá, Colombia',    color: '#E8118A' },
   { icon: '📱', label: '+57 301 697 8741',    color: '#00C4AD' },
-  { icon: '✉️', label: 'admin@bmmedios.com',  color: '#8B3FA8' },
+  { icon: '✉️', label: 'info@bmmedios.com',  color: '#8B3FA8' },
 ]
 
 export default function Contact() {
@@ -47,7 +47,7 @@ export default function Contact() {
     <section id="contacto" style={{
       padding: 'clamp(60px,8vw,100px) 1.5rem',
       borderTop: '1px solid rgba(0,0,0,0.06)',
-      background: isMobile ? `url(${FONDO_URL}) center/cover no-repeat` : 'transparent',
+      background: '#eff2f1',
     }}>
       <style>{`
         /*

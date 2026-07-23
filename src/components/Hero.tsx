@@ -11,8 +11,8 @@ import { motion, useSpring } from 'framer-motion'
  */
 
 const IMG_SRC  = '/ok-tv.png'
-const TITLE    = 'Movemos marcas en universidades'
-const TAG_TEXT = 'Circuito de pauta dentro de las universidades más grandes de Latinoamérica'
+const TITLE    = 'Circuito de pauta publicitaria más grande de Latinoamérica en universidades'
+const TAG_TEXT = '15 universidades concesionadas en todo el país nos dan acceso a un ecosistema de más de 9 millones de personas: estudiantes, docentes, personal administrativo y familia'
 
 const WORDS = TITLE.split(' ')
 
@@ -78,8 +78,8 @@ export default function Hero({ videoActive: _va = true }) {
     <h1 style={{
       margin: 0, padding: 0,
       fontSize: isMobile
-        ? 'clamp(2.4rem, 10.5vw, 3.6rem)'
-        : 'clamp(3rem, 5.8vw, 6.4rem)',
+        ? 'clamp(1.75rem, 7.5vw, 2.6rem)'
+        : 'clamp(2rem, 3.8vw, 4.2rem)',
       fontWeight: 900,
       letterSpacing: '-0.04em',
       lineHeight: 1.05,
@@ -242,7 +242,7 @@ export default function Hero({ videoActive: _va = true }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative', overflow: 'hidden',
         padding: isMobile
-          ? 'clamp(88px,13vh,120px) 1.4rem clamp(24px,4vh,40px)'
+          ? 'clamp(100px,16vh,140px) 1.4rem clamp(24px,4vh,40px)'
           : 'clamp(100px,12vh,140px) clamp(2rem,6vw,6rem) clamp(24px,4vh,40px)',
       }}
     >
@@ -279,7 +279,7 @@ export default function Hero({ videoActive: _va = true }) {
           <div style={{
             display: 'flex', alignItems: 'stretch', justifyContent: 'center',
           }}>
-            <div style={{ width: '100%' }}>{Image3D}</div>
+            <div style={{ width: '100%', transform: 'scale(1.1)', transformOrigin: 'center center' }}>{Image3D}</div>
           </div>
         </div>
       )}
@@ -294,7 +294,7 @@ export default function Hero({ videoActive: _va = true }) {
           gap: '20px',
         }}>
           {Title}
-          <div style={{ width: 'min(72vw, 280px)', padding: '20px 0' }}>
+          <div style={{ width: 'min(79vw, 308px)', padding: '20px 0' }}>
             {Image3D}
           </div>
           {BottomTag}

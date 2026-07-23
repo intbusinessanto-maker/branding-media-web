@@ -130,7 +130,7 @@ function FormatCard({ f, visibleCount, idx, isMobile, onClick }: {
       <div style={{
         padding: isMobile ? '12px' : 'clamp(18px,2.2vw,28px)',
         borderRadius: '14px',
-        background: '#eff2f1',
+        background: '#fff',
         border: `1px solid ${f.border}`,
         borderLeft: isMobile ? undefined : `4px solid ${f.color}`,
         borderTop: isMobile ? `4px solid ${f.color}` : undefined,
@@ -161,54 +161,57 @@ function FormatCard({ f, visibleCount, idx, isMobile, onClick }: {
   )
 }
 
-const MOBILE_STEP_PX = 300
-
 /* ── Sección principal ── */
 export default function Formats() {
   const [activeFormat, setActiveFormat] = useState<FormatItem | null>(null)
   const isMobile = useIsMobile()
 
+  // Desktop: sticky scroll reveal
   const [visibleCount, setVisibleCount] = useState(0)
-  const [sectionH, setSectionH] = useState(0)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-
-  const sectionCallbackRef = (el: HTMLElement | null) => {
-    if (el && el.offsetHeight !== sectionH) setSectionH(el.offsetHeight)
-  }
+  const desktopWrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const wrapper = wrapperRef.current
+    if (isMobile) return
+    const wrapper = desktopWrapperRef.current
     if (!wrapper) return
     const onScroll = () => {
       const rect = wrapper.getBoundingClientRect()
       const scrolled = -rect.top
       if (scrolled <= 0) { setVisibleCount(0); return }
-      if (isMobile) {
-        // cada MOBILE_STEP_PX de scroll revela una card más
-        const idx = Math.floor(scrolled / MOBILE_STEP_PX)
-        setVisibleCount(Math.min(idx + 1, formats.length))
-      } else {
-        const stepH = window.innerHeight
-        const count = Math.min(formats.length, Math.floor(scrolled / stepH) + 1)
-        setVisibleCount(Math.max(0, count))
-      }
+      const stepH = window.innerHeight
+      const count = Math.min(formats.length, Math.floor(scrolled / stepH) + 1)
+      setVisibleCount(Math.max(0, count))
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [isMobile, sectionH])
+  }, [isMobile])
 
-  // DESKTOP
+  // Mobile: dots sincronizan con el scroll nativo del carrusel
+  const [activeIdx, setActiveIdx] = useState(0)
+  const carouselRef = useRef<HTMLDivElement>(null)
+
+  const scrollToIdx = (i: number) => {
+    const el = carouselRef.current
+    if (!el) return
+    el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
+  }
+
+  const onCarouselScroll = () => {
+    const el = carouselRef.current
+    if (!el) return
+    setActiveIdx(Math.round(el.scrollLeft / el.clientWidth))
+  }
+
+  // ── DESKTOP ──
   const DesktopSection = (
     <section id="formatos" style={{
       position: 'relative', height: '100vh', overflow: 'hidden',
-      background: 'transparent', display: 'flex', alignItems: 'center',
+      background: '#eff2f1', display: 'flex', alignItems: 'center',
     }}>
-      {/* Estatua */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, width: 'clamp(260px,32vw,480px)', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
         <img src={STATUE_URL} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom left', display: 'block' }} />
       </div>
-      {/* Contenido */}
       <div style={{ position: 'relative', zIndex: 2, width: '100%', paddingLeft: 'clamp(240px,30vw,460px)', paddingRight: 'clamp(1.5rem,3vw,3rem)', paddingTop: 'clamp(80px,10vh,120px)', paddingBottom: 'clamp(120px,18vh,200px)', boxSizing: 'border-box' }}>
         <div style={{ textAlign: 'center', marginBottom: 'clamp(32px,5vh,56px)' }}>
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 10 }}>Formatos</span>
@@ -222,7 +225,6 @@ export default function Formats() {
           ))}
         </div>
       </div>
-      {/* Hint scroll si no hay cards aún */}
       <AnimatePresence>
         {visibleCount === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -235,17 +237,19 @@ export default function Formats() {
     </section>
   )
 
-  // MOBILE — carrusel igual que antes, pero controlado por scroll en vez de swipe.
-  // visibleCount-1 es el índice de la card activa (0, 1, 2).
-  const mobileActiveIdx = visibleCount === 0 ? 0 : Math.min(visibleCount - 1, formats.length - 1)
-
+  // ── MOBILE: muñeco fijo izq + carrusel nativo der ──
   const MobileSection = (
-    <section ref={sectionCallbackRef} id="formatos" style={{
-      backgroundImage: `url(${FONDO_URL})`, backgroundSize: 'cover', backgroundPosition: 'center',
+    <section id="formatos" style={{
+      background: '#eff2f1',
       boxSizing: 'border-box', display: 'flex', flexDirection: 'column',
       paddingTop: '96px', paddingBottom: '16px',
       overflow: 'hidden', position: 'relative',
     }}>
+      <style>{`
+        .fm-cards::-webkit-scrollbar { display: none; }
+        .fm-cards { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
       {/* Header */}
       <div style={{ textAlign: 'center', padding: '8px 16px 8px', flexShrink: 0 }}>
         <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: 4 }}>Formatos</span>
@@ -254,107 +258,95 @@ export default function Formats() {
         </h2>
       </div>
 
-      {/* Cuerpo: estatua izquierda + card activa derecha */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0 }}>
+      {/* Cuerpo: estatua fija izq + carrusel der */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative' }}>
 
-        {/* Estatua — igual que antes, pegada al borde inferior */}
-        <div style={{ flexShrink: 0, width: '38%', alignSelf: 'flex-end', marginBottom: 0 }}>
+        {/* Estatua — no participa en el scroll */}
+        <div style={{ flexShrink: 0, width: '38%', alignSelf: 'flex-end', pointerEvents: 'none', zIndex: 2 }}>
           <img src={STATUE_URL} alt="" loading="lazy" style={{
             width: '100%', height: 'auto', maxHeight: '52vw',
             objectFit: 'contain', objectPosition: 'bottom left', display: 'block',
           }} />
         </div>
 
-        {/* Columna derecha: card activa + dots */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingRight: '12px', paddingTop: '8px', paddingBottom: '12px' }}>
-
-          {/* Card activa con transición entre slides */}
-          <div style={{ position: 'relative', flex: 1 }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mobileActiveIdx}
-                initial={{ opacity: 0, x: 48 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -48 }}
-                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => setActiveFormat(formats[mobileActiveIdx])}
-                style={{ cursor: 'pointer', paddingLeft: '4px', boxSizing: 'border-box' }}
+        {/* Carrusel nativo — ocupa el 62% restante */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', paddingTop: '8px', paddingBottom: '12px' }}>
+          <div
+            ref={carouselRef}
+            className="fm-cards"
+            onScroll={onCarouselScroll}
+            style={{
+              display: 'flex',
+              overflowX: 'scroll',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+              paddingRight: '12px',
+            }}
+          >
+            {formats.map((f) => (
+              <div
+                key={f.title}
+                style={{ flex: '0 0 100%', scrollSnapAlign: 'start', boxSizing: 'border-box', paddingLeft: '4px' }}
               >
-                {(() => {
-                  const f = formats[mobileActiveIdx]
-                  return (
-                    <div style={{
-                      padding: '12px', borderRadius: '14px', background: '#eff2f1',
-                      border: `1px solid ${f.border}`, borderTop: `4px solid ${f.color}`,
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
-                      display: 'flex', flexDirection: 'column', gap: '6px', boxSizing: 'border-box',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
-                        <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver →</span>
+                <div
+                  onClick={() => setActiveFormat(f)}
+                  style={{
+                    padding: '12px', borderRadius: '14px', background: '#fff',
+                    border: `1px solid ${f.border}`, borderTop: `4px solid ${f.color}`,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+                    display: 'flex', flexDirection: 'column', gap: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '8px', fontWeight: 800, color: f.color, background: f.bg, border: `1px solid ${f.border}`, padding: '3px 8px', borderRadius: '100px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{f.tag}</span>
+                    <span style={{ fontSize: '10px', color: f.color, fontWeight: 700 }}>Ver →</span>
+                  </div>
+                  <h3 style={{ fontSize: 'clamp(1.1rem,4.5vw,1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
+                  <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: 0 }}>{f.subtitle}</p>
+                  <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {f.features.map(feat => (
+                      <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
+                        {feat}
                       </div>
-                      <h3 style={{ fontSize: 'clamp(1.1rem,4.5vw,1.4rem)', fontWeight: 900, color: f.color, letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>{f.title}</h3>
-                      <p style={{ fontSize: '10px', color: '#888', fontWeight: 600, margin: 0 }}>{f.subtitle}</p>
-                      <p style={{ fontSize: '11px', color: '#555', lineHeight: 1.5, margin: 0 }}>{f.description}</p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                        {f.features.map(feat => (
-                          <div key={feat} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', fontSize: '10px', color: '#666' }}>
-                            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: f.color, flexShrink: 0, marginTop: '3px' }} />
-                            {feat}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })()}
-              </motion.div>
-            </AnimatePresence>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Dots */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '10px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, paddingTop: '10px' }}>
             {formats.map((f, i) => (
-              <div key={f.title} style={{
-                height: 5, borderRadius: 3, transition: 'all 0.3s ease',
-                width: i === mobileActiveIdx ? 22 : 5,
-                background: i === mobileActiveIdx ? f.color : 'rgba(0,0,0,0.18)',
+              <div key={f.title} onClick={() => scrollToIdx(i)} style={{
+                height: 5, borderRadius: 3, transition: 'all 0.3s ease', cursor: 'pointer',
+                width: i === activeIdx ? 22 : 5,
+                background: i === activeIdx ? f.color : 'rgba(0,0,0,0.18)',
               }} />
             ))}
           </div>
         </div>
       </div>
-
-      {/* Hint scroll */}
-      <AnimatePresence>
-        {visibleCount <= formats.length && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, pointerEvents: 'none', zIndex: 10 }}>
-            <span style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.3)', fontWeight: 600 }}>scroll</span>
-            <div style={{ width: 1, height: 24, background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)', animation: 'fm-scroll 2s ease-in-out infinite' }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   )
 
   return (
     <>
       <style>{`@keyframes fm-scroll { 0%,100%{opacity:.8;transform:scaleY(1)} 50%{opacity:.2;transform:scaleY(.35)} }`}</style>
+
       {isMobile ? (
-        <div ref={wrapperRef} style={{ height: sectionH ? sectionH + formats.length * MOBILE_STEP_PX : 'auto', position: 'relative', marginBottom: -(formats.length * MOBILE_STEP_PX) }}>
-          <div style={{ position: 'sticky', top: 0 }}>
-            {MobileSection}
-          </div>
-        </div>
+        MobileSection
       ) : (
-        <div ref={wrapperRef} style={{ height: `${(formats.length + 1) * 100}vh`, position: 'relative' }}>
+        <div ref={desktopWrapperRef} style={{ height: `${(formats.length + 1) * 100}vh`, position: 'relative' }}>
           <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
             {DesktopSection}
           </div>
         </div>
       )}
 
-      {/* Popup */}
       <AnimatePresence>
         {activeFormat && <FormatPopup format={activeFormat} onClose={() => setActiveFormat(null)} />}
       </AnimatePresence>

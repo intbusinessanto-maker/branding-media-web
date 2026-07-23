@@ -117,9 +117,7 @@ function InteractiveBackground() {
       style={{
         position: 'fixed', inset: 0, zIndex: 0,
         pointerEvents: 'none',
-        backgroundImage: `url(${PAGE_BG_URL})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: '#eff2f1',
         willChange: 'transform',
       }}
     />

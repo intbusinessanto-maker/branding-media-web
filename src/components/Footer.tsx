@@ -89,12 +89,12 @@ export default function Footer() {
           {/* Contacto */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888', marginBottom: '2px' }}>Contacto</span>
-            <a href="mailto:admin@bmmedios.com"
+            <a href="mailto:info@bmmedios.com"
               style={{ fontSize: '13px', color: '#AAA', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.color = '#E8118A'}
               onMouseLeave={e => e.currentTarget.style.color = '#AAA'}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="14" height="14"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              admin@bmmedios.com
+              info@bmmedios.com
             </a>
             <a href="https://wa.me/573001556010" target="_blank" rel="noopener noreferrer"
               style={{ fontSize: '13px', color: '#AAA', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }}

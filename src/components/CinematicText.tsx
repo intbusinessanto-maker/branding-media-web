@@ -81,16 +81,6 @@ export default function CinematicText() {
         gap: '2rem',
         padding: 'clamp(4rem, 8vh, 6rem) clamp(1.5rem, 6vw, 5rem)',
       }}>
-        {/* Fondo textura */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-          <img
-            src={BG_IMG}
-            alt=""
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.08 }}
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-          />
-        </div>
-
         {/* Puntos */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
