@@ -8,8 +8,8 @@ const FIGURA_URL = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/p
 const FONDO_URL  = 'https://hmopsdbpyihfnxwfebbd.supabase.co/storage/v1/object/public/Imagenes%20para%20la%20web/Fondo%202.png'
 
 const INFO_ITEMS = [
-  { icon: '📍', label: 'Bogotá, Colombia',    color: '#E8118A' },
-  { icon: '📱', label: '+57 301 697 8741',    color: '#00C4AD' },
+  { icon: '📍', label: 'Calle 93a # 13-24, Piso 5, Edificio QBO, Bogotá', color: '#E8118A' },
+  { icon: '📞', label: '601 6672681',    color: '#00C4AD' },
   { icon: '✉️', label: 'info@bmmedios.com',  color: '#8B3FA8' },
 ]
 
